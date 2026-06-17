@@ -6,8 +6,8 @@ Production RAG for residential lease Q&A: cited answers, honest refusals, publis
 
 Before planning or writing code, read both files in full:
 
-1. **[spec.md](./SPEC.md)** — Architecture, scope, week-by-week plan, metrics targets, and out-of-scope items. This is the blueprint.
-2. **[progress.md](./PROGRESS.md)** — Personal checklist: what's done, what's next, scratchpad notes. Update this as you complete items.
+1. **[SPEC.md](./SPEC.md)** — Architecture, scope, week-by-week plan, metrics targets, and out-of-scope items. This is the blueprint.
+2. **[PROGRESS.md](./PROGRESS.md)** — Personal checklist: what's done, what's next, scratchpad notes. Update this as you complete items.
 
 ## Current phase
 
