@@ -1,0 +1,29 @@
+[project]
+name = "leaseclear"
+version = "0.1.0"
+description = "Residential lease Q&A with citations, refusals, and published eval metrics"
+requires-python = ">=3.12"
+dependencies = ["fastapi>=0.115", "uvicorn[standard]>=0.32"]
+
+[dependency-groups]
+dev = ["pyright>=1.1", "pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.8"]
+
+[build-system]
+requires = ["uv_build>=0.11.21,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
