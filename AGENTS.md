@@ -2,29 +2,11 @@
 
 Production RAG for residential lease Q&A: cited answers, honest refusals, published eval metrics.
 
-## Start here
-
-Before planning or writing code, read both files in full:
-
-1. **[SPEC.md](./SPEC.md)** — Architecture, scope, week-by-week plan, metrics targets, and out-of-scope items. This is the blueprint.
-2. **[PROGRESS.md](./PROGRESS.md)** — Personal checklist: what's done, what's next, scratchpad notes. Update this as you complete items.
-
-## Current phase
-
-- **Warm-up (Days 1–3):** complete
-- **Next:** Week 1 — The Spine (repo scaffold, corpus, ingestion, CLI retrieval)
-
-## How to work
-
-1. Open `PROGRESS.md` and find the **first unchecked item** in the current phase.
-2. Cross-check against `SPEC.md` for requirements and exit criteria.
-3. Implement the smallest change that satisfies that item.
-4. Mark the item done in `PROGRESS.md` when verified.
-5. Move to the next unchecked item. Do not skip ahead unless the user asks.
+Progress and build guide, start here: **[PROGRESS.md](./PROGRESS.md)**
 
 ## Commit style
 
-Use [Conventional Commits](https://www.conventionalcommits.org/) when creating commits (only when the user asks).
+Use Conventional Commits when creating commits (only when the user asks).
 
 **Format:**
 
