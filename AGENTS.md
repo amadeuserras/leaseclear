@@ -4,6 +4,10 @@ Production RAG for residential lease Q&A: cited answers, honest refusals, publis
 
 Progress and build guide, start here: **[PROGRESS.md](./PROGRESS.md)**
 
+## Frontend
+
+For any changes under `frontend/`, read the Next.js guides in `frontend/node_modules/next/dist/docs/` first (this project uses a recent Next.js with breaking changes vs older docs). Heed deprecation notices.
+
 ## Commit style
 
 Use Conventional Commits when creating commits (only when the user asks).
