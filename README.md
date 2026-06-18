@@ -2,9 +2,13 @@
 
 Residential lease Q&A with **cited answers**, **honest refusals**, and **published eval metrics**.
 
-## Development
+## Repo layout
 
-Monorepo: `backend/` (Python / FastAPI) and `frontend/` (Next.js).
+- **`backend/`** — Production API: ingestion, retrieval, generation, and evals (FastAPI).
+- **`frontend/`** — Web UI for lease Q&A (Next.js).
+- **`corpus/`** — `generate.py` builds synthetic lease PDFs from Python data in `data/`; outputs land in `corpus/generated/`.
+
+## Development
 
 ### Backend
 
@@ -58,8 +62,43 @@ Lint:
 npm run lint
 ```
 
+### Corpus
+
+`generate.py` plus `models/lease.py` (dataclasses) and `data/` (lease definitions). Each lease generates `corpus/generated/{id}.pdf`.
+
+First time:
+
+```bash
+cd corpus
+uv sync
+```
+
+Generate the full corpus:
+
+```bash
+cd corpus
+uv run python generate.py
+```
+
+Generate a single lease by id:
+
+```bash
+cd corpus
+uv run python generate.py syn-baseline
+```
+
+Lint and typecheck:
+
+```bash
+cd corpus
+uv run ruff check .
+uv run ruff format --check .
+uv run pyright
+```
+
 ## Stack
 
 - **Backend:** FastAPI, PostgreSQL + pgvector, hybrid retrieval (vector + FTS + RRF), Claude generation
 - **Frontend:** Next.js, TypeScript, Tailwind
+- **Corpus:** dataclasses, `generate.py`, Jinja template, PyMuPDF
 - **Tooling:** uv, ruff, pyright, pytest, GitHub Actions

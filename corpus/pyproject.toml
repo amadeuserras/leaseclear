@@ -1,0 +1,25 @@
+[project]
+name = "corpus"
+version = "0.1.0"
+description = "LeaseClear corpus generator script"
+requires-python = ">=3.12"
+dependencies = ["jinja2>=3.1", "pymupdf>=1.24"]
+
+[dependency-groups]
+dev = ["pyright>=1.1", "ruff>=0.8"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pyright]
+include = ["generate.py", "models", "data"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false

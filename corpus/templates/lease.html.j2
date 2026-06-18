@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>{{ meta.title }}</title>
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.45;
+      color: #111;
+    }
+    h1 {
+      font-size: 16pt;
+      text-align: center;
+      margin-bottom: 1.2em;
+    }
+    h2 {
+      font-size: 11pt;
+      margin-top: 1em;
+      margin-bottom: 0.35em;
+    }
+    p { margin: 0.35em 0; }
+    .signatures {
+      margin-top: 2em;
+      page-break-inside: avoid;
+    }
+    .signature-line {
+      margin-top: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <h1>{{ meta.title }}</h1>
+
+  <section>
+    <h2>1. PARTIES</h2>
+    <p>
+      This Agreement is entered into between
+      <strong>{{ parties.landlord.name }}</strong>
+      {% if parties.landlord.address %}
+        ({{ parties.landlord.address }})
+      {% endif %}
+      ("Landlord") and
+      {% for tenant in parties.tenants %}
+        <strong>{{ tenant.name }}</strong>{% if not loop.last %}, {% endif %}
+      {% endfor %}
+      ("Tenant").
+    </p>
+  </section>
+
+  <section>
+    <h2>2. PROPERTY</h2>
+    <p>
+      Landlord leases to Tenant the premises located at
+      <strong>{{ property.address }}</strong> ({{ property.type }}).
+    </p>
+  </section>
+
+  <section>
+    <h2>3. TERM</h2>
+    <p>
+      The lease term begins on <strong>{{ term.start }}</strong> and ends on
+      <strong>{{ term.end }}</strong>.
+    </p>
+  </section>
+
+  {% if rent %}
+  <section>
+    <h2>4. RENT</h2>
+    <p>
+      Monthly rent is <strong>{{ rent.amount }}</strong>, due on the
+      <strong>{{ rent.due_day }}</strong> of each month.
+      Payment instructions: {{ rent.payment_instructions }}.
+    </p>
+  </section>
+  {% endif %}
+
+  {% for clause in clauses %}
+  <section>
+    <h2>{{ clause.id }}. {{ clause.heading }}</h2>
+    <p>{{ clause.body }}</p>
+  </section>
+  {% endfor %}
+
+  <section class="signatures">
+    <h2>SIGNATURES</h2>
+    <p class="signature-line">Landlord: ___________________________</p>
+    <p>Printed name: {{ parties.landlord.name }}</p>
+    <p class="signature-line">Tenant: _____________________________</p>
+    <p>Printed name: {{ parties.tenants[0].name }}</p>
+  </section>
+</body>
+</html>
