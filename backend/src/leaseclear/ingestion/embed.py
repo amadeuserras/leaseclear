@@ -1,20 +1,15 @@
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
-from pathlib import Path
 
-from dotenv import load_dotenv
 from openai import OpenAI
 
+from leaseclear.core.config import settings
 from leaseclear.ingestion.chunk import Chunk
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 
-_BACKEND_ROOT = Path(__file__).resolve().parents[3]
-load_dotenv(_BACKEND_ROOT / ".env")
-
-_client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+_client = OpenAI(api_key=settings.openai_api_key)
 
 
 @dataclass
