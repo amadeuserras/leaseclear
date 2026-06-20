@@ -2,11 +2,9 @@
 
 Production RAG for residential lease Q&A: cited answers, honest refusals, published eval metrics.
 
-Progress and build guide, start here: **[PROGRESS.md](./PROGRESS.md)**
-
-## Frontend
-
-For any changes under `frontend/`, read the Next.js guides in `frontend/node_modules/next/dist/docs/` first (this project uses a recent Next.js with breaking changes vs older docs). Heed deprecation notices.
+- Progress and build guide, start here: **[PROGRESS.md](./PROGRESS.md)**
+- Backend and corpus specific instructions **[AGENTS.md](./backend/AGENTS.md)**
+- Frontend specific insutrctions -> not built yet
 
 ## Commit style
 
