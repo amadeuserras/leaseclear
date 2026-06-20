@@ -1,0 +1,506 @@
+{#-
+  ============================================================================
+  SYNTHETIC RESIDENTIAL LEASE — Jinja2 / HTML template (render to PDF via WeasyPrint)
+  ----------------------------------------------------------------------------
+  Purpose: a small (~4 page) but structurally REALISTIC lease for developing and
+  testing a document-Q&A / RAG ingestion pipeline. It deliberately reproduces the
+  *behaviours* that make real leases hard to chunk — NOT the text of any real form.
+
+  Structural features intentionally included (each is a chunker test case):
+    - Header logo + horizontal rule; repeating per-page footer boilerplate (noise)
+    - Numbered clauses 1..N in the main lease
+    - SHORT clauses (one sentence) next to LONG clauses (~400-800 tokens)
+    - Nested sub-clauses: A./B./C. and (i)/(ii)/(iii) and (a)/(b)
+    - Checkbox UI: ☒ / ☐ glyphs, plus a "Check A or B" conditional pattern
+    - A checkbox-GATED clause whose applicability depends on a box (refusal test)
+    - Fill-in-the-blank underline fields driven by Jinja vars (empty => ruled line)
+    - Cross-references to other clauses ("as described in Section 4") and to an
+      attached addendum, plus a statute-style reference
+    - A nested ADDENDUM with its OWN clause numbering reset (1..M) => multi-doc /
+      renumbering behaviour in miniature
+
+  Render contract: pass a dict `lease`. Every field is optional; missing scalar
+  fields fall back to an empty ruled line via the fill() macro, mimicking a blank
+  form. Checkbox booleans default to False (unchecked).
+  ============================================================================
+-#}
+
+{#- ---------- macros ---------- -#}
+{%- macro fill(value, width='180px') -%}
+  {%- set width_class = 'field-w-' ~ (width | replace('px', '')) -%}
+  {%- if value is not none and value|string|trim != '' -%}
+    <span class="field filled {{ width_class }}">{{ value }}</span>
+  {%- else -%}
+    <span class="field blank {{ width_class }}">&nbsp;</span>
+  {%- endif -%}
+{%- endmacro -%}
+
+{%- macro box(checked) -%}
+  {#- tolerate undefined/missing keys: a missing checkbox is simply unchecked -#}
+  <span class="cb">{{ '☒' if (checked is defined and checked) else '☐' }}</span>
+{%- endmacro -%}
+
+{%- set L = lease | default({}) -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: Letter;
+    margin: 54px 56px 64px 56px;
+    @bottom-left  { content: "MERIDIAN RESIDENTIAL LEASE  (Form MRL-204, Rev. 03/24)"; font-size: 7pt; color:#555; }
+    @bottom-center{ content: "Property: {{ L.property_address | default('________________') }}"; font-size: 7pt; color:#555; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 7pt; color:#555; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: 9.2pt;
+    line-height: 1.34;
+    color: #111;
+  }
+
+  /* ---------- header / logo ---------- */
+  .masthead { display: flex; align-items: center; gap: 12px; padding-bottom: 6px; }
+  .logo {
+    width: 46px; height: 46px; flex: 0 0 46px;
+    border: 2px solid #1a3a5c; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #1a3a5c; font-weight: bold; font-size: 17pt;
+    font-family: Georgia, serif; letter-spacing: -1px;
+  }
+  .masthead .org { font-family: Georgia, serif; font-size: 8pt; letter-spacing: 2px; color:#1a3a5c; line-height:1.25; }
+  .masthead .title-block { margin-left: auto; text-align: right; }
+  .doc-title { font-weight: bold; font-size: 12.5pt; letter-spacing: .5px; }
+  .doc-sub   { font-size: 8pt; color:#333; }
+  .rule { border: none; border-top: 2px solid #1a3a5c; margin: 4px 0 10px 0; }
+  .rule-thin { border:none; border-top:1px solid #999; margin: 9px 0; }
+
+  /* ---------- preamble ---------- */
+  .preamble { margin-bottom: 8px; }
+
+  /* ---------- clauses ---------- */
+  .clause { margin: 0 0 7px 0; text-align: justify; }
+  .clause > .num { font-weight: bold; }
+  .clause-title { font-weight: bold; text-transform: uppercase; letter-spacing:.3px; }
+  .sub  { margin: 2px 0 2px 20px; text-align: justify; }
+  .subsub { margin: 2px 0 2px 40px; text-align: justify; }
+  .sublabel { font-weight: bold; }
+
+  /* ---------- fill-in fields & checkboxes ---------- */
+  .field {
+    display: inline-block;
+    border-bottom: 1px solid #222;
+    padding: 0 4px;
+    text-align: center;
+    line-height: 1.05;
+  }
+  .field.filled { font-style: italic; font-weight: bold; color:#13335c; }
+  .field-w-40  { min-width: 40px; }
+  .field-w-50  { min-width: 50px; }
+  .field-w-70  { min-width: 70px; }
+  .field-w-90  { min-width: 90px; }
+  .field-w-100 { min-width: 100px; }
+  .field-w-110 { min-width: 110px; }
+  .field-w-120 { min-width: 120px; }
+  .field-w-140 { min-width: 140px; }
+  .field-w-150 { min-width: 150px; }
+  .field-w-160 { min-width: 160px; }
+  .field-w-180 { min-width: 180px; }
+  .field-w-210 { min-width: 210px; }
+  .field-w-230 { min-width: 230px; }
+  .field-w-280 { min-width: 280px; }
+  .field-w-300 { min-width: 300px; }
+  .field-w-320 { min-width: 320px; }
+  .field-w-330 { min-width: 330px; }
+  .cb { font-size: 11pt; vertical-align: -1px; padding-right: 2px; }
+
+  /* ---------- initials line ---------- */
+  .initials {
+    margin-top: 10px; padding-top: 4px; border-top: 1px solid #bbb;
+    font-size: 8pt; color:#333; display:flex; justify-content: space-between;
+  }
+
+  /* ---------- table (move-in style) ---------- */
+  table.grid { width:100%; border-collapse: collapse; margin: 4px 0 6px 0; font-size: 8.4pt; }
+  table.grid th, table.grid td { border: 1px solid #444; padding: 3px 5px; text-align:left; }
+  table.grid th { background:#eef2f6; font-weight:bold; }
+
+  .section-banner {
+    margin-top: 4px; padding: 5px 8px; background:#1a3a5c; color:#fff;
+    font-weight:bold; font-size: 10pt; letter-spacing:.5px;
+  }
+  .page-break { break-before: page; }
+  .small { font-size: 7.6pt; color:#444; }
+  .notice-box { border:1px solid #444; padding:6px 8px; margin:6px 0; background:#fbfbf5; }
+</style>
+</head>
+<body>
+
+{#- ============================ PAGE 1 ============================ -#}
+<div class="masthead">
+  <div class="logo">M</div>
+  <div class="org">MERIDIAN<br>PROPERTY<br>FORMS</div>
+  <div class="title-block">
+    <div class="doc-title">RESIDENTIAL LEASE AGREEMENT</div>
+    <div class="doc-sub">Fixed-Term or Month-to-Month &middot; Form MRL-204 (Rev. 03/24)</div>
+  </div>
+</div>
+<hr class="rule">
+
+<div class="preamble">
+This Residential Lease Agreement (this &ldquo;Agreement&rdquo;) is made on
+{{ fill(L.date_made, '140px') }} between {{ fill(L.landlord_name, '210px') }}
+(&ldquo;Landlord&rdquo;) and {{ fill(L.tenant_name, '210px') }} (&ldquo;Tenant&rdquo;),
+who agree as follows.
+</div>
+
+<div class="clause">
+  <span class="num">1.</span> <span class="clause-title">Premises.</span>
+  Landlord leases to Tenant the residential premises located at
+  {{ fill(L.property_address, '300px') }} (the &ldquo;Premises&rdquo;), together with
+  the fixtures and personal property described in Section&nbsp;4. The Premises shall be
+  occupied solely as a private residence by the following named occupants and no others:
+  {{ fill(L.occupants, '320px') }}.
+</div>
+
+<div class="clause">
+  <span class="num">2.</span> <span class="clause-title">Term.</span>
+  <span class="sublabel">(Check A or B):</span>
+  <div class="sub">
+    {{ box(L.term_is_month_to_month) }} <span class="sublabel">A. Month-to-Month.</span>
+    This Agreement begins on {{ fill(L.start_date, '120px') }} and continues as a
+    month-to-month tenancy until terminated by either party on at least thirty (30) days&rsquo;
+    written notice given in the manner required by law.
+  </div>
+  <div class="sub">
+    {{ box(L.term_is_fixed) }} <span class="sublabel">B. Fixed Term.</span>
+    This Agreement begins on {{ fill(L.start_date, '120px') }} and ends at 11:59&nbsp;PM on
+    {{ fill(L.end_date, '120px') }}, unless (i)&nbsp;extended in a writing signed by both
+    parties; (ii)&nbsp;terminated earlier under Section&nbsp;14; or (iii)&nbsp;Landlord accepts
+    Rent after the end date, in which case a month-to-month tenancy is created under
+    paragraph&nbsp;2A above.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="num">3.</span> <span class="clause-title">Rent.</span>
+  Tenant shall pay Rent of {{ fill(L.rent_amount, '110px') }} per month, in advance, due on the
+  {{ fill(L.rent_due_day, '40px') }} day of each calendar month and delinquent thereafter.
+  &ldquo;Rent&rdquo; means all monetary obligations of Tenant under this Agreement except the
+  security deposit described in Section&nbsp;5.
+  <div class="sub">
+    <span class="sublabel">A.</span> Rent is payable by {{ box(L.pay_check) }} personal check
+    {{ box(L.pay_transfer) }} electronic transfer {{ box(L.pay_other) }} other:
+    {{ fill(L.pay_other_desc, '150px') }}, payable to {{ fill(L.payee, '180px') }}.
+  </div>
+  <div class="sub">
+    <span class="sublabel">B.</span> If any payment is returned unpaid, Tenant shall pay a
+    returned-payment fee of {{ fill(L.nsf_fee, '70px') }} and, after the second such event,
+    Landlord may require all future Rent to be paid by certified funds.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="num">4.</span> <span class="clause-title">Included Personal Property.</span>
+  The following items are provided with the Premises and are to be returned in the same
+  condition, ordinary wear and tear excepted: {{ fill(L.included_property, '330px') }}
+  {{ box(L.property_addendum_attached) }} (if checked) additional items are listed on the
+  attached inventory addendum.
+</div>
+
+<div class="clause">
+  <span class="num">5.</span> <span class="clause-title">Security Deposit.</span>
+  Tenant shall deposit {{ fill(L.deposit_amount, '110px') }} as security for Tenant&rsquo;s
+  performance. Landlord may apply the deposit, as reasonably necessary, to: (i)&nbsp;unpaid
+  Rent; (ii)&nbsp;repair of damage beyond ordinary wear and tear caused by Tenant or
+  Tenant&rsquo;s guests; (iii)&nbsp;cleaning of the Premises upon termination; and
+  (iv)&nbsp;the replacement of personal property described in Section&nbsp;4. The deposit
+  shall not be applied by Tenant to the last month&rsquo;s Rent. Within the period required by
+  applicable law after Tenant vacates, Landlord shall return the balance of the deposit together
+  with an itemized statement of any amounts withheld.
+</div>
+
+<div class="initials">
+  <span>Tenant&rsquo;s Initials: ( {{ L.tenant_initials | default('______') }} )</span>
+  <span>Landlord&rsquo;s Initials: ( {{ L.landlord_initials | default('______') }} )</span>
+</div>
+
+{#- ============================ PAGE 2 ============================ -#}
+<div class="page-break"></div>
+
+<div class="clause">
+  <span class="num">6.</span> <span class="clause-title">Maintenance, Use, and Reporting.</span>
+  This is intentionally one of the long clauses in this Agreement and is meant to exceed the
+  several-hundred-token range so that retrieval and chunking behaviour can be tested on a single
+  dense block of obligations.
+  <div class="sub">
+    <span class="sublabel">A.</span> Tenant shall properly use, operate, and safeguard the
+    Premises, including any landscaping, furniture, furnishings, appliances, and all mechanical,
+    electrical, gas, and plumbing fixtures, and shall keep them and the Premises clean, sanitary,
+    and well ventilated. Tenant shall be responsible for checking and maintaining all smoke and
+    carbon-monoxide detectors and shall replace batteries and burned-out bulbs as needed.
+  </div>
+  <div class="sub">
+    <span class="sublabel">B.</span> Tenant shall promptly notify Landlord in writing of any
+    problem, malfunction, or damage. Tenant shall be charged for all repairs or replacements
+    caused by Tenant, Tenant&rsquo;s pets, guests, or licensees, excluding ordinary wear and tear,
+    and shall be charged for damage resulting from Tenant&rsquo;s failure to give timely notice.
+    Tenant shall be charged for the repair of drain blockages or stoppages, unless caused by
+    defective plumbing or by tree roots invading sewer lines.
+  </div>
+  <div class="sub">
+    <span class="sublabel">C.</span> Responsibility for the garden, landscaping, trees, and shrubs
+    is allocated as follows: watering shall be performed by {{ box(L.water_landlord) }} Landlord
+    {{ box(L.water_tenant) }} Tenant; routine maintenance shall be performed by
+    {{ box(L.maint_landlord) }} Landlord {{ box(L.maint_tenant) }} Tenant; except as follows:
+    {{ fill(L.landscaping_except, '230px') }}.
+  </div>
+  <div class="sub">
+    <span class="sublabel">D.</span> The parties agree that state or local water-use restrictions
+    supersede any watering or maintenance obligation under paragraphs&nbsp;6C above. Tenant&rsquo;s
+    failure to maintain any item for which Tenant is responsible entitles Landlord to perform such
+    maintenance and charge Tenant the reasonable cost, which shall be deemed additional Rent under
+    Section&nbsp;3.
+  </div>
+  <div class="sub">
+    <span class="sublabel">E.</span> Tenant shall not, without Landlord&rsquo;s prior written
+    consent: (i)&nbsp;make alterations, repairs, or improvements, including painting, wallpapering,
+    or changing locks; (ii)&nbsp;install antennas, satellite dishes, or signs; or
+    (iii)&nbsp;deduct from Rent the cost of any repair, alteration, or improvement. Any such
+    deduction shall be treated as unpaid Rent.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="num">7.</span> <span class="clause-title">Pets.</span>
+  No animal shall be kept on or about the Premises without Landlord&rsquo;s prior written consent,
+  except as expressly permitted in the attached Pet Addendum (see Schedule&nbsp;A). A service
+  animal or assistance animal required by law is not a pet for purposes of this Section.
+</div>
+
+<div class="clause">
+  <span class="num">8.</span> <span class="clause-title">Quiet Enjoyment; Nuisance.</span>
+  Tenant shall not disturb, annoy, endanger, or interfere with other residents or neighbours, nor
+  use the Premises for any unlawful purpose, nor commit waste or nuisance on or about the Premises.
+</div>
+
+<div class="clause">
+  <span class="num">9.</span> <span class="clause-title">Entry.</span>
+  <div class="sub">
+    <span class="sublabel">A.</span> Tenant shall make the Premises available to Landlord or
+    Landlord&rsquo;s agents to make necessary or agreed repairs, to supply agreed services, or to
+    show the Premises to prospective tenants, purchasers, lenders, or contractors.
+  </div>
+  <div class="sub">
+    <span class="sublabel">B.</span> Except in the cases listed in paragraph&nbsp;9C, Landlord
+    shall give Tenant at least twenty-four (24) hours&rsquo; written notice before entry. No notice
+    is required: (i)&nbsp;in an emergency; (ii)&nbsp;if Tenant is present and consents at the time of
+    entry; or (iii)&nbsp;if Tenant has abandoned or surrendered the Premises.
+  </div>
+  <div class="sub">
+    <span class="sublabel">C.</span> {{ box(L.keysafe_authorized) }} (If checked) Tenant authorizes
+    the use of a keysafe/lockbox to permit entry under the conditions stated in paragraph&nbsp;9A.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="num">10.</span> <span class="clause-title">Assignment and Subletting.</span>
+  Tenant shall not sublet the Premises or assign this Agreement without Landlord&rsquo;s prior
+  written consent. This prohibition {{ box(L.sublet_short_term_applies) }} applies
+  {{ box(L.sublet_short_term_excluded) }} does not apply to short-term, vacation, or transient
+  rentals arranged through any hosting platform. Any violation of this Section is a non-curable,
+  material breach of this Agreement.
+</div>
+
+<div class="initials">
+  <span>Tenant&rsquo;s Initials: ( {{ L.tenant_initials | default('______') }} )</span>
+  <span>Landlord&rsquo;s Initials: ( {{ L.landlord_initials | default('______') }} )</span>
+</div>
+
+{#- ============================ PAGE 3 ============================ -#}
+<div class="page-break"></div>
+
+<div class="clause">
+  <span class="num">11.</span> <span class="clause-title">Statutory and Condition Disclosures.</span>
+  The following disclosures form part of this Agreement and are made by Landlord to Tenant as of
+  the start date. Each lettered item applies only if the associated box is checked; an unchecked
+  box means the disclosure does not apply to this tenancy and that Tenant should not infer any
+  representation from its absence. This Section is intentionally written at length, with several
+  conditional and nested provisions, so that retrieval, citation, and refusal behaviour can be
+  exercised against a dense disclosure block of the kind commonly found at the back of a lease.
+  <div class="sub">
+    <span class="sublabel">A.</span> {{ box(L.disc_lead_paint) }} <span class="sublabel">Pre-1978
+    Construction.</span> If checked, the Premises were built before 1978, and Tenant acknowledges
+    receipt of (i)&nbsp;the lead-based-paint disclosure referenced in Schedule&nbsp;A;
+    (ii)&nbsp;the federally approved pamphlet on lead-poisoning prevention; and (iii)&nbsp;any
+    records in Landlord&rsquo;s possession concerning lead-based paint in the Premises. If the box
+    is not checked, Landlord makes no representation under this paragraph.
+  </div>
+  <div class="sub">
+    <span class="sublabel">B.</span> {{ box(L.disc_pest) }} <span class="sublabel">Periodic Pest
+    Control.</span> If checked, Landlord has contracted for periodic pest-control treatment and
+    shall provide Tenant a copy of any notice received from the pest-control operator. Tenant shall:
+    (a)&nbsp;cooperate with reasonable access for treatment; and (b)&nbsp;follow any written
+    preparation instructions provided in advance of a scheduled treatment.
+  </div>
+  <div class="sub">
+    <span class="sublabel">C.</span> {{ box(L.disc_flood) }} <span class="sublabel">Flood
+    Hazard.</span> If checked, the Premises are located in a designated flood-hazard area. Tenant is
+    advised that (i)&nbsp;Landlord&rsquo;s insurance does not cover Tenant&rsquo;s personal property;
+    and (ii)&nbsp;flood insurance for Tenant&rsquo;s belongings, if desired, is the sole
+    responsibility of Tenant.
+  </div>
+  <div class="sub">
+    <span class="sublabel">D.</span> {{ box(L.disc_mold) }} <span class="sublabel">Mold and
+    Ventilation.</span> If checked, the Premises were previously treated for elevated levels of mold.
+    In all cases, whether or not this box is checked, Tenant agrees to: (a)&nbsp;keep the Premises
+    properly ventilated; (b)&nbsp;promptly report any water intrusion, leak, or visible mold growth;
+    and (c)&nbsp;refrain from blocking vents or exhaust fans. Tenant&rsquo;s failure to comply may be
+    treated as a failure to maintain under Section&nbsp;6.
+  </div>
+  <div class="sub">
+    <span class="sublabel">E.</span> <span class="sublabel">Registered-Offender Database.</span>
+    Information about registered offenders is made available to the public on a database maintained
+    by the responsible state agency. Neither Landlord nor any agent is required to check the
+    database on Tenant&rsquo;s behalf, and Tenant may consult the database directly if Tenant wishes
+    to obtain such information.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="num">12.</span> <span class="clause-title">Insurance.</span>
+  Tenant&rsquo;s personal property is not insured by Landlord. Tenant is advised to carry
+  renter&rsquo;s insurance. {{ box(L.insurance_required) }} (If checked) Tenant shall obtain and
+  maintain liability insurance of not less than {{ fill(L.insurance_amount, '110px') }}, naming
+  Landlord as an additional insured, and shall provide proof of coverage before the start date.
+</div>
+
+<div class="clause">
+  <span class="num">13.</span> <span class="clause-title">Move-In Condition.</span>
+  The condition of the Premises at move-in is recorded below. Items not listed are presumed clean
+  and in operable condition.
+  <table class="grid">
+    <thead>
+      <tr><th style="width:34%">Area / Item</th><th style="width:14%">Condition</th><th style="width:52%">Comments</th></tr>
+    </thead>
+    <tbody>
+      {% for row in L.condition_rows | default([]) %}
+      <tr><td>{{ row.area }}</td><td>{{ row.condition }}</td><td>{{ row.comments }}</td></tr>
+      {% else %}
+      <tr><td>Living area</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>Kitchen / appliances</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>Bathroom(s)</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>Flooring / walls</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="clause">
+  <span class="num">14.</span> <span class="clause-title">Early Termination.</span>
+  If Tenant terminates before the end of the term stated in Section&nbsp;2B, Tenant remains
+  responsible for lost Rent, reasonable re-rental costs, and advertising expenses, which Landlord
+  may withhold from the security deposit described in Section&nbsp;5.
+</div>
+
+<div class="clause">
+  <span class="num">15.</span> <span class="clause-title">Waiver.</span>
+  Landlord&rsquo;s waiver of any breach shall not be a waiver of any later breach.
+</div>
+
+<div class="clause">
+  <span class="num">16.</span> <span class="clause-title">Entire Agreement.</span>
+  This Agreement, together with any addendum or schedule incorporated by reference, is the final
+  and complete expression of the parties&rsquo; agreement and supersedes all prior or contemporaneous
+  oral agreements. Any modification must be in a writing signed by both parties.
+</div>
+
+<div class="initials">
+  <span>Tenant&rsquo;s Initials: ( {{ L.tenant_initials | default('______') }} )</span>
+  <span>Landlord&rsquo;s Initials: ( {{ L.landlord_initials | default('______') }} )</span>
+</div>
+
+{#- ============================ PAGE 4 — ADDENDUM (numbering resets) ============================ -#}
+<div class="page-break"></div>
+
+<div class="masthead">
+  <div class="logo">M</div>
+  <div class="org">MERIDIAN<br>PROPERTY<br>FORMS</div>
+  <div class="title-block">
+    <div class="doc-title">SCHEDULE A &mdash; PET ADDENDUM</div>
+    <div class="doc-sub">Attached to and part of Form MRL-204 &middot; Form MRL-PET (Rev. 03/24)</div>
+  </div>
+</div>
+<hr class="rule">
+
+<div class="preamble">
+This Pet Addendum is incorporated into and made part of the Residential Lease Agreement dated
+{{ fill(L.date_made, '140px') }} for the Premises at {{ fill(L.property_address, '280px') }}.
+Where this Addendum conflicts with the main Agreement, this Addendum controls as to pets.
+Notwithstanding Section&nbsp;7 of the Agreement, Landlord grants permission for Tenant to keep the
+following pet(s) only: {{ fill(L.pets_permitted, '300px') }}.
+</div>
+
+<div class="clause">
+  <span class="num">1.</span> <span class="clause-title">Permitted Pets Only.</span>
+  Tenant shall keep no animal other than those identified above, including animals that are
+  &ldquo;just visiting,&rdquo; without Landlord&rsquo;s further written consent.
+</div>
+
+<div class="clause">
+  <span class="num">2.</span> <span class="clause-title">Pet Deposit and Rent.</span>
+  Tenant shall pay an additional pet deposit of {{ fill(L.pet_deposit, '100px') }} and additional
+  monthly pet rent of {{ fill(L.pet_rent, '100px') }}, which is part of &ldquo;Rent&rdquo; under
+  Section&nbsp;3 of the Agreement.
+</div>
+
+<div class="clause">
+  <span class="num">3.</span> <span class="clause-title">Tenant Obligations.</span>
+  Tenant agrees that the pet(s) will be: (i)&nbsp;properly licensed and vaccinated as required by
+  law; (ii)&nbsp;kept under control and not left unattended in common areas; and
+  (iii)&nbsp;prevented from causing damage, odour, or disturbance. Tenant shall promptly remove and
+  dispose of all pet waste.
+</div>
+
+<div class="clause">
+  <span class="num">4.</span> <span class="clause-title">Liability.</span>
+  Tenant is responsible for, and shall indemnify Landlord against, all damage and all claims for
+  injury arising from the pet(s), whether or not the specific animal is listed above.
+</div>
+
+<div class="clause">
+  <span class="num">5.</span> <span class="clause-title">Revocation.</span>
+  Landlord may revoke permission to keep a pet on {{ fill(L.pet_revoke_days, '50px') }} days&rsquo;
+  written notice for cause. Tenant&rsquo;s failure to remove the pet after revocation is a breach of
+  the Agreement.
+</div>
+
+<div class="clause">
+  <span class="num">6.</span>
+  {{ box(L.pet_insurance_required) }} <span class="clause-title">Renter&rsquo;s Insurance for Pets
+  (if checked).</span> Tenant shall carry renter&rsquo;s insurance that includes coverage for pet
+  ownership and shall provide proof on request.
+</div>
+
+<div class="notice-box small">
+  By signing below, Tenant acknowledges having read, understood, and received a copy of this
+  Pet Addendum.
+</div>
+
+<table class="grid" style="margin-top:14px;">
+  <tr>
+    <td style="width:50%">Tenant: {{ fill(L.tenant_name, '160px') }}</td>
+    <td style="width:25%">Date: {{ fill(L.sign_date, '90px') }}</td>
+    <td style="width:25%">Sign: ____________</td>
+  </tr>
+  <tr>
+    <td>Landlord: {{ fill(L.landlord_name, '160px') }}</td>
+    <td>Date: {{ fill(L.sign_date, '90px') }}</td>
+    <td>Sign: ____________</td>
+  </tr>
+</table>
+
+</body>
+</html>

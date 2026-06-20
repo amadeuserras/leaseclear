@@ -19,7 +19,7 @@ target-version = "py312"
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.pyright]
-include = ["generate.py", "registry.py", "doc_meta.py", "render.py", "themes.py", "families"]
+include = ["generate.py", "model.py", "data.py"]
 pythonVersion = "3.12"
 typeCheckingMode = "standard"
 reportMissingTypeStubs = false

@@ -6,7 +6,7 @@ Residential lease Q&A with **cited answers**, **honest refusals**, and **publish
 
 - **`backend/`** — Production API: ingestion, retrieval, generation, and evals (FastAPI).
 - **`frontend/`** — Web UI for lease Q&A (Next.js).
-- **`corpus/`** — `generate.py` builds synthetic lease PDFs from Python data in `data/`; outputs land in `corpus/generated/`.
+- **`corpus/`** — Builds a synthetic lease PDF into `corpus/generated/`.
 
 ## Development
 
