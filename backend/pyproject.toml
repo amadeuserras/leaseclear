@@ -3,7 +3,11 @@ name = "leaseclear"
 version = "0.1.0"
 description = "Residential lease Q&A with citations, refusals, and published eval metrics"
 requires-python = ">=3.12"
-dependencies = ["fastapi>=0.115", "uvicorn[standard]>=0.32"]
+dependencies = [
+    "fastapi>=0.115",
+    "pymupdf>=1.27.2.3",
+    "uvicorn[standard]>=0.32",
+]
 
 [dependency-groups]
 dev = ["pyright>=1.1", "pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.8"]
