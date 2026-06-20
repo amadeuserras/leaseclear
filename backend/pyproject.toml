@@ -4,10 +4,11 @@ version = "0.1.0"
 description = "Residential lease Q&A with citations, refusals, and published eval metrics"
 requires-python = ">=3.12"
 dependencies = [
+    "asyncpg>=0.30",
     "fastapi>=0.115",
     "openai>=2.43.0",
+    "pydantic-settings>=2.14.2",
     "pymupdf>=1.27.2.3",
-    "python-dotenv>=1.2.2",
     "tiktoken>=0.9",
     "uvicorn[standard]>=0.32",
 ]

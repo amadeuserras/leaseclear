@@ -1,0 +1,34 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import asyncpg
+
+from leaseclear.core.config import settings
+
+DATABASE_URL = settings.database_url
+
+_pool: asyncpg.Pool | None = None
+
+
+async def get_pool() -> asyncpg.Pool:
+    global _pool
+    if _pool is None:
+        _pool = await asyncpg.create_pool(DATABASE_URL)
+    return _pool
+
+
+async def close_pool() -> None:
+    global _pool
+    if _pool is not None:
+        await _pool.close()
+        _pool = None
+
+
+async def apply_schema(conn: asyncpg.Connection) -> None:
+    schema_sql = Path(__file__).with_name("schema.sql").read_text()
+    statements = [
+        statement.strip() for statement in schema_sql.split(";") if statement.strip()
+    ]
+    for statement in statements:
+        await conn.execute(statement)
