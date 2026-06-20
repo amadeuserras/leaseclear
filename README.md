@@ -27,6 +27,7 @@ uv run ruff check .
 uv run ruff format --check .
 uv run pyright
 uv run pytest
+uv run pytest tests/test_parse.py # run specific test file only
 ```
 
 Auto-format if `ruff format --check` fails:
