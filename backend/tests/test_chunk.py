@@ -11,6 +11,6 @@ def test_chunk_document_corpus_lease() -> None:
     )
 
     parsed = parse_pdf(pdf_file)
-    chunks = chunk_document(parsed)
+    chunks = chunk_document(parsed, "lease")
 
     assert chunks == EXPECTED_CHUNKS_LEASE

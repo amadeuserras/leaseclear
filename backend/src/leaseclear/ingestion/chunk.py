@@ -3,21 +3,29 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+import tiktoken
+
 from leaseclear.ingestion.parse import PageText, ParsedDocument
 
 SUB_CLAUSE_LINE = re.compile(r"^(\d+\.\d+)\s+(.*)$")
 TOP_CLAUSE_LINE = re.compile(r"^(\d+)\.\s+(.*)$")
-TITLE = re.compile(r"^([A-Z][A-Z\s/&,\-']+?)\.(?:\s|$)")
+TITLE = re.compile(r"^(.+?)\.(?:\s|$)")
 
 MAX_CHUNK_CHARS = 2400
 SPLITTERS = ("\n\n", "\n", ". ", " ")
+_TOKEN_ENCODER = tiktoken.get_encoding("cl100k_base")
 
 
 @dataclass
 class Chunk:
+    chunk_id: str
+    document_id: str
     text: str
     clause_label: str
     page_number: int
+    char_start: int
+    char_end: int
+    token_count: int
 
 
 @dataclass
@@ -27,11 +35,40 @@ class _Section:
     lines: list[tuple[int, str]]
 
 
-def chunk_document(document: ParsedDocument) -> list[Chunk]:
+@dataclass
+class _RawChunk:
+    text: str
+    clause_label: str
+    page_number: int
+
+
+def chunk_document(document: ParsedDocument, document_id: str) -> list[Chunk]:
     sections = _split_into_sections(document.pages)
-    chunks: list[Chunk] = []
+    raw_chunks: list[_RawChunk] = []
     for section in sections:
-        chunks.extend(_section_to_chunks(section))
+        raw_chunks.extend(_section_to_chunks(section))
+
+    full_text = document.full_text
+    search_from = 0
+    chunks: list[Chunk] = []
+    for index, raw in enumerate(raw_chunks, start=1):
+        char_start = full_text.find(raw.text, search_from)
+        if char_start == -1:
+            char_start = search_from
+        char_end = char_start + len(raw.text)
+        search_from = char_end
+        chunks.append(
+            Chunk(
+                chunk_id=f"{document_id}_chunk-{index:03d}",
+                document_id=document_id,
+                text=raw.text,
+                clause_label=raw.clause_label,
+                page_number=raw.page_number,
+                char_start=char_start,
+                char_end=char_end,
+                token_count=_count_tokens(raw.text),
+            )
+        )
     return chunks
 
 
@@ -70,24 +107,37 @@ def _split_into_sections(pages: list[PageText]) -> list[_Section]:
     return sections
 
 
-def _section_to_chunks(section: _Section) -> list[Chunk]:
-    text = "\n".join(line for _, line in section.lines).strip()
+def _section_to_chunks(section: _Section) -> list[_RawChunk]:
+    text = _section_text(section.lines).strip()
     if not text:
         return []
 
     pieces = _split_oversized(text, MAX_CHUNK_CHARS)
-    chunks: list[Chunk] = []
+    chunks: list[_RawChunk] = []
     for index, piece in enumerate(pieces):
         page_number = _page_for_piece(section.lines, index, pieces)
         body = piece if index == 0 else _prepend_label(piece, section.clause_label)
         chunks.append(
-            Chunk(
+            _RawChunk(
                 text=body,
                 clause_label=section.clause_label,
                 page_number=page_number,
             )
         )
     return chunks
+
+
+def _section_text(lines: list[tuple[int, str]]) -> str:
+    if not lines:
+        return ""
+
+    parts = [lines[0][1]]
+    for index in range(1, len(lines)):
+        prev_page = lines[index - 1][0]
+        page, line = lines[index]
+        separator = "\n\n" if page != prev_page else "\n"
+        parts.append(separator + line)
+    return "".join(parts)
 
 
 def _page_for_piece(
@@ -129,6 +179,10 @@ def _prepend_label(body: str, label: str) -> str:
     if not label:
         return body
     return f"{label}\n\n{body}"
+
+
+def _count_tokens(text: str) -> int:
+    return len(_TOKEN_ENCODER.encode(text))
 
 
 def _split_oversized(text: str, max_chars: int) -> list[str]:
