@@ -1,0 +1,229 @@
+{#==============================================================================
+  complex_lease.j2  —  High structural-density residential lease
+==============================================================================#}
+<h1 class="doc-title">RESIDENTIAL LEASE AGREEMENT</h1>
+
+<p class="meta-line">
+  This Agreement is made on {{ meta.agreement_date }} and governed by the laws of
+  {{ meta.jurisdiction }}.
+</p>
+
+<p class="clause">
+  <span class="clause-num">1.</span>
+  <span class="clause-title">PARTIES.</span>
+</p>
+<p class="sub-clause">
+  <span class="clause-num">1.1</span>
+  Landlord: {{ landlord.name }}, mailing address {{ landlord.address }}.
+</p>
+<p class="sub-clause">
+  <span class="clause-num">1.2</span>
+  Tenant(s): {{ tenants | map(attribute='name') | join('; ') }}.
+  Each individual named as a Tenant is jointly and severally liable for all
+  obligations under this Agreement.
+</p>
+
+<p class="clause">
+  <span class="clause-num">2.</span>
+  <span class="clause-title">PREMISES.</span>
+</p>
+<p class="sub-clause">
+  <span class="clause-num">2.1</span>
+  Address: {{ property.address }}.
+</p>
+<p class="sub-clause">
+  <span class="clause-num">2.2</span>
+  Legal description: {{ property.legal_description }}.
+</p>
+<p class="sub-clause">
+  <span class="clause-num">2.3</span>
+  Residence type: {{ property.type }}. The foregoing is the "Premises".
+</p>
+
+<p class="clause">
+  <span class="clause-num">3.</span>
+  <span class="clause-title">TERM.</span>
+</p>
+<p class="sub-clause">
+  <span class="clause-num">3.1</span>
+  Commencement: {{ term.start }}. Expiration: {{ term.end }}.
+</p>
+<p class="sub-clause">
+  <span class="clause-num">3.2</span>
+  Renewal: Upon expiration and absent renewal, the Tenant
+{%- if term.renewal == 'month_to_month' %}
+  may continue on a month-to-month basis terminable on {{ term.notice_days }}
+  days' written notice by either Party.
+{%- else %}
+  must vacate the Premises.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">4.</span>
+  <span class="clause-title">DEFINITIONS.</span>
+  The following terms have the meanings assigned below and are
+  capitalized throughout this Agreement:
+</p>
+<p class="sub-clause">
+  <span class="clause-num">4.1</span>
+  "Rent" means the monthly sum payable under Section 5.
+</p>
+<p class="sub-clause">
+  <span class="clause-num">4.2</span>
+  "Security Deposit" means the sum held under Section 7 as security for the
+  Tenant's performance.
+</p>
+<p class="sub-clause">
+  <span class="clause-num">4.3</span>
+  "Due Date" means the {{ rent.due_day }} day of each calendar month.
+</p>
+<p class="sub-clause">
+  <span class="clause-num">4.4</span>
+  "Default" has the meaning assigned in Section 10.
+</p>
+
+<p class="clause">
+  <span class="clause-num">5.</span>
+  <span class="clause-title">RENT.</span>
+  The Tenant shall pay Rent of ${{ "%.2f" | format(rent.amount) }} per
+  month, payable in advance on each Due Date (as defined in Section 4.3).
+</p>
+
+<p class="clause">
+  <span class="clause-num">6.</span>
+  <span class="clause-title">LATE CHARGE.</span>
+  If Rent is not received within {{ late_fee.grace_days }} day(s)
+  after the Due Date, the Tenant shall pay a late charge of
+  ${{ "%.2f" | format(late_fee.amount) }}. Assessment of late charges is subject
+  to {{ meta.late_fee_statute }}.
+</p>
+
+<p class="clause">
+  <span class="clause-num">7.</span>
+  <span class="clause-title">SECURITY DEPOSIT.</span>
+</p>
+<p class="sub-clause">
+  <span class="clause-num">7.1</span>
+  Amount: ${{ "%.2f" | format(deposit.amount) }}, due on execution.
+</p>
+<p class="sub-clause">
+  <span class="clause-num">7.2</span>
+  Return: The Security Deposit (as defined in Section 4.2), less itemized
+  deductions, shall be returned within {{ deposit.return_days }} days after
+  surrender, in accordance with {{ meta.deposit_statute }}.
+</p>
+<p class="sub-clause">
+  <span class="clause-num">7.3</span>
+  The Security Deposit shall not be applied to Rent (Section 5) without the
+  Landlord's written consent.
+</p>
+
+{% if not edges.omit_pet_section -%}
+<p class="clause">
+  <span class="clause-num">8.</span>
+  <span class="clause-title">PETS.</span>
+{%- if pets.allowed %}
+  The Tenant may keep pets not exceeding {{ pets.max_weight }} lbs, subject to a
+  fee of ${{ "%.2f" | format(pets.fee) }}. The Tenant is liable for all
+  pet-related damage and shall restore the Premises at the Tenant's expense.
+{%- else %}
+  No pets are permitted on the Premises or in common areas.
+{%- endif %}
+</p>
+{%- else -%}
+<p class="clause">
+  <span class="clause-num">8.</span>
+  <span class="clause-title reserved">[RESERVED]</span>
+</p>
+{%- endif %}
+
+<p class="clause">
+  <span class="clause-num">9.</span>
+  <span class="clause-title">RIGHT OF ENTRY.</span>
+  The Landlord may enter the Premises upon at least 24 hours'
+  written notice for inspection, repairs, or showings, except that no notice is
+  required in an emergency.
+</p>
+
+<p class="clause">
+  <span class="clause-num">10.</span>
+  <span class="clause-title">DEFAULT.</span>
+  The Tenant is in Default if the Tenant (a) fails to pay Rent or other
+  amounts when due; (b) violates any term of this Agreement; or (c) abandons the
+  Premises. Upon Default the Landlord may exercise all remedies available under
+  this Agreement and applicable law.
+</p>
+
+<p class="clause">
+  <span class="clause-num">11.</span>
+  <span class="clause-title">SUBLETTING.</span>
+{%- if sublet.allowed %}
+{%- if edges.cross_ref_sublet %}
+  The Tenant may sublet only with the Landlord's prior written consent. Consent
+  to one subtenant does not constitute consent to any subsequent subtenant, and
+  a subletting Tenant remains liable under Section 1.2 (joint and several
+  liability) and is not released from the obligations defined in Section 10.
+{%- else %}
+  The Tenant may sublet only with the Landlord's prior written consent.
+{%- endif %}
+{%- else %}
+  The Tenant may not sublet the Premises.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">12.</span>
+  <span class="clause-title">MAINTENANCE.</span>
+  The Tenant shall maintain the Premises in clean and sanitary
+  condition and surrender it as received, normal wear and tear excepted.
+</p>
+
+<p class="clause">
+  <span class="clause-num">13.</span>
+  <span class="clause-title">SMOKE ALARMS &amp; SECURITY DEVICES.</span>
+  The Premises is equipped with smoke alarms
+  and exterior-door security devices as required by applicable law. Requests for
+  repair must be in writing.
+</p>
+
+{% if edges.conflicting_late_fee -%}
+<p class="clause">
+  <span class="clause-num">14.</span>
+  <span class="clause-title">ADDITIONAL FEE PROVISIONS.</span>
+  Notwithstanding any other provision, a late charge of
+  ${{ "%.2f" | format(late_fee_conflict_amount) }} shall apply to any Rent paid
+  after the Due Date.
+</p>
+{%- else -%}
+<p class="clause">
+  <span class="clause-num">14.</span>
+  <span class="clause-title">SEVERABILITY.</span>
+  If any provision of this Agreement is held unenforceable, the
+  remainder shall remain in full force and effect.
+</p>
+{%- endif %}
+
+<p class="clause">
+  <span class="clause-num">15.</span>
+  <span class="clause-title">ENTIRE AGREEMENT.</span>
+  This Agreement, together with any addenda, constitutes the
+  entire agreement between the Parties and supersedes all prior negotiations,
+  understandings, and oral agreements.
+</p>
+
+<div class="signatures">
+  <div class="section-heading">SIGNATURES</div>
+
+  <div class="sig-block">
+    <div class="sig-line">Landlord: _________________________&nbsp;&nbsp;Date: __________</div>
+    <div class="sig-name">{{ landlord.name }}</div>
+  </div>
+
+{% for t in tenants -%}
+  <div class="sig-block">
+    <div class="sig-line">Tenant: ___________________________&nbsp;&nbsp;Date: __________</div>
+    <div class="sig-name">{{ t.name }}</div>
+  </div>
+{% endfor -%}
+</div>

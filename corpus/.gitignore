@@ -1,2 +1,5 @@
 # Copyrighted anchor PDFs (re-downloadable)
 sources/
+
+# Generated PDFs
+generated/

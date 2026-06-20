@@ -1,0 +1,199 @@
+{#==============================================================================
+  standard_lease.j2  —  Mid-complexity residential lease
+==============================================================================#}
+<h1 class="doc-title">STANDARD RESIDENTIAL LEASE AGREEMENT</h1>
+
+<p class="clause">
+  <span class="clause-num">1.</span>
+  <span class="clause-title">PARTIES.</span>
+  This Agreement is made on {{ agreement_date }} between
+  {{ landlord.name }} ("Landlord"), mailing address {{ landlord.address }},
+  telephone {{ landlord.phone }}, and the following tenant(s)
+  ("Tenant"): {{ tenants | map(attribute='name') | join('; ') }}.
+</p>
+
+<p class="clause">
+  <span class="clause-num">2.</span>
+  <span class="clause-title">PREMISES.</span>
+  The Premises is located at {{ property.address }}, a
+  {{ property.type }} containing {{ property.bedrooms }} bedroom(s) and
+  {{ property.bathrooms }} bathroom(s), to be used as a residential dwelling only.
+</p>
+
+<p class="clause">
+  <span class="clause-num">3.</span>
+  <span class="clause-title">OCCUPANTS.</span>
+{%- if occupants %}
+  In addition to the Tenant, the following individuals may occupy the Premises:
+  {{ occupants | join(', ') }}.
+{%- else %}
+  No occupants other than the Tenant are permitted to reside on the Premises.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">4.</span>
+  <span class="clause-title">TERM.</span>
+{%- if term.type == 'fixed' %}
+  This is a fixed-term lease beginning {{ term.start }} and ending {{ term.end }}.
+{%- else %}
+  This is a month-to-month tenancy beginning {{ term.start }}, terminable by either
+  Party on {{ term.notice_days }} days' written notice.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">5.</span>
+  <span class="clause-title">RENT.</span>
+  The Tenant shall pay ${{ "%.2f" | format(rent.amount) }} per month
+  ("Rent"), due on the {{ rent.due_day }} day of each month. Acceptable payment
+  methods: {{ rent.methods | join(', ') }}.
+</p>
+
+<p class="clause">
+  <span class="clause-num">6.</span>
+  <span class="clause-title">SECURITY DEPOSIT.</span>
+{%- if deposit.required %}
+  A security deposit of ${{ "%.2f" | format(deposit.amount) }} is due upon
+  execution of this Agreement and shall be returned, less itemized deductions,
+  within {{ deposit.return_days }} days after the Term ends. The deposit may not
+  be applied to Rent (see Section 5) without the Landlord's written consent.
+{%- else %}
+  No security deposit is required.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">7.</span>
+  <span class="clause-title">LATE FEE.</span>
+{%- if late_fee.enabled %}
+  If Rent is not received within {{ late_fee.grace_days }} day(s) after the due date
+  stated in Section 5, the Tenant shall pay ${{ "%.2f" | format(late_fee.amount) }}
+  {{ "per occurrence" if late_fee.per == 'occurrence' else "for each day Rent remains late" }}.
+{%- else %}
+  No late fee shall be charged.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">8.</span>
+  <span class="clause-title">NON-SUFFICIENT FUNDS.</span>
+{%- if nsf_fee.enabled %}
+  A fee of ${{ "%.2f" | format(nsf_fee.amount) }} applies to each returned payment.
+{%- else %}
+  No NSF fee shall be charged.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">9.</span>
+  <span class="clause-title">PETS.</span>
+{%- if pets.allowed %}
+  The Tenant may keep the following pet(s) on the Premises:
+  <ul class="pet-list">
+{%- for p in pets.list %}
+    <li>{{ p.type }} (maximum weight {{ p.max_weight }} lbs)</li>
+{%- endfor %}
+  </ul>
+  A pet fee of ${{ "%.2f" | format(pets.fee) }} applies and is
+  {{ "refundable" if pets.refundable else "non-refundable" }}. The Tenant is
+  liable for all pet-related damage.
+{%- else %}
+  No pets are permitted on the Premises.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">10.</span>
+  <span class="clause-title">SMOKING.</span>
+  Smoking is {{ "permitted" if smoking.allowed else "prohibited" }}
+  on the Premises and in common areas.
+</p>
+
+<p class="clause">
+  <span class="clause-num">11.</span>
+  <span class="clause-title">UTILITIES.</span>
+{%- if utilities.landlord_pays %}
+  The Landlord shall provide: {{ utilities.landlord_pays | join(', ') }}.
+  All other utilities and services are the Tenant's responsibility.
+{%- else %}
+  The Tenant is responsible for all utilities and services.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">12.</span>
+  <span class="clause-title">PARKING.</span>
+{%- if parking.provided %}
+  The Landlord provides {{ parking.spaces }} parking space(s) for a fee of
+  ${{ "%.2f" | format(parking.fee) }} per month.
+{%- else %}
+  No parking is provided.
+{%- endif %}
+</p>
+
+<p class="clause">
+  <span class="clause-num">13.</span>
+  <span class="clause-title">MAINTENANCE.</span>
+  The Tenant shall keep the Premises clean and sanitary and
+  surrender it in the condition received, normal wear and tear excepted.
+</p>
+
+<p class="clause">
+  <span class="clause-num">14.</span>
+  <span class="clause-title">RIGHT OF ENTRY.</span>
+  The Landlord may enter the Premises upon at least 24 hours'
+  notice for inspection, repairs, or showings, except in an emergency.
+</p>
+
+<p class="clause">
+  <span class="clause-num">15.</span>
+  <span class="clause-title">GOVERNING LAW.</span>
+  This Agreement is governed by the laws of the jurisdiction
+  in which the Premises is located.
+</p>
+
+<p class="clause">
+  <span class="clause-num">16.</span>
+  <span class="clause-title">ENTIRE AGREEMENT.</span>
+  This Agreement, including any attachments, constitutes the
+  entire agreement between the Parties and supersedes all prior understandings.
+</p>
+
+<div class="section-heading">AMOUNT DUE AT SIGNING</div>
+<table class="fees">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th class="amount">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for row in due_at_signing -%}
+    <tr>
+      <td>{{ row.label }}</td>
+      <td class="amount">${{ "%.2f" | format(row.amount) }}</td>
+    </tr>
+{% endfor -%}
+    <tr class="total">
+      <td>Total</td>
+      <td class="amount">${{ "%.2f" | format(due_at_signing | sum(attribute='amount')) }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="signatures">
+  <div class="section-heading">SIGNATURES</div>
+
+  <div class="sig-block">
+    <div class="sig-line">Landlord: _________________________&nbsp;&nbsp;Date: __________</div>
+    <div class="sig-name">{{ landlord.name }}</div>
+  </div>
+
+{% for t in tenants -%}
+  <div class="sig-block">
+    <div class="sig-line">Tenant: ___________________________&nbsp;&nbsp;Date: __________</div>
+    <div class="sig-name">{{ t.name }}</div>
+  </div>
+{% endfor -%}
+</div>

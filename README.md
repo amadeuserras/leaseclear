@@ -64,8 +64,6 @@ npm run lint
 
 ### Corpus
 
-`generate.py` plus `models/lease.py` (dataclasses) and `data/` (lease definitions). Each lease generates `corpus/generated/{id}.pdf`.
-
 First time:
 
 ```bash
@@ -80,12 +78,7 @@ cd corpus
 uv run python generate.py
 ```
 
-Generate a single lease by id:
-
-```bash
-cd corpus
-uv run python generate.py syn-baseline
-```
+Pdf's appear in `/generated`
 
 Lint and typecheck:
 
@@ -100,5 +93,5 @@ uv run pyright
 
 - **Backend:** FastAPI, PostgreSQL + pgvector, hybrid retrieval (vector + FTS + RRF), Claude generation
 - **Frontend:** Next.js, TypeScript, Tailwind
-- **Corpus:** dataclasses, `generate.py`, Jinja template, PyMuPDF
+- **Corpus:** dataclasses, `generate.py`, Jinja2 templates, PyMuPDF
 - **Tooling:** uv, ruff, pyright, pytest, GitHub Actions
