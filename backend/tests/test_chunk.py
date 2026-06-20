@@ -1,7 +1,8 @@
 from pathlib import Path
 
-import leaseclear.ingestion.chunk as chunk_mod
 import pytest
+
+import leaseclear.ingestion.chunk as chunk_mod
 from leaseclear.ingestion.chunk import Chunk, chunk_document
 from leaseclear.ingestion.parse import PageText, ParsedDocument, parse_pdf
 from leaseclear.utils.pretty_print import pretty_print
