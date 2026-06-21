@@ -5,7 +5,7 @@ from dataclasses import asdict
 from openai import OpenAI
 
 from leaseclear.core.config import settings
-from leaseclear.schema import EmbeddedChunk, ParsedChunk
+from leaseclear.types import EmbeddedChunk, ParsedChunk
 
 _client = OpenAI(api_key=settings.openai_api_key)
 

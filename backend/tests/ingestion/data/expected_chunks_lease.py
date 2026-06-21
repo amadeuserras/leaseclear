@@ -1,4 +1,4 @@
-from leaseclear.schema import ParsedChunk
+from leaseclear.types import ParsedChunk
 
 EXPECTED_CHUNKS_LEASE = [
     ParsedChunk(

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from leaseclear.db.connection import DbConnection
-from leaseclear.schema import EmbeddedChunk
+from leaseclear.types import EmbeddedChunk
 
 
 async def store_chunks(

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import tiktoken
 
 from leaseclear.ingestion.parse import PageText, ParsedDocument
-from leaseclear.schema import ParsedChunk
+from leaseclear.types import ParsedChunk
 
 SUB_CLAUSE_LINE = re.compile(r"^(\d+\.\d+)\s+(.*)$")
 TOP_CLAUSE_LINE = re.compile(r"^(\d+)\.\s+(.*)$")

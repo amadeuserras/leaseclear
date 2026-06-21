@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from leaseclear.retrieval.fusion import reciprocal_rank_fusion
-from leaseclear.schema import RetrievedChunk
+from leaseclear.types import RetrievedChunk
 
 
 def _chunk(chunk_id: str, *, similarity: float = 0.0) -> RetrievedChunk:

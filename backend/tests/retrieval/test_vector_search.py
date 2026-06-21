@@ -4,7 +4,7 @@ import asyncpg
 import pytest
 
 from leaseclear.retrieval.vector_search import search
-from leaseclear.schema import RetrievedChunk
+from leaseclear.types import RetrievedChunk
 from tests.retrieval.data.search_cases_lease import SEARCH_CASES_LEASE
 
 

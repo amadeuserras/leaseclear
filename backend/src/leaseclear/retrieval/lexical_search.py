@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncpg
 
-from leaseclear.schema import RetrievedChunk
+from leaseclear.types import RetrievedChunk
 
 
 async def search(

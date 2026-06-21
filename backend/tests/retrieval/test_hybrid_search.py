@@ -4,7 +4,7 @@ import asyncpg
 import pytest
 
 from leaseclear.retrieval import hybrid
-from leaseclear.schema import RetrievedChunk
+from leaseclear.types import RetrievedChunk
 
 
 @pytest.mark.real_api

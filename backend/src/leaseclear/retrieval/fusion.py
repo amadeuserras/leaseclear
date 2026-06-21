@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from leaseclear.schema import RetrievedChunk
+from leaseclear.types import RetrievedChunk
 
 DEFAULT_RRF_K = 60
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncpg
 
 from leaseclear.retrieval import fusion, lexical_search, vector_search
-from leaseclear.schema import RetrievedChunk
+from leaseclear.types import RetrievedChunk
 
 VECTOR_TOP_K = 20
 LEXICAL_TOP_K = 20
