@@ -1,7 +1,7 @@
-from leaseclear.ingestion.chunk import Chunk
+from leaseclear.schema import ParsedChunk
 
 EXPECTED_CHUNKS_LEASE = [
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-001",
         document_id="lease",
         text="M\nMERIDIAN\nPROPERTY\nFORMS\nRESIDENTIAL LEASE AGREEMENT\nFixed-Term or Month-to-Month · Form MRL-204 (Rev. 03/24)\nThis Residential Lease Agreement (this “Agreement”) is made on\nJune 14, 2025\nbetween\nCedar Grove Rentals LLC\n(“Landlord”) and\nPriya Nadkarni and Daniel Osei\n(“Tenant”), who agree as follows.",
@@ -11,7 +11,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=301,
         token_count=98,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-002",
         document_id="lease",
         text="1. Premises. Landlord leases to Tenant the residential premises located at\n77 Larkspur Lane, Apt 3C, Port Marlow, CA 94066\n(the “Premises”), together with the ﬁxtures and personal property described in Section\xa04. The Premises shall be occupied solely as a\nprivate residence by the following named occupants and no others:\nPriya Nadkarni, Daniel Osei, one minor child\n.",
@@ -21,7 +21,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=670,
         token_count=95,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-003",
         document_id="lease",
         text="2. Term. (Check A or B):\n☐ A. Month-to-Month. This Agreement begins on\nJuly 1, 2025\nand continues as a month-to-month tenancy until terminated by either party on at least thirty (30) days’ written notice given in\nthe manner required by law.\n☒ B. Fixed Term. This Agreement begins on\nJuly 1, 2025\nand ends at 11:59\xa0PM on\nJune 30, 2026\n, unless (i)\xa0extended in a writing signed by both parties; (ii)\xa0terminated earlier under Section\xa014; or (iii)\xa0Landlord accepts Rent\nafter the end date, in which case a month-to-month tenancy is created under paragraph\xa02A above.",
@@ -31,7 +31,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=1232,
         token_count=164,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-004",
         document_id="lease",
         text="3. Rent. Tenant shall pay Rent of\n$2,875.00\nper month, in advance, due on the\n1st\nday of each calendar month and delinquent thereafter. “Rent” means all monetary obligations of Tenant under this Agreement\nexcept the security deposit described in Section\xa05.\nA. Rent is payable by ☒ personal check ☒ electronic transfer ☐ other:\n\xa0\n, payable to\nCedar Grove Rentals LLC\n.\nB. If any payment is returned unpaid, Tenant shall pay a returned-payment fee of\n$40.00\nand, after the second such event, Landlord may require all future Rent to be paid by certiﬁed funds.",
@@ -41,7 +41,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=1789,
         token_count=143,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-005",
         document_id="lease",
         text="4. Included Personal Property. The following items are provided with the Premises and are to be returned in the same condition,\nordinary wear and tear excepted:\nrefrigerator, gas range, dishwasher, stacked washer/dryer\n☐ (if checked) additional items are listed on the attached inventory addendum.",
@@ -51,7 +51,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=2087,
         token_count=64,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-006",
         document_id="lease",
         text="5. Security Deposit. Tenant shall deposit\n$2,875.00\n\nas security for Tenant’s performance. Landlord may apply the deposit, as reasonably necessary, to: (i)\xa0unpaid Rent; (ii)\xa0repair of\ndamage beyond ordinary wear and tear caused by Tenant or Tenant’s guests; (iii)\xa0cleaning of the Premises upon termination; and\n(iv)\xa0the replacement of personal property described in Section\xa04. The deposit shall not be applied by Tenant to the last month’s\nRent. Within the period required by applicable law after Tenant vacates, Landlord shall return the balance of the deposit together\nwith an itemized statement of any amounts withheld.\nTenant’s Initials: ( PN ) Landlord’s Initials: ( CL )",
@@ -61,7 +61,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=2764,
         token_count=160,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-007",
         document_id="lease",
         text="6. Maintenance, Use, and Reporting. This is intentionally one of the long clauses in this Agreement and is meant to exceed the\nseveral-hundred-token range so that retrieval and chunking behaviour can be tested on a single dense block of obligations.\nA. Tenant shall properly use, operate, and safeguard the Premises, including any landscaping, furniture, furnishings,\nappliances, and all mechanical, electrical, gas, and plumbing ﬁxtures, and shall keep them and the Premises clean, sanitary,\nand well ventilated. Tenant shall be responsible for checking and maintaining all smoke and carbon-monoxide detectors and\nshall replace batteries and burned-out bulbs as needed.\nB. Tenant shall promptly notify Landlord in writing of any problem, malfunction, or damage. Tenant shall be charged for all\nrepairs or replacements caused by Tenant, Tenant’s pets, guests, or licensees, excluding ordinary wear and tear, and shall be\ncharged for damage resulting from Tenant’s failure to give timely notice. Tenant shall be charged for the repair of drain\nblockages or stoppages, unless caused by defective plumbing or by tree roots invading sewer lines.\nC. Responsibility for the garden, landscaping, trees, and shrubs is allocated as follows: watering shall be performed by ☐\nLandlord ☒ Tenant; routine maintenance shall be performed by ☒ Landlord ☐ Tenant; except as follows:\nshared courtyard maintained by Landlord\n.\nD. The parties agree that state or local water-use restrictions supersede any watering or maintenance obligation under\nparagraphs\xa06C above. Tenant’s failure to maintain any item for which Tenant is responsible entitles Landlord to perform such\nmaintenance and charge Tenant the reasonable cost, which shall be deemed additional Rent under Section\xa03.\nE. Tenant shall not, without Landlord’s prior written consent: (i)\xa0make alterations, repairs, or improvements, including\npainting, wallpapering, or changing locks; (ii)\xa0install antennas, satellite dishes, or signs; or (iii)\xa0deduct from Rent the cost of\nany repair, alteration, or improvement. Any such deduction shall be treated as unpaid Rent.",
@@ -71,7 +71,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=4867,
         token_count=440,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-008",
         document_id="lease",
         text="7. Pets. No animal shall be kept on or about the Premises without Landlord’s prior written consent, except as expressly permitted in\nthe attached Pet Addendum (see Schedule\xa0A). A service animal or assistance animal required by law is not a pet for purposes of\nthis Section.",
@@ -81,7 +81,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=5141,
         token_count=60,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-009",
         document_id="lease",
         text="8. Quiet Enjoyment; Nuisance. Tenant shall not disturb, annoy, endanger, or interfere with other residents or neighbours, nor use\nthe Premises for any unlawful purpose, nor commit waste or nuisance on or about the Premises.",
@@ -91,7 +91,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=5365,
         token_count=50,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-010",
         document_id="lease",
         text="9. Entry.\nA. Tenant shall make the Premises available to Landlord or Landlord’s agents to make necessary or agreed repairs, to supply\nagreed services, or to show the Premises to prospective tenants, purchasers, lenders, or contractors.\nB. Except in the cases listed in paragraph\xa09C, Landlord shall give Tenant at least twenty-four (24) hours’ written notice before\nentry. No notice is required: (i)\xa0in an emergency; (ii)\xa0if Tenant is present and consents at the time of entry; or (iii)\xa0if Tenant\nhas abandoned or surrendered the Premises.\nC. ☐ (If checked) Tenant authorizes the use of a keysafe/lockbox to permit entry under the conditions stated in paragraph\xa09A.",
@@ -101,7 +101,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=6030,
         token_count=164,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-011",
         document_id="lease",
         text="10. Assignment and Subletting. Tenant shall not sublet the Premises or assign this Agreement without Landlord’s prior written\nconsent. This prohibition ☒ applies ☐ does not apply to short-term, vacation, or transient rentals arranged through any hosting\nplatform. Any violation of this Section is a non-curable, material breach of this Agreement.\nTenant’s Initials: ( PN ) Landlord’s Initials: ( CL )",
@@ -111,7 +111,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=6431,
         token_count=90,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-012",
         document_id="lease",
         text="11. Statutory and Condition Disclosures. The following disclosures form part of this Agreement and are made by Landlord to\nTenant as of the start date. Each lettered item applies only if the associated box is checked; an unchecked box means the disclosure\ndoes not apply to this tenancy and that Tenant should not infer any representation from its absence. This Section is intentionally\nwritten at length, with several conditional and nested provisions, so that retrieval, citation, and refusal behaviour can be exercised\nagainst a dense disclosure block of the kind commonly found at the back of a lease.\nA. ☒ Pre-1978 Construction. If checked, the Premises were built before 1978, and Tenant acknowledges receipt of (i)\xa0the\nlead-based-paint disclosure referenced in Schedule\xa0A; (ii)\xa0the federally approved pamphlet on lead-poisoning prevention; and\n(iii)\xa0any records in Landlord’s possession concerning lead-based paint in the Premises. If the box is not checked, Landlord",
@@ -121,7 +121,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=7406,
         token_count=209,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-013",
         document_id="lease",
         text="11. Statutory and Condition Disclosures\n\nmakes no representation under this paragraph.\nB. ☐ Periodic Pest Control. If checked, Landlord has contracted for periodic pest-control treatment and shall provide Tenant\na copy of any notice received from the pest-control operator. Tenant shall: (a)\xa0cooperate with reasonable access for treatment;\nand (b)\xa0follow any written preparation instructions provided in advance of a scheduled treatment.\nC. ☒ Flood Hazard. If checked, the Premises are located in a designated ﬂood-hazard area. Tenant is advised that\n(i)\xa0Landlord’s insurance does not cover Tenant’s personal property; and (ii)\xa0ﬂood insurance for Tenant’s belongings, if\ndesired, is the sole responsibility of Tenant.\nD. ☐ Mold and Ventilation. If checked, the Premises were previously treated for elevated levels of mold. In all cases,\nwhether or not this box is checked, Tenant agrees to: (a)\xa0keep the Premises properly ventilated; (b)\xa0promptly report any water\nintrusion, leak, or visible mold growth; and (c)\xa0refrain from blocking vents or exhaust fans. Tenant’s failure to comply may be\ntreated as a failure to maintain under Section\xa06.\nE. Registered-Oﬀender Database. Information about registered oﬀenders is made available to the public on a database\nmaintained by the responsible state agency. Neither Landlord nor any agent is required to check the database on Tenant’s\nbehalf, and Tenant may consult the database directly if Tenant wishes to obtain such information.",
@@ -131,7 +131,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=8882,
         token_count=335,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-014",
         document_id="lease",
         text="12. Insurance. Tenant’s personal property is not insured by Landlord. Tenant is advised to carry renter’s insurance. ☒ (If checked)\nTenant shall obtain and maintain liability insurance of not less than\n$100,000.00\n, naming Landlord as an additional insured, and shall provide proof of coverage before the start date.",
@@ -141,7 +141,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=9198,
         token_count=70,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-015",
         document_id="lease",
         text="13. Move-In Condition. The condition of the Premises at move-in is recorded below. Items not listed are presumed clean and in\noperable condition.\nArea / Item\nCondition\nComments\nLiving area\nSatisfactory\nsmall nail holes, east wall\nKitchen / appliances\nNew\nrange installed 2025\nBathroom(s)\nSatisfactory\ngrout re-sealed prior to move-in\nFlooring / walls\nOther\nminor carpet stain, hallway",
@@ -151,7 +151,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=9582,
         token_count=96,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-016",
         document_id="lease",
         text="14. Early Termination. If Tenant terminates before the end of the term stated in Section\xa02B, Tenant remains responsible for lost\nRent, reasonable re-rental costs, and advertising expenses, which Landlord may withhold from the security deposit described in\nSection\xa05.",
@@ -161,7 +161,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=9848,
         token_count=57,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-017",
         document_id="lease",
         text="15. Waiver. Landlord’s waiver of any breach shall not be a waiver of any later breach.",
@@ -171,7 +171,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=9934,
         token_count=22,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-018",
         document_id="lease",
         text="16. Entire Agreement. This Agreement, together with any addendum or schedule incorporated by reference, is the ﬁnal and\ncomplete expression of the parties’ agreement and supersedes all prior or contemporaneous oral agreements. Any modiﬁcation\nmust be in a writing signed by both parties.\nTenant’s Initials: ( PN ) Landlord’s Initials: ( CL )\nM\nMERIDIAN\nPROPERTY\nFORMS\nSCHEDULE A — PET ADDENDUM\nAttached to and part of Form MRL-204 · Form MRL-PET (Rev. 03/24)\nThis Pet Addendum is incorporated into and made part of the Residential Lease Agreement dated\nJune 14, 2025\nfor the Premises at\n77 Larkspur Lane, Apt 3C, Port Marlow, CA 94066\n. Where this Addendum conﬂicts with the main Agreement, this Addendum controls as to pets. Notwithstanding Section\xa07 of the\nAgreement, Landlord grants permission for Tenant to keep the following pet(s) only:\none dog under 25 lbs (breed: beagle mix)\n\n.",
@@ -181,7 +181,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=10820,
         token_count=239,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-019",
         document_id="lease",
         text="1. Permitted Pets Only. Tenant shall keep no animal other than those identiﬁed above, including animals that are “just visiting,”\nwithout Landlord’s further written consent.",
@@ -191,7 +191,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=10993,
         token_count=39,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-020",
         document_id="lease",
         text="2. Pet Deposit and Rent. Tenant shall pay an additional pet deposit of\n$500.00\nand additional monthly pet rent of\n$35.00\n, which is part of “Rent” under Section\xa03 of the Agreement.",
@@ -201,7 +201,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=11173,
         token_count=49,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-021",
         document_id="lease",
         text="3. Tenant Obligations. Tenant agrees that the pet(s) will be: (i)\xa0properly licensed and vaccinated as required by law; (ii)\xa0kept\nunder control and not left unattended in common areas; and (iii)\xa0prevented from causing damage, odour, or disturbance. Tenant\nshall promptly remove and dispose of all pet waste.",
@@ -211,7 +211,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=11479,
         token_count=77,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-022",
         document_id="lease",
         text="4. Liability. Tenant is responsible for, and shall indemnify Landlord against, all damage and all claims for injury arising from the\npet(s), whether or not the speciﬁc animal is listed above.",
@@ -221,7 +221,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=11670,
         token_count=45,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-023",
         document_id="lease",
         text="5. Revocation. Landlord may revoke permission to keep a pet on\n10\ndays’ written notice for cause. Tenant’s failure to remove the pet after revocation is a breach of the Agreement.",
@@ -231,7 +231,7 @@ EXPECTED_CHUNKS_LEASE = [
         char_end=11849,
         token_count=42,
     ),
-    Chunk(
+    ParsedChunk(
         chunk_id="lease_chunk-024",
         document_id="lease",
         text="6. ☒ Renter’s Insurance for Pets (if checked). Tenant shall carry renter’s insurance that includes coverage for pet ownership and\nshall provide proof on request.\nBy signing below, Tenant acknowledges having read, understood, and received a copy of this Pet Addendum.\nTenant:\nPriya Nadkarni and Daniel Osei\nDate:\nJune 14, 2025\nSign: ____________\nLandlord:\nCedar Grove Rentals LLC\nDate:\nJune 14, 2025\nSign: ____________",
