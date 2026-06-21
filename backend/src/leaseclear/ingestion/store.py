@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import asyncpg
-
+from leaseclear.db.connection import DbConnection
 from leaseclear.schema import EmbeddedChunk
 
 
 async def store_chunks(
-    conn: asyncpg.Connection,
+    conn: DbConnection,
     chunks: list[EmbeddedChunk],
 ) -> None:
     await conn.executemany(
-        """
+        """--sql
         INSERT INTO chunks (
             chunk_id, document_id, text, embedding,
             clause_label, page_number, char_start, char_end, token_count
