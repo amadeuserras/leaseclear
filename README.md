@@ -40,6 +40,14 @@ uv run ruff format .
 uv run pyright
 ```
 
+Database (Postgres must be running — see Docker above):
+
+```bash
+cd backend
+uv run python scripts/apply_schema.py   
+uv run python scripts/db_preview.py     
+```
+
 ### Frontend
 
 First time:
