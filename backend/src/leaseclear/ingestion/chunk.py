@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import tiktoken
 
 from leaseclear.ingestion.parse import PageText, ParsedDocument
+from leaseclear.schema import ParsedChunk
 
 SUB_CLAUSE_LINE = re.compile(r"^(\d+\.\d+)\s+(.*)$")
 TOP_CLAUSE_LINE = re.compile(r"^(\d+)\.\s+(.*)$")
@@ -14,18 +15,6 @@ TITLE = re.compile(r"^(.+?)\.(?:\s|$)")
 MAX_CHUNK_CHARS = 2400
 SPLITTERS = ("\n\n", "\n", ". ", " ")
 _TOKEN_ENCODER = tiktoken.get_encoding("cl100k_base")
-
-
-@dataclass
-class Chunk:
-    chunk_id: str
-    document_id: str
-    text: str
-    clause_label: str
-    page_number: int
-    char_start: int
-    char_end: int
-    token_count: int
 
 
 @dataclass
@@ -42,7 +31,7 @@ class _RawChunk:
     page_number: int
 
 
-def chunk_document(document: ParsedDocument, document_id: str) -> list[Chunk]:
+def chunk_document(document: ParsedDocument, document_id: str) -> list[ParsedChunk]:
     sections = _split_into_sections(document.pages)
     raw_chunks: list[_RawChunk] = []
     for section in sections:
@@ -50,7 +39,7 @@ def chunk_document(document: ParsedDocument, document_id: str) -> list[Chunk]:
 
     full_text = document.full_text
     search_from = 0
-    chunks: list[Chunk] = []
+    chunks: list[ParsedChunk] = []
     for index, raw in enumerate(raw_chunks, start=1):
         char_start = full_text.find(raw.text, search_from)
         if char_start == -1:
@@ -58,7 +47,7 @@ def chunk_document(document: ParsedDocument, document_id: str) -> list[Chunk]:
         char_end = char_start + len(raw.text)
         search_from = char_end
         chunks.append(
-            Chunk(
+            ParsedChunk(
                 chunk_id=f"{document_id}_chunk-{index:03d}",
                 document_id=document_id,
                 text=raw.text,
