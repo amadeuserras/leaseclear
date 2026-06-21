@@ -9,8 +9,10 @@ _BACKEND_ROOT = Path(__file__).resolve().parents[3]
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=_BACKEND_ROOT / ".env")
-
     database_url: str = "postgresql://leaseclear:leaseclear@localhost:5433/leaseclear"
+    test_database_url: str = (
+        "postgresql://leaseclear:leaseclear@localhost:5433/leaseclear_test"
+    )
     openai_api_key: str
     anthropic_api_key: str
     jwt_secret: str

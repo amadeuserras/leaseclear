@@ -6,15 +6,13 @@ import asyncpg
 
 from leaseclear.core.config import settings
 
-DATABASE_URL = settings.database_url
-
 _pool: asyncpg.Pool | None = None
 
 
 async def get_pool() -> asyncpg.Pool:
     global _pool
     if _pool is None:
-        _pool = await asyncpg.create_pool(DATABASE_URL)
+        _pool = await asyncpg.create_pool(settings.database_url)
     return _pool
 
 
