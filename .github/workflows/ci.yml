@@ -34,6 +34,10 @@ jobs:
 
       - name: Pytest
         run: uv run pytest
+        env:
+          OPENAI_API_KEY: ci-placeholder
+          ANTHROPIC_API_KEY: ci-placeholder
+          JWT_SECRET: ci-placeholder
 
   corpus:
     name: Corpus
