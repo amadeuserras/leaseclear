@@ -32,6 +32,12 @@ jobs:
       - name: Pyright
         run: uv run pyright
 
+      - name: Generate corpus
+        working-directory: corpus
+        run: |
+          uv sync --frozen
+          uv run python generate.py
+
       - name: Pytest
         run: uv run pytest
         env:
