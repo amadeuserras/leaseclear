@@ -5,11 +5,11 @@ import pytest
 
 from leaseclear.retrieval.vector_search import search
 from leaseclear.types import RetrievedChunk
-from tests.retrieval.data.search_cases_lease import SEARCH_CASES_LEASE
+from tests.retrieval.data.vector_search_cases import as_pytest_params
 
 
 @pytest.mark.real_api
-@pytest.mark.parametrize("question,expected_clause", SEARCH_CASES_LEASE)
+@pytest.mark.parametrize("question,expected_clause", as_pytest_params())
 async def test_vector_search_returns_relevant_clause(
     seeded_db: asyncpg.Connection,
     question: str,
