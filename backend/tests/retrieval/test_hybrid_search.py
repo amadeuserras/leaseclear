@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncpg
 import pytest
 
-from leaseclear.retrieval import hybrid, lexical_search, vector_search
+from leaseclear.retrieval import hybrid, lexical, vector
 from leaseclear.utils.pretty_print import pretty_print
 from tests.retrieval.data.mrr_comparison_cases import CASES
 from tests.retrieval.metrics import mean_reciprocal_rank, reciprocal_rank
@@ -11,11 +11,10 @@ from tests.retrieval.metrics import mean_reciprocal_rank, reciprocal_rank
 # Snapshot on demo corpus:
 #   vector ≈ 0.83   lexical ≈ 0.41   hybrid ≈ 0.83
 #
-# Read: hybrid TIES vector and does not beat it here. Lexical is currently
+# Read: hybrid TIES vector. Lexical is currently
 # weak on currency tokens ($40.00 vs "$40") and AND-joined filler words
-# ("show me..."), which caps its score. The takeaway is robustness, not
-# superiority: hybrid tracks the BEST available retriever even while one
-# component (lexical) is degraded — fusion doesn't drag it down.
+# ("show me..."), which caps its score. The takeaway is robustness: hybrid tracks the BEST
+# available retriever even while one component (lexical) is degraded — fusion doesn't drag it down.
 #
 # A genuine hybrid WIN requires a query where vector ranks the clause low
 # but lexical ranks it high. That depends on fixing lexical first.
@@ -29,8 +28,8 @@ async def test_search_mrr_comparison(seeded_db: asyncpg.Connection) -> None:
 
     for case in CASES:
         hybrid_results = await hybrid.search(seeded_db, case.query)
-        lexical_results = await lexical_search.search(seeded_db, case.query)
-        vector_results = await vector_search.search(seeded_db, case.query)
+        lexical_results = await lexical.search(seeded_db, case.query)
+        vector_results = await vector.search(seeded_db, case.query)
 
         hybrid_rrs.append(reciprocal_rank(hybrid_results, case.expected_clause))
         lexical_rrs.append(reciprocal_rank(lexical_results, case.expected_clause))

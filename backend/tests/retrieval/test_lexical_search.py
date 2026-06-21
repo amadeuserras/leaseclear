@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncpg
 
-from leaseclear.retrieval.lexical_search import search
+from leaseclear.retrieval.lexical import search
 
 
 async def test_lexical_search_matches_exact_clause_heading(

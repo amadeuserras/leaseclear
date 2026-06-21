@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncpg
 import pytest
 
-from leaseclear.retrieval.vector_search import search
+from leaseclear.retrieval.vector import search
 from leaseclear.types import RetrievedChunk
 from tests.retrieval.data.vector_search_cases import as_pytest_params
 
