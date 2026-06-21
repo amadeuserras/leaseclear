@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import asyncpg
+from asyncpg import Connection
+from asyncpg.pool import PoolConnectionProxy
 
 from leaseclear.core.config import settings
 
@@ -23,7 +25,7 @@ async def close_pool() -> None:
         _pool = None
 
 
-async def apply_schema(conn: asyncpg.Connection) -> None:
+async def apply_schema(conn: Connection | PoolConnectionProxy) -> None:
     schema_sql = Path(__file__).with_name("schema.sql").read_text()
     statements = [
         statement.strip() for statement in schema_sql.split(";") if statement.strip()
