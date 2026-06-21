@@ -1,0 +1,30 @@
+import asyncio
+from pathlib import Path
+
+from leaseclear.db.connection import apply_schema, close_pool, get_pool
+from leaseclear.ingestion.chunk import chunk_document
+from leaseclear.ingestion.embed import embed_chunks
+from leaseclear.ingestion.parse import parse_pdf
+from leaseclear.ingestion.store import store_chunks
+
+DEFAULT_PDF = Path(__file__).resolve().parents[2] / "corpus" / "generated" / "lease.pdf"
+DEFAULT_DOCUMENT_ID = "lease"
+
+
+async def main() -> None:
+    pool = await get_pool()
+    try:
+        async with pool.acquire() as conn:
+            await apply_schema(conn)
+            await conn.execute("TRUNCATE chunks")
+            document = parse_pdf(DEFAULT_PDF)
+            chunks = chunk_document(document, DEFAULT_DOCUMENT_ID)
+            embedded = embed_chunks(chunks)
+            await store_chunks(conn, embedded)
+            print(f"Ingested {len(embedded)} chunks from {DEFAULT_PDF}")
+    finally:
+        await close_pool()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
