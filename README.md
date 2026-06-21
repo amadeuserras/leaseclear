@@ -44,8 +44,7 @@ Database (Postgres must be running — see Docker above):
 
 ```bash
 cd backend
-uv run python scripts/apply_schema.py   
-uv run python scripts/db_preview.py     
+uv run python scripts/{filename}.py   
 ```
 
 ### Frontend
