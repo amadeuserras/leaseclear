@@ -4,6 +4,7 @@ import asyncpg
 import pytest
 
 from leaseclear.retrieval.search import search
+from leaseclear.schema import RetrievedChunk
 from tests.retrieval.data.search_cases_lease import SEARCH_CASES_LEASE
 
 
@@ -14,7 +15,7 @@ async def test_search_returns_relevant_clause(
     question: str,
     expected_clause: str,
 ) -> None:
-    results = await search(seeded_db, question, top_k=5)
+    results: list[RetrievedChunk] = await search(seeded_db, question, top_k=5)
 
     assert results
     assert all(result.document_id == "lease" for result in results)
