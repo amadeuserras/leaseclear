@@ -3,14 +3,14 @@ from __future__ import annotations
 import asyncpg
 import pytest
 
-from leaseclear.retrieval.search import search
+from leaseclear.retrieval.vector_search import search
 from leaseclear.schema import RetrievedChunk
 from tests.retrieval.data.search_cases_lease import SEARCH_CASES_LEASE
 
 
 @pytest.mark.real_api
 @pytest.mark.parametrize("question,expected_clause", SEARCH_CASES_LEASE)
-async def test_search_returns_relevant_clause(
+async def test_vector_search_returns_relevant_clause(
     seeded_db: asyncpg.Connection,
     question: str,
     expected_clause: str,
