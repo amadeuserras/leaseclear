@@ -12,28 +12,32 @@ Residential lease Q&A with **cited answers**, **honest refusals**, and **publish
 
 ### Backend
 
-First time (installs Python 3.12 and deps via [uv](https://docs.astral.sh/uv/)):
+Docker (for PostgreSQL connection)
+
+```bash
+# Open 'Docker Desktop' manually
+docker compose up -d
+docker compose ps 
+docker compose down
+```
+
+Test
 
 ```bash
 cd backend
-uv sync
+uv run pytest                                    
+uv run pytest -m real_api                        
+uv run pytest -m ""                              
+uv run pytest tests/ingestion/test_parse.py      
 ```
 
-Lint, typecheck, and test:
+Lint, typecheck:
 
 ```bash
 cd backend
 uv run ruff check .
-uv run ruff format --check .
-uv run pyright
-uv run pytest
-uv run pytest tests/test_parse.py # run specific test file only
-```
-
-Auto-format if `ruff format --check` fails:
-
-```bash
 uv run ruff format .
+uv run pyright
 ```
 
 ### Frontend
