@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import asyncpg
 
 from leaseclear.ingestion.embed import embed_texts
@@ -26,4 +24,4 @@ async def search(
         str(query_vector),
         top_k,
     )
-    return [RetrievedChunk(**dict[Any, Any](row)) for row in rows]
+    return [RetrievedChunk(**dict(row)) for row in rows]
