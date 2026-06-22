@@ -6,14 +6,12 @@ from typing import Any, cast
 
 
 def pretty_print(value: Any) -> None:
-    title = "👋 Hello! 🖨️ Pretty print:"
-    print(title)
-    print(json.dumps(_to_jsonable(value), indent=2, default=str))
+    print(json.dumps(_to_jsonable(value), indent=2, default=str, ensure_ascii=False))
 
 
 def _to_jsonable(value: Any) -> Any:
     if is_dataclass(value) and not isinstance(value, type):
-        return asdict(value)
+        return {key: _to_jsonable(item) for key, item in asdict(value).items()}
     if isinstance(value, list):
         items = cast(list[Any], value)
         return [_to_jsonable(item) for item in items]
