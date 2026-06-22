@@ -28,3 +28,32 @@ class EmbeddedChunk(ChunkBase):
 @dataclass
 class RetrievedChunk(ChunkBase):
     similarity: float
+
+
+@dataclass
+class LabelledChunk:
+    citation_id: str
+    chunk_id: str
+    text: str
+    similarity: float
+
+
+@dataclass
+class Citation:
+    id: str
+    quote: str
+
+
+@dataclass
+class GenerationResult:
+    answer: str
+    citations: list[Citation]
+    confidence: float
+    refusal: bool
+
+
+@dataclass
+class ValidationResult:
+    passed: bool
+    phantom_ids: list[str]
+    uncited_claims: bool
