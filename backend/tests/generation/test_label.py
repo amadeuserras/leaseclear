@@ -1,0 +1,32 @@
+from __future__ import annotations
+
+from leaseclear.generation.label import label_chunks
+from leaseclear.types import RetrievedChunk
+
+
+def make_chunk(
+    chunk_id: str, document_id: str, clause_label: str | None
+) -> RetrievedChunk:
+    return RetrievedChunk(
+        chunk_id=chunk_id,
+        document_id=document_id,
+        text="some text",
+        clause_label=clause_label,
+        page_number=1,
+        char_start=0,
+        char_end=100,
+        token_count=20,
+        similarity=0.9,
+    )
+
+
+def test_label_with_clause():
+    chunks = [make_chunk("lease_chunk-004", "lease", "3. Rent")]
+    result = label_chunks(chunks)
+    assert result[0].citation_id == "[lease §3. Rent]"
+
+
+def test_label_fallback_when_no_clause():
+    chunks = [make_chunk("lease_chunk-001", "lease", None)]
+    result = label_chunks(chunks)
+    assert result[0].citation_id == "[lease p.1]"

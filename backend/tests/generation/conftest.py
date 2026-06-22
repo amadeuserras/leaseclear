@@ -1,0 +1,43 @@
+from __future__ import annotations
+
+import pytest
+
+from leaseclear.types import Citation, GenerationResult, LabelledChunk
+
+
+@pytest.fixture
+def chunks() -> list[LabelledChunk]:
+    return [
+        LabelledChunk(
+            citation_id="[lease §3. Rent]",
+            chunk_id="lease_chunk-004",
+            text="Tenant shall pay Rent of $2,875.00 per month.",
+            similarity=0.91,
+        ),
+        LabelledChunk(
+            citation_id="[lease §4. Security Deposit]",
+            chunk_id="lease_chunk-005",
+            text="Tenant shall deposit $5,750.00 as a security deposit.",
+            similarity=0.87,
+        ),
+    ]
+
+
+@pytest.fixture
+def cited_result() -> GenerationResult:
+    return GenerationResult(
+        answer="The security deposit is $5,750.00. [lease §4. Security Deposit]",
+        citations=[Citation(id="[lease §4. Security Deposit]", quote="$5,750.00")],
+        confidence=1.0,
+        refusal=False,
+    )
+
+
+@pytest.fixture
+def refusal_result() -> GenerationResult:
+    return GenerationResult(
+        answer="This is not specified in the provided lease(s).",
+        citations=[],
+        confidence=0.0,
+        refusal=True,
+    )
