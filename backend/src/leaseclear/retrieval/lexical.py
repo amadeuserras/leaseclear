@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import asyncpg
-
+from leaseclear.db.connection import DbConnection
 from leaseclear.types import ChunkBase
 
 
 async def search(
-    conn: asyncpg.Connection,
+    conn: DbConnection,
     question: str,
     top_k: int = 20,
 ) -> list[ChunkBase]:

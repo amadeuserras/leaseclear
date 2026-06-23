@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import asyncpg
-
+from leaseclear.db.connection import DbConnection
 from leaseclear.ingestion.embed import embed_texts
 from leaseclear.types import ChunkBase
 
@@ -9,7 +8,7 @@ DEFAULT_SIMILARITY_FLOOR = 0.35
 
 
 async def search(
-    conn: asyncpg.Connection,
+    conn: DbConnection,
     question: str,
     top_k: int = 20,
     similarity_floor: float | None = DEFAULT_SIMILARITY_FLOOR,

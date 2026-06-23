@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import asyncpg
-
+from leaseclear.db.connection import DbConnection
 from leaseclear.retrieval import fusion, lexical, vector
 from leaseclear.types import ChunkBase
 
@@ -11,7 +10,7 @@ DEFAULT_TOP_K = 8
 
 
 async def search(
-    conn: asyncpg.Connection,
+    conn: DbConnection,
     question: str,
     top_k: int = DEFAULT_TOP_K,
 ) -> list[ChunkBase]:
