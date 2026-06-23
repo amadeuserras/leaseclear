@@ -29,8 +29,7 @@ async def close_pool() -> None:
 
 async def apply_schema(conn: DbConnection) -> None:
     schema_sql = Path(__file__).with_name("schema.sql").read_text()
-    statements = [
-        statement.strip() for statement in schema_sql.split(";") if statement.strip()
-    ]
-    for statement in statements:
-        await conn.execute(statement)
+    schema_sql = schema_sql.strip()
+    if not schema_sql:
+        return
+    await conn.execute(schema_sql)
