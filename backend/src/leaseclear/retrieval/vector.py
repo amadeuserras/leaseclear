@@ -5,12 +5,14 @@ import asyncpg
 from leaseclear.ingestion.embed import embed_texts
 from leaseclear.types import ChunkBase
 
+DEFAULT_SIMILARITY_FLOOR = 0.35
+
 
 async def search(
     conn: asyncpg.Connection,
     question: str,
     top_k: int = 20,
-    similarity_floor: float | None = 0.35,
+    similarity_floor: float | None = DEFAULT_SIMILARITY_FLOOR,
 ) -> list[ChunkBase]:
     [query_vector] = embed_texts([question])
     rows = await conn.fetch(
