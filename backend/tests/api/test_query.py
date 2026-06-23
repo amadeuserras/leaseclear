@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import pytest
 from fastapi.testclient import TestClient
 
 
-@pytest.mark.real_api
 def test_query_returns_cited_answer(api_client: TestClient) -> None:
     response = api_client.post(
         "/query",
@@ -22,7 +20,6 @@ def test_query_returns_cited_answer(api_client: TestClient) -> None:
     )
 
 
-@pytest.mark.real_api
 def test_query_refuses_unanswerable_question(api_client: TestClient) -> None:
     response = api_client.post(
         "/query",
