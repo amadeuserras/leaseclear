@@ -21,4 +21,4 @@ def reciprocal_rank_fusion(
         scores, key=lambda cid: scores[cid], reverse=True
     )
 
-    return [chunks[cid] for cid in ranked_chunk_ids]
+    return [chunks[i] for i in ranked_chunk_ids]
