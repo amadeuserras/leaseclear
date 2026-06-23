@@ -16,18 +16,8 @@ class ChunkBase:
 
 
 @dataclass
-class ParsedChunk(ChunkBase):
-    pass
-
-
-@dataclass
 class EmbeddedChunk(ChunkBase):
     embedding: list[float]
-
-
-@dataclass
-class RetrievedChunk(ChunkBase):
-    similarity: float
 
 
 @dataclass
@@ -35,7 +25,6 @@ class LabelledChunk:
     citation_id: str
     chunk_id: str
     text: str
-    similarity: float
 
 
 @dataclass

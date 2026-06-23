@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from leaseclear.types import RetrievedChunk
+from leaseclear.types import ChunkBase
 
 
-def reciprocal_rank(results: list[RetrievedChunk], clause_label: str) -> float:
+def reciprocal_rank(results: list[ChunkBase], clause_label: str) -> float:
     for position, chunk in enumerate(results, start=1):
         if chunk.clause_label == clause_label:
             return 1.0 / position

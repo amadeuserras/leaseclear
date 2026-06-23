@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from leaseclear.generation.label import label_chunks
-from leaseclear.types import RetrievedChunk
+from leaseclear.types import ChunkBase
 
 
-def make_chunk(
-    chunk_id: str, document_id: str, clause_label: str | None
-) -> RetrievedChunk:
-    return RetrievedChunk(
+def make_chunk(chunk_id: str, document_id: str, clause_label: str | None) -> ChunkBase:
+    return ChunkBase(
         chunk_id=chunk_id,
         document_id=document_id,
         text="some text",
@@ -16,7 +14,6 @@ def make_chunk(
         char_start=0,
         char_end=100,
         token_count=20,
-        similarity=0.9,
     )
 
 

@@ -13,13 +13,11 @@ chunks = [
         "citation_id": "[lease §3. Rent]",
         "chunk_id": "lease_chunk-004",
         "text": "3. Rent. Tenant shall pay Rent of $2,875.00 per month, due on the 1st of each month.",
-        "similarity": 0.91,
     },
     {
         "citation_id": "[lease §4. Security Deposit]",
         "chunk_id": "lease_chunk-005",
         "text": "4. Security Deposit. Tenant shall deposit $5,750.00 as a security deposit prior to move-in.",
-        "similarity": 0.87,
     },
 ]
 

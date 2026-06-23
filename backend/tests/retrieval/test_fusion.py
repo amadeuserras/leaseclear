@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from leaseclear.retrieval.fusion import reciprocal_rank_fusion
-from leaseclear.types import RetrievedChunk
+from leaseclear.types import ChunkBase
 
 
-def _chunk(chunk_id: str, *, similarity: float = 0.0) -> RetrievedChunk:
-    return RetrievedChunk(
+def _chunk(chunk_id: str) -> ChunkBase:
+    return ChunkBase(
         chunk_id=chunk_id,
         document_id="lease",
         text=f"text for {chunk_id}",
@@ -14,7 +14,6 @@ def _chunk(chunk_id: str, *, similarity: float = 0.0) -> RetrievedChunk:
         char_start=0,
         char_end=10,
         token_count=5,
-        similarity=similarity,
     )
 
 
@@ -25,4 +24,3 @@ def test_rrf_ranks_shared_chunks_ahead_of_single_list_hits() -> None:
     fused = reciprocal_rank_fusion(vector_results, lexical_results)
 
     assert [chunk.chunk_id for chunk in fused] == ["b", "a", "d", "c"]
-    assert fused[0].similarity > fused[1].similarity

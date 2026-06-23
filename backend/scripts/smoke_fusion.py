@@ -1,0 +1,86 @@
+# ruff: noqa: E501
+"""Reciprocal Rank Fusion (RRF) — merge vector + lexical ranked lists.
+
+Hybrid retrieval runs two searches independently:
+  - vector: pgvector cosine similarity (filtered by similarity floor in SQL)
+  - lexical: Postgres full-text search ranked by ts_rank
+
+RRF combines them without normalizing scores. For each ranked list, a chunk at
+rank r earns 1 / (k + r) points (k = 60 by default). A chunk that appears in
+BOTH lists accumulates points from both — shared hits float to the top even when
+one retriever alone ranks them lower.
+"""
+
+from __future__ import annotations
+
+from leaseclear.utils.pretty_print import pretty_print
+
+vector_results = [
+    {
+        "chunk_id": "lease_chunk-005",
+        "clause_label": "5. Security Deposit",
+        "text": "5. Security Deposit. Tenant shall deposit $5,750.00 as a security deposit prior to move-in.",
+    },
+    {
+        "chunk_id": "lease_chunk-004",
+        "clause_label": "4. Rent",
+        "text": "4. Rent. Tenant shall pay Rent of $2,875.00 per month, due on the 1st of each month.",
+    },
+    {
+        "chunk_id": "lease_chunk-011",
+        "clause_label": "11. Statutory Disclosures",
+        "text": "11. Statutory and Condition Disclosures. The following disclosures form part of this Agreement...",
+    },
+]
+
+lexical_results = [
+    {
+        "chunk_id": "lease_chunk-005",
+        "clause_label": "5. Security Deposit",
+        "text": "5. Security Deposit. Tenant shall deposit $5,750.00 as a security deposit prior to move-in.",
+    },
+    {
+        "chunk_id": "lease_chunk-008",
+        "clause_label": "8. Maintenance",
+        "text": "8. Maintenance, Use, and Reporting. Tenant shall properly use, operate, and safeguard the Premises...",
+    },
+]
+
+# Fused output — re-ranked by RRF score.
+#
+#   lease_chunk-005  vector rank 1 + lexical rank 1  →  1/61 + 1/61 ≈ 0.0328
+#   lease_chunk-004  vector rank 2 only               →  1/62       ≈ 0.0161
+#   lease_chunk-008  lexical rank 2 only              →  1/62       ≈ 0.0161
+#   lease_chunk-011  vector rank 3 only               →  1/63       ≈ 0.0159
+example_output = [
+    {
+        "chunk_id": "lease_chunk-005",
+        "clause_label": "5. Security Deposit",
+        "rrf_note": "rank 1 in vector + rank 1 in lexical",
+    },
+    {
+        "chunk_id": "lease_chunk-004",
+        "clause_label": "4. Rent",
+        "rrf_note": "rank 2 in vector only",
+    },
+    {
+        "chunk_id": "lease_chunk-008",
+        "clause_label": "8. Maintenance",
+        "rrf_note": "rank 2 in lexical only",
+    },
+    {
+        "chunk_id": "lease_chunk-011",
+        "clause_label": "11. Statutory Disclosures",
+        "rrf_note": "rank 3 in vector only",
+    },
+]
+
+
+def run() -> None:
+    pretty_print(vector_results, "Vector input")
+    pretty_print(lexical_results, "Lexical input")
+    pretty_print(example_output, "Fused output (RRF rank order)")
+
+
+if __name__ == "__main__":
+    run()

@@ -12,13 +12,11 @@ def chunks() -> list[LabelledChunk]:
             citation_id="[lease §3. Rent]",
             chunk_id="lease_chunk-004",
             text="Tenant shall pay Rent of $2,875.00 per month.",
-            similarity=0.91,
         ),
         LabelledChunk(
             citation_id="[lease §4. Security Deposit]",
             chunk_id="lease_chunk-005",
             text="Tenant shall deposit $5,750.00 as a security deposit.",
-            similarity=0.87,
         ),
     ]
 
