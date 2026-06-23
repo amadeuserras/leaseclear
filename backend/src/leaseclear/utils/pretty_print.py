@@ -5,7 +5,10 @@ from dataclasses import asdict, is_dataclass
 from typing import Any, cast
 
 
-def pretty_print(value: Any) -> None:
+def pretty_print(value: Any, title: str | None = None) -> None:
+    if title:
+        print(f"🖨️ {title} -------------------")
+    print("🖨️ --------------------------------")
     print(json.dumps(_to_jsonable(value), indent=2, default=str, ensure_ascii=False))
 
 
