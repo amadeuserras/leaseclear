@@ -6,8 +6,9 @@ from leaseclear.types import GenerationResult, LabelledChunk, ValidationResult
 def validate(
     result: GenerationResult,
     chunks: list[LabelledChunk],
+    refusal_message: str,
 ) -> ValidationResult:
-    if result.refusal:
+    if result.answer.strip() == refusal_message:
         return ValidationResult(passed=True, phantom_ids=[], uncited_claims=False)
 
     valid_ids = {c.citation_id for c in chunks}

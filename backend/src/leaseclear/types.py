@@ -38,7 +38,6 @@ class GenerationResult:
     answer: str
     citations: list[Citation]
     confidence: float
-    refusal: bool
 
 
 @dataclass

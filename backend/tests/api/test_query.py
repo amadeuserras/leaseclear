@@ -16,7 +16,6 @@ def mock_generate(monkeypatch: pytest.MonkeyPatch) -> None:
             answer="A mock answer.",
             citations=citations,
             confidence=0.9,
-            refusal=False,
         )
 
     monkeypatch.setattr("leaseclear.api.query.generate", fake_generate)

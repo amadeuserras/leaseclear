@@ -5,7 +5,7 @@ import json
 import anthropic
 
 from leaseclear.core.config import settings
-from leaseclear.generation.prompts import SYSTEM_PROMPT
+from leaseclear.generation.prompts import DELIMITER, SYSTEM_PROMPT
 from leaseclear.types import Citation, GenerationResult, LabelledChunk
 
 
@@ -24,16 +24,24 @@ def _strip_markdown_fence(raw: str) -> str:
 
 
 def _parse_response(raw: str) -> GenerationResult:
+    parts = raw.split(DELIMITER, 1)
+    if len(parts) != 2:
+        raise ValueError(
+            f"Expected prose and metadata separated by {DELIMITER!r}\n\nRaw:\n{raw}"
+        )
+
+    answer = parts[0].strip()
     try:
-        data = json.loads(_strip_markdown_fence(raw))
+        data = json.loads(_strip_markdown_fence(parts[1]))
     except json.JSONDecodeError as e:
-        raise ValueError(f"Claude returned invalid JSON: {e}\n\nRaw:\n{raw}") from e
+        raise ValueError(
+            f"Claude returned invalid metadata JSON: {e}\n\nRaw:\n{raw}"
+        ) from e
 
     return GenerationResult(
-        answer=data["answer"],
+        answer=answer,
         citations=[Citation(**c) for c in data.get("citations", [])],
         confidence=float(data["confidence"]),
-        refusal=bool(data["refusal"]),
     )
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from leaseclear.generation.prompts import REFUSAL_MESSAGE
 from leaseclear.generation.validate import validate
 from leaseclear.types import Citation, GenerationResult, LabelledChunk
 from leaseclear.utils.pretty_print import pretty_print
@@ -28,7 +29,6 @@ result = {
         }
     ],
     "confidence": 1.0,
-    "refusal": False,
 }
 
 example_output = {
@@ -44,9 +44,8 @@ def run() -> None:
         answer=result["answer"],
         citations=[Citation(**citation) for citation in result["citations"]],
         confidence=result["confidence"],
-        refusal=result["refusal"],
     )
-    output = validate(generation_result, labelled_chunks)
+    output = validate(generation_result, labelled_chunks, REFUSAL_MESSAGE)
     pretty_print(output)
 
 

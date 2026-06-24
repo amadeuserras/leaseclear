@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from leaseclear.generation.prompts import REFUSAL_MESSAGE
 from leaseclear.types import Citation, GenerationResult, LabelledChunk
 
 
@@ -27,15 +28,13 @@ def cited_result() -> GenerationResult:
         answer="The security deposit is $5,750.00. [lease §4. Security Deposit]",
         citations=[Citation(id="[lease §4. Security Deposit]", quote="$5,750.00")],
         confidence=1.0,
-        refusal=False,
     )
 
 
 @pytest.fixture
 def refusal_result() -> GenerationResult:
     return GenerationResult(
-        answer="This is not specified in the provided lease(s).",
+        answer=REFUSAL_MESSAGE,
         citations=[],
         confidence=0.0,
-        refusal=True,
     )

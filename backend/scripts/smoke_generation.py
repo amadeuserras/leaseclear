@@ -30,7 +30,6 @@ example_output = {
         }
     ],
     "confidence": 1.0,
-    "refusal": False,
 }
 
 
