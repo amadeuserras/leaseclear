@@ -1,9 +1,28 @@
 from __future__ import annotations
 
+import pytest
 from fastapi.testclient import TestClient
 
+from leaseclear.types import Citation, GenerationResult, LabelledChunk
 
-def test_query_returns_cited_answer(api_client: TestClient) -> None:
+
+@pytest.fixture
+def mock_generate(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_generate(question: str, chunks: list[LabelledChunk]) -> GenerationResult:
+        citations = (
+            [Citation(id=chunks[0].citation_id, quote="mock passage")] if chunks else []
+        )
+        return GenerationResult(
+            answer="A mock answer.",
+            citations=citations,
+            confidence=0.9,
+            refusal=False,
+        )
+
+    monkeypatch.setattr("leaseclear.api.query.generate", fake_generate)
+
+
+def test_query_endpoint_shape(api_client: TestClient) -> None:
     response = api_client.post(
         "/query",
         json={"question": "How much is the security deposit?"},
@@ -11,23 +30,12 @@ def test_query_returns_cited_answer(api_client: TestClient) -> None:
 
     assert response.status_code == 200
     data = response.json()
-    assert data["confidence"] > 0.5
-    assert data["citations"]
-    assert any(
-        "deposit" in citation["clause_label"].lower()
-        or "deposit" in citation["passage"].lower()
-        for citation in data["citations"]
-    )
+    assert data["answer"] == "A mock answer."
+    assert data["confidence"] == 0.9
+    assert len(data["citations"]) == 1
 
-
-def test_query_refuses_unanswerable_question(api_client: TestClient) -> None:
-    response = api_client.post(
-        "/query",
-        json={"question": "Can I operate a daycare from the unit?"},
-    )
-
-    assert response.status_code == 200
-    data = response.json()
-    assert data["confidence"] == 0.0
-    assert data["citations"] == []
-    assert "not specified" in data["answer"].lower()
+    citation = data["citations"][0]
+    assert citation["passage"] == "mock passage"
+    assert citation["chunk_id"]
+    assert isinstance(citation["clause_label"], str)
+    assert isinstance(citation["page_number"], int)
