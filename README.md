@@ -12,19 +12,28 @@ Residential lease Q&A with **cited answers**, **honest refusals**, and **publish
 
 ### Backend
 
-Docker (for PostgreSQL connection)
+```bash
+cd backend
+```
+
+Run Docker (for PostgreSQL connection, 'Docker Desktop' must be running)
+
 
 ```bash
-# Open 'Docker Desktop' manually
 docker compose up -d
 docker compose ps 
 docker compose down
 ```
 
+Run API server
+
+```bash
+uv run uvicorn leaseclear.api.main:app --reload --port 8000
+```
+
 Test
 
 ```bash
-cd backend
 uv run pytest                                    
 uv run pytest -m real_api                        
 uv run pytest -m ""                              
@@ -34,17 +43,9 @@ uv run pytest tests/ingestion/test_parse.py
 Lint, typecheck:
 
 ```bash
-cd backend
 uv run ruff check .
 uv run ruff format .
 uv run pyright
-```
-
-Database (Postgres must be running — see Docker above):
-
-```bash
-cd backend
-uv run python scripts/{filename}.py   
 ```
 
 ### Frontend
