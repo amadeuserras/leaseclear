@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import jwt
-import pytest
 from fastapi.testclient import TestClient
 
-from leaseclear.api.schemas import DocumentResponse
 from leaseclear.core.config import settings
 
 
@@ -78,17 +76,8 @@ def test_documents_rejects_bad_token(api_client: TestClient) -> None:
 
 def test_documents_accepts_valid_token(
     api_client: TestClient,
-    monkeypatch: pytest.MonkeyPatch,
+    mock_upload_document: None,
 ) -> None:
-    async def fake_upload(_file: object) -> DocumentResponse:
-        return DocumentResponse(
-            document_id="00000000-0000-0000-0000-000000000099",
-            filename="lease.pdf",
-            chunks_created=0,
-        )
-
-    monkeypatch.setattr("leaseclear.api.main.upload_document", fake_upload)
-
     response = api_client.post(
         "/auth/register",
         json={"email": "upload@b.com", "password": "hunter2"},
