@@ -4,6 +4,21 @@ from leaseclear.db.connection import DbConnection
 from leaseclear.types import EmbeddedChunk
 
 
+async def store_document(
+    conn: DbConnection,
+    document_id: str,
+    filename: str,
+) -> None:
+    await conn.execute(
+        """--sql
+        INSERT INTO documents (id, filename)
+        VALUES ($1, $2)
+        """,
+        document_id,
+        filename,
+    )
+
+
 async def store_chunks(
     conn: DbConnection,
     chunks: list[EmbeddedChunk],

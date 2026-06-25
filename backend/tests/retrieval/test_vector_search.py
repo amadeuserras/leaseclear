@@ -5,6 +5,7 @@ import pytest
 
 from leaseclear.retrieval.vector import search
 from leaseclear.types import ChunkBase
+from tests.db import SEED_DOCUMENT_ID
 from tests.retrieval.data.vector_search_cases import as_pytest_params
 
 
@@ -18,7 +19,7 @@ async def test_vector_search_returns_relevant_clause(
     results: list[ChunkBase] = await search(seeded_db, question, top_k=5)
 
     assert results
-    assert all(result.document_id == "lease" for result in results)
+    assert all(result.document_id == SEED_DOCUMENT_ID for result in results)
 
     top_labels = [result.clause_label for result in results[:3]]
     assert expected_clause in top_labels, (

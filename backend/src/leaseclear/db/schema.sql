@@ -2,6 +2,7 @@
 
 DROP TABLE IF EXISTS logs CASCADE;
 DROP TABLE IF EXISTS chunks CASCADE;
+DROP TABLE IF EXISTS documents CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -13,9 +14,15 @@ CREATE TABLE users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE documents (
+    id UUID PRIMARY KEY,
+    filename TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE chunks (
     chunk_id TEXT PRIMARY KEY,
-    document_id TEXT NOT NULL,
+    document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
     text TEXT NOT NULL,
     embedding vector(1536) NOT NULL,
     clause_label TEXT,

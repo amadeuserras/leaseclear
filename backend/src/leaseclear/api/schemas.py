@@ -10,6 +10,12 @@ class QueryRequest(BaseModel):
     document_ids: list[str] | None = None
 
 
+class DocumentResponse(BaseModel):
+    document_id: str
+    filename: str
+    chunks_created: int
+
+
 class Citation(BaseModel):
     chunk_id: str
     clause_label: str
