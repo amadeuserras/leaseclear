@@ -6,6 +6,7 @@ from leaseclear.db.connection import close_pool, get_pool
 
 MAX_ROWS = 4
 MAX_CELL_WIDTH = 48
+MAX_COMPACT_CELL_WIDTH = 8
 
 
 async def list_tables(conn) -> list[str]:
@@ -40,21 +41,48 @@ async def list_columns(conn, table: str) -> list[tuple[str, str]]:
     return [(row["column_name"], row["data_type"]) for row in rows]
 
 
-def format_cell(value: object) -> str:
+def is_compact_column(name: str, dtype: str) -> bool:
+    if name == "id" or name.endswith("_id") or name.endswith("_ids"):
+        return True
+    dtype_lower = dtype.lower()
+    numeric_types = (
+        "int",
+        "bigint",
+        "smallint",
+        "serial",
+        "numeric",
+        "decimal",
+        "double",
+        "real",
+        "float",
+        "uuid",
+    )
+    return any(token in dtype_lower for token in numeric_types)
+
+
+def format_cell(value: object, *, max_width: int = MAX_CELL_WIDTH) -> str:
     if value is None:
         return "NULL"
 
     text = str(value).replace("\n", "\\n")
-    if len(text) > MAX_CELL_WIDTH:
-        return f"{text[: MAX_CELL_WIDTH - 3]}..."
+    if len(text) > max_width:
+        return f"{text[: max_width - 3]}..."
     return text
 
 
 def print_table(
     table: str, columns: list[tuple[str, str]], rows: list[asyncpg.Record]
 ) -> None:
-    headers = [f"{name} ({dtype})" for name, dtype in columns]
+    compact = [is_compact_column(name, dtype) for name, dtype in columns]
+    headers = [
+        name if is_compact else f"{name} ({dtype})"
+        for (name, dtype), is_compact in zip(columns, compact, strict=True)
+    ]
     column_names = [name for name, _ in columns]
+    max_widths = [
+        MAX_COMPACT_CELL_WIDTH if is_compact else MAX_CELL_WIDTH
+        for is_compact in compact
+    ]
 
     if not rows:
         print(f"\n=== {table} (0 rows) ===")
@@ -64,10 +92,17 @@ def print_table(
         return
 
     rendered_rows = [
-        [format_cell(row[column_name]) for column_name in column_names] for row in rows
+        [
+            format_cell(row[column_name], max_width=max_widths[index])
+            for index, column_name in enumerate(column_names)
+        ]
+        for row in rows
     ]
     widths = [
-        max(len(header), *(len(row[index]) for row in rendered_rows))
+        min(
+            max(len(header), *(len(row[index]) for row in rendered_rows)),
+            max_widths[index],
+        )
         for index, header in enumerate(headers)
     ]
 
