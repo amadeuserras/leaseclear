@@ -16,7 +16,6 @@ async def api_client(
     monkeypatch: pytest.MonkeyPatch,
     database_url: str,
     seeded_db: asyncpg.Connection,
-    mock_generate: None,
 ) -> AsyncIterator[TestClient]:
     monkeypatch.setattr(settings, "database_url", database_url)
     await close_pool()

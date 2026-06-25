@@ -3,9 +3,10 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from sse_starlette.sse import EventSourceResponse
 
-from leaseclear.api.query import run_query
-from leaseclear.api.schemas import HealthResponse, QueryRequest, QueryResponse
+from leaseclear.api.query import query_events
+from leaseclear.api.schemas import HealthResponse, QueryRequest
 from leaseclear.db.connection import close_pool, get_pool
 
 
@@ -24,6 +25,8 @@ def health() -> HealthResponse:
     return HealthResponse(status="ok")
 
 
-@app.post("/query", response_model=QueryResponse)
-async def query(request: QueryRequest) -> QueryResponse:
-    return await run_query(request.question, request.document_ids)
+@app.post("/query")
+async def query(request: QueryRequest) -> EventSourceResponse:
+    return EventSourceResponse(
+        query_events(request.question, request.document_ids),
+    )
