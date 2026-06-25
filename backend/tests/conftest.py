@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import random
 from collections.abc import AsyncIterator
 
 import asyncpg
 import pytest
 
 from leaseclear.core.config import settings
-from tests.corpus_fixture import load_query_embeddings
-from tests.db import ensure_database_exists, reset_and_seed_lease, truncate_db
+from scripts.init_db import seed_db
+from tests.db import ensure_database_exists, truncate_db
 
 
 @pytest.fixture(scope="session")
@@ -27,10 +28,8 @@ def mock_embed_texts(
     if request.node.get_closest_marker("real_api") is not None:
         return
 
-    query_embeddings = load_query_embeddings()
-
     def fake_embed_texts(texts: list[str]) -> list[list[float]]:
-        return [query_embeddings[text] for text in texts]
+        return [[random.gauss(0, 1) for _ in range(1536)] for _ in texts]
 
     monkeypatch.setattr("leaseclear.retrieval.vector.embed_texts", fake_embed_texts)
 
@@ -42,7 +41,7 @@ async def seeded_db(
 ) -> AsyncIterator[asyncpg.Connection]:
     conn = await asyncpg.connect(database_url)
     try:
-        await reset_and_seed_lease(conn)
+        await seed_db(conn)
         yield conn
     finally:
         await truncate_db(conn)

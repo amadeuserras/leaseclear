@@ -22,6 +22,9 @@ out/
 .idea/
 .vscode/
 
+# Generated corpus data
+backend/data/
+
 # Local Working Docs
 PROGRESS.md
 SPEC.md
