@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import random
 from collections.abc import AsyncIterator
 
 import asyncpg
@@ -30,21 +29,8 @@ async def ensure_test_database(database_url: str) -> None:
         await conn.close()
 
 
-@pytest.fixture(autouse=True)
-def mock_embed_texts(
-    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    if request.node.get_closest_marker("real_api") is not None:
-        return
-
-    def fake_embed_texts(texts: list[str]) -> list[list[float]]:
-        return [[random.gauss(0, 1) for _ in range(1536)] for _ in texts]
-
-    monkeypatch.setattr("leaseclear.retrieval.vector.embed_texts", fake_embed_texts)
-
-
 @pytest.fixture
-async def seeded_db(
+async def test_db(
     database_url: str,
     ensure_test_database: None,
 ) -> AsyncIterator[asyncpg.Connection]:
