@@ -8,8 +8,8 @@ DROP TABLE IF EXISTS users CASCADE;
 CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE users (
-    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email TEXT NOT NULL UNIQUE,
+    id UUID PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

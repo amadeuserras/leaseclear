@@ -1,8 +1,18 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class HealthResponse(BaseModel):
     status: str
+
+
+class AuthRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
 
 
 class QueryRequest(BaseModel):
