@@ -5,8 +5,9 @@ import pytest
 
 from leaseclear.retrieval.vector import search
 from leaseclear.types import ChunkBase
-from tests.db import SEED_DOCUMENT_ID
 from tests.retrieval.data.vector_search_cases import as_pytest_params
+
+SEED_DOCUMENT_ID = "lease"
 
 
 @pytest.mark.real_api
