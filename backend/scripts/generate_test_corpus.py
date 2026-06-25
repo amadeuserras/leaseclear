@@ -1,10 +1,3 @@
-"""Build tests/fixtures/seed_corpus.json from the demo lease corpus.
-
-Run after changing the lease PDF, chunking, or test queries:
-
-    cd backend && uv run python scripts/generate_test_corpus.py
-"""
-
 from __future__ import annotations
 
 import json
