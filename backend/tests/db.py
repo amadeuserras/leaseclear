@@ -30,13 +30,13 @@ async def ensure_database_exists(database_url: str) -> None:
         await conn.close()
 
 
-async def truncate_chunks(conn: DbConnection) -> None:
-    await conn.execute("TRUNCATE chunks")
+async def truncate_db(conn: DbConnection) -> None:
+    await conn.execute("TRUNCATE chunks, logs, users")
 
 
 async def reset_and_seed_lease(conn: DbConnection) -> int:
     await apply_schema(conn)
-    await truncate_chunks(conn)
+    await truncate_db(conn)
     document = parse_pdf(LEASE_PDF)
     chunks = chunk_document(document, LEASE_DOCUMENT_ID)
     embedded = embed_chunks(chunks)

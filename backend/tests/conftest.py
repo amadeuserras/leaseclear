@@ -6,7 +6,7 @@ import asyncpg
 import pytest
 
 from leaseclear.core.config import settings
-from tests.db import ensure_database_exists, reset_and_seed_lease, truncate_chunks
+from tests.db import ensure_database_exists, reset_and_seed_lease, truncate_db
 
 
 @pytest.fixture(scope="session")
@@ -29,5 +29,5 @@ async def seeded_db(
         await reset_and_seed_lease(conn)
         yield conn
     finally:
-        await truncate_chunks(conn)
+        await truncate_db(conn)
         await conn.close()

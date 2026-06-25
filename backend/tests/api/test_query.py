@@ -4,11 +4,15 @@ import json
 import re
 from collections.abc import AsyncIterator
 
+import asyncpg
 import pytest
 from fastapi.testclient import TestClient
 
 from leaseclear.generation.prompts import DELIMITER
-from leaseclear.types import LabelledChunk
+from leaseclear.types import GenerationStreamMeta, LabelledChunk
+
+MOCK_INPUT_TOKENS = 10
+MOCK_OUTPUT_TOKENS = 20
 
 
 def parse_sse_events(body: str) -> list[tuple[str, str]]:
@@ -30,19 +34,20 @@ def parse_sse_events(body: str) -> list[tuple[str, str]]:
 
 @pytest.fixture
 def mock_generate_stream(monkeypatch: pytest.MonkeyPatch) -> None:
-    async def fake_generate_stream(
+    def fake_generate_stream(
         question: str, chunks: list[LabelledChunk]
-    ) -> AsyncIterator[str]:
-        cid = chunks[0].citation_id if chunks else "[lease §unknown]"
-        for token in (
-            "A mock answer. ",
-            cid,
-            "\n",
-            DELIMITER,
-            "\n",
-            f'{{"citations": [{{"id": "{cid}", "quote": "mock passage"}}], "confidence": 0.9}}',
-        ):
-            yield token
+    ) -> tuple[AsyncIterator[str], GenerationStreamMeta]:
+        async def tokens() -> AsyncIterator[str]:
+            cid = chunks[0].citation_id if chunks else "[lease §unknown]"
+            yield (
+                f"A mock answer. {cid}\n{DELIMITER}\n"
+                f'{{"citations": [{{"id": "{cid}", "quote": "mock passage"}}], "confidence": 0.9}}'
+            )
+
+        return tokens(), GenerationStreamMeta(
+            input_tokens=MOCK_INPUT_TOKENS,
+            output_tokens=MOCK_OUTPUT_TOKENS,
+        )
 
     monkeypatch.setattr("leaseclear.api.query.generate_stream", fake_generate_stream)
 
@@ -73,3 +78,33 @@ def test_query_endpoint_streams_sse(
     assert payload["confidence"] == 0.9
     assert len(payload["citations"]) == 1
     assert payload["citations"][0]["passage"] == "mock passage"
+
+
+async def test_query_writes_log_row(
+    api_client: TestClient,
+    seeded_db: asyncpg.Connection,
+    mock_generate_stream: None,
+) -> None:
+    question = "How much is the security deposit?"
+
+    with api_client.stream(
+        "POST",
+        "/query",
+        json={"question": question},
+    ) as response:
+        assert response.status_code == 200
+        response.read()
+
+    row = await seeded_db.fetchrow(
+        "SELECT * FROM logs WHERE question = $1",
+        question,
+    )
+    assert row is not None
+    assert row["document_ids"] is None
+    assert row["chunk_ids_retrieved"]
+    assert all(chunk_id.startswith("lease_") for chunk_id in row["chunk_ids_retrieved"])
+    assert row["input_tokens"] == MOCK_INPUT_TOKENS
+    assert row["output_tokens"] == MOCK_OUTPUT_TOKENS
+    assert row["refused"] is False
+    assert row["ttft_s"] is not None and row["ttft_s"] > 0
+    assert row["total_s"] is not None and row["total_s"] >= row["ttft_s"]
