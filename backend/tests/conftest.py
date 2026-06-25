@@ -6,6 +6,7 @@ import asyncpg
 import pytest
 
 from leaseclear.core.config import settings
+from tests.corpus_fixture import load_query_embeddings
 from tests.db import ensure_database_exists, reset_and_seed_lease, truncate_db
 
 
@@ -17,6 +18,21 @@ def database_url() -> str:
 @pytest.fixture(scope="session")
 async def ensure_test_database(database_url: str) -> None:
     await ensure_database_exists(database_url)
+
+
+@pytest.fixture(autouse=True)
+def mock_embed_texts(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    if request.node.get_closest_marker("real_api") is not None:
+        return
+
+    query_embeddings = load_query_embeddings()
+
+    def fake_embed_texts(texts: list[str]) -> list[list[float]]:
+        return [query_embeddings[text] for text in texts]
+
+    monkeypatch.setattr("leaseclear.retrieval.vector.embed_texts", fake_embed_texts)
 
 
 @pytest.fixture

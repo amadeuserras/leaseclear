@@ -1,18 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import asyncpg
 
 from leaseclear.db.connection import DbConnection, apply_schema
-from leaseclear.ingestion.chunk import chunk_document
-from leaseclear.ingestion.embed import embed_chunks
-from leaseclear.ingestion.parse import parse_pdf
 from leaseclear.ingestion.store import store_chunks
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-LEASE_PDF = REPO_ROOT / "corpus" / "generated" / "lease.pdf"
-LEASE_DOCUMENT_ID = "lease"
+from tests.corpus_fixture import load_seed_corpus
 
 
 async def ensure_database_exists(database_url: str) -> None:
@@ -37,8 +29,6 @@ async def truncate_db(conn: DbConnection) -> None:
 async def reset_and_seed_lease(conn: DbConnection) -> int:
     await apply_schema(conn)
     await truncate_db(conn)
-    document = parse_pdf(LEASE_PDF)
-    chunks = chunk_document(document, LEASE_DOCUMENT_ID)
-    embedded = embed_chunks(chunks)
+    embedded = load_seed_corpus()
     await store_chunks(conn, embedded)
     return len(embedded)
