@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
+from leaseclear.api.limiter import limiter
 from leaseclear.api.schemas import AuthRequest, TokenResponse
 from leaseclear.auth.jwt import create_token
 from leaseclear.auth.users import authenticate_user, register_user
@@ -16,6 +17,7 @@ async def register(req: AuthRequest) -> TokenResponse:
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(req: AuthRequest) -> TokenResponse:
+@limiter.limit("5/minute")
+async def login(request: Request, req: AuthRequest) -> TokenResponse:
     user_id = await authenticate_user(req.email, req.password)
     return TokenResponse(access_token=create_token(user_id))
