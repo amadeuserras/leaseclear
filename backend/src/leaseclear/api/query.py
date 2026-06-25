@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import json
+import logging
+import time
 from collections.abc import AsyncIterator
+from uuid import uuid4
 
 from leaseclear.api.schemas import Citation, QueryResponse
 from leaseclear.db.connection import get_pool
+from leaseclear.db.logs import insert_query_log
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.label import label_chunks
 from leaseclear.generation.prompts import DELIMITER, REFUSAL_MESSAGE
@@ -14,10 +18,13 @@ from leaseclear.types import (
     ChunkBase,
     GenerationResult,
     LabelledChunk,
+    QueryLogEntry,
 )
 from leaseclear.types import (
     Citation as GenCitation,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _strip_markdown_fence(raw: str) -> str:
@@ -118,6 +125,9 @@ async def query_events(
     question: str,
     document_ids: list[str] | None = None,
 ) -> AsyncIterator[dict[str, str]]:
+    start = time.perf_counter()
+    ttft_s: float | None = None
+
     pool = await get_pool()
     async with pool.acquire() as conn:
         retrieved = await hybrid.search(conn, question)
@@ -129,7 +139,10 @@ async def query_events(
 
     raw_parts: list[str] = []
     prose_parts: list[str] = []
-    async for prose in _stream_prose(generate_stream(question, labelled), raw_parts):
+    tokens, stream_meta = generate_stream(question, labelled)
+    async for prose in _stream_prose(tokens, raw_parts):
+        if ttft_s is None:
+            ttft_s = time.perf_counter() - start
         prose_parts.append(prose)
         yield {"event": "token", "data": prose}
 
@@ -141,6 +154,24 @@ async def query_events(
     )
     payload = _to_response(result, retrieved, labelled)
     yield {"event": "done", "data": json.dumps(payload.model_dump())}
+
+    total_s = time.perf_counter() - start
+    entry = QueryLogEntry(
+        id=uuid4(),
+        question=question,
+        document_ids=document_ids,
+        chunk_ids_retrieved=[c.chunk_id for c in retrieved],
+        ttft_s=ttft_s,
+        total_s=total_s,
+        input_tokens=stream_meta.input_tokens,
+        output_tokens=stream_meta.output_tokens,
+        refused=result.answer.strip() == REFUSAL_MESSAGE,
+    )
+    try:
+        async with pool.acquire() as conn:
+            await insert_query_log(conn, entry)
+    except Exception:
+        logger.exception("failed to write query log")
 
 
 async def run_query(

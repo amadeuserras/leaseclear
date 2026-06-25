@@ -6,7 +6,7 @@ from anthropic import AsyncAnthropic
 
 from leaseclear.core.config import settings
 from leaseclear.generation.prompts import SYSTEM_PROMPT
-from leaseclear.types import LabelledChunk
+from leaseclear.types import GenerationStreamMeta, LabelledChunk
 
 
 def _build_user_message(question: str, chunks: list[LabelledChunk]) -> str:
@@ -14,9 +14,10 @@ def _build_user_message(question: str, chunks: list[LabelledChunk]) -> str:
     return f"LEASE CLAUSES:\n\n{chunk_block}\n\nQUESTION: {question}"
 
 
-async def generate_stream(
+async def _token_stream(
     question: str,
     chunks: list[LabelledChunk],
+    meta: GenerationStreamMeta,
 ) -> AsyncIterator[str]:
     client = AsyncAnthropic(api_key=settings.anthropic_api_key)
     async with client.messages.stream(
@@ -27,3 +28,14 @@ async def generate_stream(
     ) as stream:
         async for token in stream.text_stream:
             yield token
+        message = await stream.get_final_message()
+        meta.input_tokens = message.usage.input_tokens
+        meta.output_tokens = message.usage.output_tokens
+
+
+def generate_stream(
+    question: str,
+    chunks: list[LabelledChunk],
+) -> tuple[AsyncIterator[str], GenerationStreamMeta]:
+    meta = GenerationStreamMeta()
+    return _token_stream(question, chunks, meta), meta

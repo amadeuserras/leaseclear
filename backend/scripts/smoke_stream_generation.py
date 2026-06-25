@@ -7,8 +7,6 @@ import sys
 from leaseclear.generation.generate import generate_stream
 from leaseclear.types import LabelledChunk
 
-question = "How much is the security deposit?"
-
 chunks = [
     LabelledChunk(
         citation_id="[lease §3. Rent]",
@@ -23,8 +21,12 @@ chunks = [
 ]
 
 
+question = "How much is the security deposit?"
+
+
 async def run() -> None:
-    async for token in generate_stream(question, chunks):
+    tokens, _ = generate_stream(question, chunks)
+    async for token in tokens:
         sys.stdout.write(token)
         sys.stdout.flush()
 
