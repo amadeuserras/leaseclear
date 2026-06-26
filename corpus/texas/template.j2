@@ -1,0 +1,527 @@
+{#-
+  ============================================================================
+  TEXAS RESIDENTIAL LEASE AGREEMENT — Jinja2 / HTML template
+  ----------------------------------------------------------------------------
+  Structural features intentionally reproduced (chunker test cases):
+    - Centered underlined title; dense justified opening paragraph (no §number)
+    - 34 numbered clauses with bold+uppercase inline titles; no logo or header box
+    - Sub-clauses A–L with underlined labels (§12 maintenance rules)
+    - Roman-numeral sub-sub-clauses (i)/(ii) inside §2 term
+    - Fill-in-the-blank underlines throughout (via fill() macro)
+    - "REFUND OF SECURITY DEPOSIT" bold sub-header embedded inside §4 body
+    - §14 access list A–F; §3 has five lettered sub-clauses (A–E)
+    - Signature block: "As to Landlord this __ day of ____, 20__" format;
+      two separate Tenant signature rows for joint tenants
+    - Cross-references: §2 → §3 rate, §3A waiver, §22 default 7-day notice
+    - Texas-specific: per-day late charge, no-animals clause with daily fee,
+      no-waterbeds clause, subordination, recording prohibition (§25)
+  ============================================================================
+-#}
+
+{%- macro fill(value, width='140px') -%}
+  {%- set wc = 'fw-' ~ (width | replace('px','')) -%}
+  {%- if value is not none and value|string|trim != '' -%}
+    <span class="field filled {{ wc }}">{{ value }}</span>
+  {%- else -%}
+    <span class="field blank {{ wc }}">&nbsp;</span>
+  {%- endif -%}
+{%- endmacro -%}
+
+{%- set L = lease | default({}) -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 10.5pt;
+    line-height: 1.45;
+    color: #000;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ---- title ---- */
+  .doc-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12pt;
+    text-decoration: underline;
+    margin-bottom: 14px;
+  }
+
+  /* ---- opening paragraph (unnumbered) ---- */
+  .preamble {
+    text-align: justify;
+    text-indent: 36px;
+    margin-bottom: 10px;
+  }
+
+  /* ---- numbered clauses ---- */
+  .clause {
+    display: flex;
+    gap: 0;
+    margin-bottom: 8px;
+    text-align: justify;
+  }
+  .clause-num {
+    flex: 0 0 30px;
+    font-weight: bold;
+    padding-top: 0;
+  }
+  .clause-body {
+    flex: 1;
+  }
+  .clause-title {
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  /* ---- sub-clauses (A. B. C. …) ---- */
+  .sub {
+    display: flex;
+    gap: 0;
+    margin: 4px 0 4px 20px;
+    text-align: justify;
+  }
+  .sub-label {
+    flex: 0 0 24px;
+    text-decoration: underline;
+    font-weight: normal;
+  }
+  .sub-body { flex: 1; }
+
+  /* ---- roman numeral sub-sub-clauses ---- */
+  .subsub {
+    display: flex;
+    gap: 0;
+    margin: 4px 0 4px 44px;
+    text-align: justify;
+  }
+  .subsub-label { flex: 0 0 28px; }
+  .subsub-body { flex: 1; }
+
+  /* ---- inline body paragraph within a clause (no sub-label) ---- */
+  .clause-para {
+    margin: 4px 0 4px 0;
+    text-align: justify;
+  }
+
+  /* ---- fill-in fields ---- */
+  .field {
+    display: inline-block;
+    border-bottom: 0.75px solid #000;
+    padding: 0 2px;
+    min-height: 12px;
+    vertical-align: baseline;
+  }
+  .field.filled { font-style: italic; font-weight: bold; }
+  .fw-30  { min-width: 30px; }
+  .fw-40  { min-width: 40px; }
+  .fw-50  { min-width: 50px; }
+  .fw-60  { min-width: 60px; }
+  .fw-80  { min-width: 80px; }
+  .fw-100 { min-width: 100px; }
+  .fw-120 { min-width: 120px; }
+  .fw-140 { min-width: 140px; }
+  .fw-160 { min-width: 160px; }
+  .fw-180 { min-width: 180px; }
+  .fw-200 { min-width: 200px; }
+  .fw-240 { min-width: 240px; }
+  .fw-260 { min-width: 260px; }
+  .fw-300 { min-width: 300px; }
+  .fw-340 { min-width: 340px; }
+  .fw-380 { min-width: 380px; }
+  .fw-420 { min-width: 420px; }
+
+  /* ---- bold sub-header inside clause body (§4 REFUND) ---- */
+  .sub-header { font-weight: bold; text-transform: uppercase; }
+
+  /* ---- signature block ---- */
+  .sig-section { margin-top: 16px; }
+  .sig-intro { font-weight: bold; margin-bottom: 6px; }
+  .sig-role { font-weight: bold; margin: 8px 0 2px 0; letter-spacing: 0.3px; }
+  .sig-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 6px;
+    align-items: flex-end;
+  }
+  .sig-field-wrap { display: flex; flex-direction: column; }
+  .sig-line {
+    border-bottom: 0.75px solid #000;
+    min-width: 220px;
+    min-height: 18px;
+    display: block;
+  }
+  .sig-line-short {
+    border-bottom: 0.75px solid #000;
+    min-width: 120px;
+    min-height: 18px;
+    display: block;
+  }
+  .sig-label-text { font-size: 9.5pt; margin-top: 1px; }
+  .sig-filled { font-style: italic; font-weight: bold; font-size: 10pt; }
+
+  .underline { text-decoration: underline; }
+  .bold { font-weight: bold; }
+  .page-break { break-before: page; }
+</style>
+</head>
+<body>
+
+<div class="doc-title">Texas Residential Lease Agreement</div>
+
+<div class="preamble">
+  <span class="bold">THIS AGREEMENT</span> (hereinafter referred to as the &ldquo;Texas Lease Agreement&rdquo;) is made and entered into this {{ fill(L.agreement_day, '40px') }} day of {{ fill(L.agreement_month, '120px') }}, 20{{ fill(L.agreement_year, '40px') }}, by and between {{ fill(L.landlord_name, '240px') }} (hereinafter referred to as &ldquo;Landlord&rdquo;) and {{ fill(L.tenant_name, '260px') }} (hereinafter referred to as &ldquo;Tenant.&rdquo; For and in consideration of the covenants and obligations contained herein and other good and valuable consideration, the receipt and sufficiency of which is hereby acknowledged, the parties hereto hereby agree as follows:
+</div>
+
+<div class="clause">
+  <div class="clause-num">1.</div>
+  <div class="clause-body">
+    <span class="clause-title">Property.</span> Landlord owns certain real property and improvements located at {{ fill(L.property_address, '300px') }} (hereinafter referred to as the &ldquo;Property&rdquo;). Landlord desires to lease the Premises to Tenant upon the terms and conditions contained herein. Tenant desires to lease the Premises from Landlord on the terms and conditions as contained herein.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">2.</div>
+  <div class="clause-body">
+    <span class="clause-title">Term.</span> This Texas Lease Agreement shall commence on {{ fill(L.term_start, '160px') }} and shall continue as a lease for term. The termination date shall be on {{ fill(L.term_end, '160px') }} at 11:59 PM. Upon termination date, Tenant shall be required to vacate the Premises unless one of the following circumstances occur:
+    <div class="subsub">
+      <div class="subsub-label">(i)</div>
+      <div class="subsub-body">Landlord and Tenant formally extend this Texas Lease Agreement in writing or create and execute a new, written, and signed Texas Lease Agreement; or</div>
+    </div>
+    <div class="subsub">
+      <div class="subsub-label">(ii)</div>
+      <div class="subsub-body">Landlord willingly accepts new Rent from Tenant, which does not constitute past due Rent.</div>
+    </div>
+    <div class="clause-para">
+      In the event that Landlord accepts new rent from Tenant after the termination date, a month-to-month tenancy shall be created. If at any time either party desires to terminate the month-to-month tenancy, such party may do so by providing to the other party written notice of intention to terminate at least 30 days prior to the desired date of termination of the month-to-month tenancy.
+    </div>
+    <div class="clause-para">
+      Notices to terminate may be given on any calendar day, irrespective of Commencement Date. Rent shall continue at the rate specified in this Texas Lease Agreement, or as allowed by law. All other terms and conditions as outlined in this Texas Lease Agreement shall remain in full force and effect. Time is of the essence for providing notice of termination (strict compliance with dates by which notice must be provided is required).
+    </div>
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">3.</div>
+  <div class="clause-body">
+    <span class="clause-title">Rent.</span> Tenant shall pay to Landlord the sum of {{ fill(L.rent_amount, '110px') }} per month as Rent for the Term of the Agreement. Due date for Rent payment shall be the 1st day of each calendar month and shall be considered advance payment for that month. Weekends and holidays do not delay or excuse Tenant&rsquo;s obligation to timely pay rent.
+    <div class="sub">
+      <div class="sub-label">A.</div>
+      <div class="sub-body"><span class="underline">Delinquent Rent</span>. If not paid on the 1st, Rent shall be considered overdue and delinquent on the 2nd day of each calendar month. If Tenant fails to timely pay any month&rsquo;s rent, Tenant will pay Landlord a late charge of {{ fill(L.late_charge_per_day, '80px') }} per day until rent is paid in full. If Landlord <span class="bold underline">receives</span> the monthly rent by the 3<sup>rd</sup> day of the month, Landlord will waive the late charges for that month. Any waiver of late charges under this paragraph will not affect or diminish any other right or remedy Landlord may exercise for Tenant&rsquo;s failure to timely pay rent.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-label">B.</div>
+      <div class="sub-body"><span class="underline">Prorated Rent</span>. In the event that the Commencement Date is not the 1st of the calendar month, Rent payment remitted on the Commencement Date shall be prorated based on a 30-day period.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-label">C.</div>
+      <div class="sub-body"><span class="underline">Returned Checks</span>. In the event that any payment by Tenant is returned for insufficient funds (&ldquo;NSF&rdquo;) or if Tenant stops payment, Tenant will pay {{ fill(L.nsf_fee, '80px') }} to Landlord for each such check, plus late charges, as described above, until Landlord has <span class="bold underline">received</span> payment. Furthermore, Landlord may require in writing that Tenant pay all future Rent payments by cash, money order, or cashier&rsquo;s check.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-label">D.</div>
+      <div class="sub-body"><span class="underline">Order in which funds are applied</span>. Landlord will apply all funds received from Tenant first to any non-rent obligations of Tenant including late charges, returned check charges, charge-backs for repairs, brokerage fees, and periodic utilities, then to rent, regardless of any notations on a check.</div>
+    </div>
+    <div class="sub">
+      <div class="sub-label">E.</div>
+      <div class="sub-body"><span class="underline">Rent Increases</span>. There will be no rent increases through the Termination Date. If this lease is renewed automatically on a month to month basis, Landlord may increase the rent during the renewal period by providing written notice to Tenant that becomes effective the month following the 30<sup>th</sup> day after the notice is provided.</div>
+    </div>
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">4.</div>
+  <div class="clause-body">
+    <span class="clause-title">Security Deposit.</span> Upon execution of this Texas Lease Agreement, Tenant shall deposit with Landlord the sum of {{ fill(L.deposit_amount, '120px') }}, receipt of which is hereby acknowledged by Landlord, as security for any damage caused to the Premises during the term hereof.
+    <div class="clause-para">
+      <span class="sub-header">Refund of Security Deposit.</span> Upon termination of the tenancy, all funds held by the landlord as security deposit may be applied to the payment of accrued rent and the amount of damages that the landlord has suffered by reason of the tenant&rsquo;s noncompliance with the terms of this Texas Lease Agreement or with any and all laws, ordinances, rules and orders of any and all governmental or quasi-governmental authorities affecting the cleanliness, use, occupancy and preservation of the Premises.
+    </div>
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">5.</div>
+  <div class="clause-body">
+    <span class="clause-title">Use of Premises.</span> The Premises shall be used and occupied solely by Tenant and Tenant&rsquo;s immediate family, consisting of {{ fill(L.occupants, '300px') }}, exclusively, as a private single family dwelling, and no part of the Premises shall be used at any time during the term of this Texas Lease Agreement by Tenant for the purpose of carrying on any business, profession, or trade of any kind, or for any purpose other than as a private single family dwelling. Tenant shall not allow any other person, other than Tenant&rsquo;s immediate family or transient relatives and friends who are guests of Tenant, to use or occupy the Premises without first obtaining Landlord&rsquo;s written consent to such use. Tenant shall comply with any and all laws, ordinances, rules and orders of any and all governmental or quasi-governmental authorities affecting the cleanliness, use, occupancy and preservation of the Premises.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">6.</div>
+  <div class="clause-body">
+    <span class="clause-title">Condition of Premises.</span> Tenant stipulates, represents and warrants that Tenant has examined the Premises, and that they are at the time of this Lease in good order, repair, and in a safe, clean and tenantable condition.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">7.</div>
+  <div class="clause-body">
+    <span class="clause-title">Assignment and Sub-Letting.</span> Tenant shall not assign this Texas Lease Agreement, or sub-let or grant any license to use the Premises or any part thereof without the prior written consent of Landlord. A consent by Landlord to one such assignment, sub-letting or license shall not be deemed to be a consent to any subsequent assignment, sub-letting or license. An assignment, sub-letting or license without the prior written consent of Landlord or an assignment or sub-letting by operation of law shall be absolutely null and void and shall, at Landlord&rsquo;s option, terminate this Texas Lease Agreement.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">8.</div>
+  <div class="clause-body">
+    <span class="clause-title">Alterations and Improvements.</span> Tenant shall make no alterations to the buildings or improvements on the Premises or construct any building or make any other improvements on the Premises without the prior written consent of Landlord. Any and all alterations, changes, and/or improvements built, constructed or placed on the Premises by Tenant shall, unless otherwise provided by written agreement between Landlord and Tenant, be and become the property of Landlord and remain on the Premises at the expiration or earlier termination of this Texas Lease Agreement.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">9.</div>
+  <div class="clause-body">
+    <span class="clause-title">Non-Delivery of Possession.</span> In the event Landlord cannot deliver possession of the Premises to Tenant upon the commencement of the Lease term, through no fault of Landlord or its agents, then Landlord or its agents shall have no liability, but the rental herein provided shall abate until possession is given. Landlord or its agents shall have thirty (30) days in which to give possession, and if possession is tendered within such time, Tenant agrees to accept the demised Premises and pay the rental herein provided from that date. In the event possession cannot be delivered within such time, through no fault of Landlord or its agents, then this Texas Lease Agreement and all rights hereunder shall terminate.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">10.</div>
+  <div class="clause-body">
+    <span class="clause-title">Hazardous Materials.</span> Tenant shall not keep on the Premises any item of a dangerous, flammable or explosive character that might unreasonably increase the danger of fire or explosion on the Premises or that might be considered hazardous or extra hazardous by any responsible insurance company.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">11.</div>
+  <div class="clause-body">
+    <span class="clause-title">Utilities.</span> Tenant shall be responsible for arranging for and paying for all utility services required on the Premises.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">12.</div>
+  <div class="clause-body">
+    <span class="clause-title">Maintenance, Repair, and Rules.</span> Tenant will, at its sole expense, keep and maintain the Premises and appurtenances in good and sanitary condition and repair during the term of this Texas Lease Agreement and any renewal thereof. Without limiting the generality of the foregoing, Tenant shall:
+    <div class="sub"><div class="sub-label">A.</div><div class="sub-body">Not obstruct the driveways, sidewalks, courts, entry ways, stairs and/or halls, which shall be used for the purposes of ingress and egress only;</div></div>
+    <div class="sub"><div class="sub-label">B.</div><div class="sub-body">Keep all windows, glass, window coverings, doors, locks and hardware in good, clean order and repair;</div></div>
+    <div class="sub"><div class="sub-label">C.</div><div class="sub-body">Not obstruct or cover the windows or doors;</div></div>
+    <div class="sub"><div class="sub-label">D.</div><div class="sub-body">Not leave windows or doors in an open position during any inclement weather;</div></div>
+    <div class="sub"><div class="sub-label">E.</div><div class="sub-body">Not hang any laundry, clothing, sheets, etc., from any window, rail, porch or balcony nor air or dry any of same within any yard area or space;</div></div>
+    <div class="sub"><div class="sub-label">F.</div><div class="sub-body">Not cause or permit any locks or hooks to be placed upon any door or window without the prior written consent of Landlord;</div></div>
+    <div class="sub"><div class="sub-label">G.</div><div class="sub-body">Keep all air conditioning filters clean and free from dirt;</div></div>
+    <div class="sub"><div class="sub-label">H.</div><div class="sub-body">Keep all lavatories, sinks, toilets, and all other water and plumbing apparatus in good order and repair and shall use same only for the purposes for which they were constructed. Tenant shall not allow any sweepings, rubbish, sand, rags, ashes or other substances to be thrown or deposited therein. Any damage to any such apparatus and the cost of clearing stopped plumbing resulting from misuse shall be borne by Tenant;</div></div>
+    <div class="sub"><div class="sub-label">I.</div><div class="sub-body">Tenant&rsquo;s family and guests shall at all times maintain order in the Premises and at all places on the Premises, and shall not make or permit any loud or improper noises, or otherwise disturb other residents;</div></div>
+    <div class="sub"><div class="sub-label">J.</div><div class="sub-body">Keep all radios, television sets, stereos, phonographs, etc., turned down to a level of sound that does not annoy or interfere with other residents;</div></div>
+    <div class="sub"><div class="sub-label">K.</div><div class="sub-body">Deposit all trash, garbage, rubbish or refuse in the locations provided and shall not allow any trash, garbage, rubbish or refuse to be deposited or permitted to stand on the exterior of any building or within the common elements;</div></div>
+    <div class="sub"><div class="sub-label">L.</div><div class="sub-body">Abide by and be bound by any and all rules and regulations affecting the Premises or the common area appurtenant thereto which may be adopted or promulgated by the Condominium or Homeowners&rsquo; Association having control over them.</div></div>
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">13.</div>
+  <div class="clause-body">
+    <span class="clause-title">Damage to Premises.</span> In the event the Premises are destroyed or rendered wholly uninhabitable by fire, storm, earthquake, or other casualty not caused by the negligence of Tenant, this Texas Lease Agreement shall terminate from such time except for the purpose of enforcing rights that may have then accrued hereunder. The rental provided for herein shall then be accounted for by and between Landlord and Tenant up to the time of such injury or destruction of the Premises, Tenant paying rentals up to such date and Landlord refunding rentals collected beyond such date. Should a portion of the Premises thereby be rendered uninhabitable, the Landlord shall have the option of either repairing such injured or damaged portion or terminating this Lease. In the event that Landlord exercises its right to repair such uninhabitable portion, the rental shall abate in the proportion that the injured parts bears to the whole Premises, and such part so injured shall be restored by Landlord as speedily as practicable, after which the full rent shall recommence and the Texas Lease Agreement continue according to its terms.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">14.</div>
+  <div class="clause-body">
+    <span class="clause-title">Access by Landlord.</span> Landlord and Landlord&rsquo;s agents shall have the right at all reasonable times, and by all reasonable means, without notice, during the term of this Texas Lease Agreement and any renewal thereof to enter the Premises for the following purposes:
+    <div class="sub"><div class="sub-label">A.</div><div class="sub-body">Inspect the Property for condition;</div></div>
+    <div class="sub"><div class="sub-label">B.</div><div class="sub-body">Make repairs;</div></div>
+    <div class="sub"><div class="sub-label">C.</div><div class="sub-body">Show the Property to prospective tenants, prospective purchasers, inspectors, fire marshals, lenders, appraisers, or insurance agents;</div></div>
+    <div class="sub"><div class="sub-label">D.</div><div class="sub-body">Exercise a contractual or statutory lien;</div></div>
+    <div class="sub"><div class="sub-label">E.</div><div class="sub-body">Leave written notice;</div></div>
+    <div class="sub"><div class="sub-label">F.</div><div class="sub-body">Seize nonexempt property after default.</div></div>
+    <div class="clause-para">Landlord may prominently display a &ldquo;For Sale&rdquo; or &ldquo;For Lease&rdquo; or similarly worded sign on the Property during the term of this Lease or any renewal period.</div>
+    <div class="clause-para">If Tenant fails to permit reasonable access under this Paragraph, Tenant will be in default.</div>
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">15.</div>
+  <div class="clause-body">
+    <span class="clause-title">Subordination of Lease.</span> This Texas Lease Agreement and Tenant&rsquo;s interest hereunder are and shall be subordinate, junior and inferior to any and all mortgages, liens or encumbrances now or hereafter placed on the Premises by Landlord, all advances made under any such mortgages, liens or encumbrances (including, but not limited to, future advances), the interest payable on such mortgages, liens or encumbrances and any and all renewals, extensions or modifications of such mortgages, liens or encumbrances.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">16.</div>
+  <div class="clause-body">
+    <span class="clause-title">Tenant&rsquo;s Hold Over.</span> If Tenant remains in possession of the Premises with the consent of Landlord after the natural expiration of this Texas Lease Agreement, a new tenancy from month-to-month shall be created between Landlord and Tenant which shall be subject to all of the terms and conditions hereof except that rent shall then be due and owing at {{ fill(L.holdover_amount, '100px') }} per month and except that such tenancy shall be terminable upon fifteen (15) days written notice served by either party.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">17.</div>
+  <div class="clause-body">
+    <span class="clause-title">Surrender of Premises.</span> Upon the expiration of the term hereof, Tenant shall surrender the Premises in as good a state and condition as they were at the commencement of this Texas Lease Agreement, reasonable use and wear and tear thereof and damages by the elements excepted.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">18.</div>
+  <div class="clause-body">
+    <span class="clause-title">Animals.</span> THERE WILL BE NO ANIMALS, unless authorized by a separate written Pet Addendum to this Residential Lease Agreement. Tenant shall not permit any animal, including mammals, reptiles, birds, fish, rodents, or insects on the property, even temporarily, unless otherwise agreed by a separate written Pet Agreement. If tenant violates the pet restrictions of this Lease, Tenant will pay to Landlord a fee of {{ fill(L.unauthorized_animal_fee, '80px') }} per day per animal for each day Tenant violates the animal restrictions as additional rent for any unauthorized animal. Landlord may remove or cause to be removed any unauthorized animal and deliver it to appropriate local authorities by providing at least 24-hour written notice to Tenant of Landlord&rsquo;s intention to remove the unauthorized animal. Landlord will not be liable for any harm, injury, death, or sickness to any unauthorized animal. Tenant is responsible and liable for any damage or required cleaning to the Property caused by any unauthorized animal and for all costs Landlord may incur in removing or causing any unauthorized animal to be removed.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">19.</div>
+  <div class="clause-body">
+    <span class="clause-title">Waterbeds.</span> THERE WILL BE NO WATERBEDS, unless authorized by a separate written Waterbed Addendum to this Residential Lease Agreement.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">20.</div>
+  <div class="clause-body">
+    <span class="clause-title">Quiet Enjoyment.</span> Tenant, upon payment of all of the sums referred to herein as being payable by Tenant and Tenant&rsquo;s performance of all Tenant&rsquo;s agreements contained herein and Tenant&rsquo;s observance of all rules and regulations, shall and may peacefully and quietly have, hold and enjoy said Premises for the term hereof.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">21.</div>
+  <div class="clause-body">
+    <span class="clause-title">Indemnification.</span> Landlord shall not be liable for any damage or injury of or to the Tenant, Tenant&rsquo;s family, guests, invitees, agents or employees or to any person entering the Premises or the building of which the Premises are a part or to goods or equipment, or in the structure or equipment of the structure of which the Premises are a part, and Tenant hereby agrees to indemnify, defend and hold Landlord harmless from any and all claims or assertions of every kind and nature.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">22.</div>
+  <div class="clause-body">
+    <span class="clause-title">Default.</span> If Landlord breaches this Lease, Tenant may seek any relief provided by law. If Tenant fails to comply with any of the material provisions of this Texas Lease Agreement, other than the covenant to pay rent, or of any present rules and regulations or any that may be hereafter prescribed by Landlord, or materially fails to comply with any duties imposed on Tenant by statute, within seven (7) days after delivery of written notice by Landlord specifying the non-compliance and indicating the intention of Landlord to terminate the Lease by reason thereof, Landlord may terminate this Texas Lease Agreement. If Tenant fails to pay rent when due and the default continues for seven (7) days thereafter, Landlord may, at Landlord&rsquo;s option, declare the entire balance of rent payable hereunder to be immediately due and payable and may exercise any and all rights and remedies available to Landlord at law or in equity or may immediately terminate this Texas Lease Agreement.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">23.</div>
+  <div class="clause-body">
+    <span class="clause-title">Abandonment.</span> If at any time during the term of this Texas Lease Agreement Tenant abandons the Premises or any part thereof, Landlord may, at Landlord&rsquo;s option, obtain possession of the Premises in the manner provided by law, and without becoming liable to Tenant for damages or for any payment of any kind whatever. Landlord may, at Landlord&rsquo;s discretion, as agent for Tenant, relet the Premises, or any part thereof, for the whole or any part thereof, for the whole or any part of the then unexpired term, and may receive and collect all rent payable by virtue of such reletting, and, at Landlord&rsquo;s option, hold Tenant liable for any difference between the rent that would have been payable under this Texas Lease Agreement during the balance of the unexpired term, if this Texas Lease Agreement had continued in force, and the net rent for such period realized by Landlord by means of such reletting. If Landlord&rsquo;s right of reentry is exercised following abandonment of the Premises by Tenant, then Landlord shall consider any personal property belonging to Tenant and left on the Premises to also have been abandoned, in which case Landlord may dispose of all such personal property in any manner Landlord shall deem proper and Landlord is hereby relieved of all liability for doing so.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">24.</div>
+  <div class="clause-body">
+    <span class="clause-title">Attorneys&rsquo; Fees.</span> Should it become necessary for Landlord to employ an attorney to enforce any of the conditions or covenants hereof, including the collection of rentals or gaining possession of the Premises, Tenant agrees to pay all expenses so incurred, including a reasonable attorneys&rsquo; fee.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">25.</div>
+  <div class="clause-body">
+    <span class="clause-title">Recording of Texas Lease Agreement.</span> Tenant shall not record this Texas Lease Agreement on the Public Records of any public office. In the event that Tenant shall record this Texas Lease Agreement, this Texas Lease Agreement shall, at Landlord&rsquo;s option, terminate immediately and Landlord shall be entitled to all rights and remedies that it has at law or in equity.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">26.</div>
+  <div class="clause-body">
+    <span class="clause-title">Governing Law.</span> This Texas Lease Agreement shall be governed, construed and interpreted by, through and under the Laws of the State of Texas.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">27.</div>
+  <div class="clause-body">
+    <span class="clause-title">Severability.</span> If any provision of this Texas Lease Agreement or the application thereof shall, for any reason and to any extent, be invalid or unenforceable, neither the remainder of this Texas Lease Agreement nor the application of the provision to other persons, entities or circumstances shall be affected thereby, but instead shall be enforced to the maximum extent permitted by law.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">28.</div>
+  <div class="clause-body">
+    <span class="clause-title">Binding Effect.</span> The covenants, obligations and conditions herein contained shall be binding on and inure to the benefit of the heirs, legal representatives, and assigns of the parties hereto.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">29.</div>
+  <div class="clause-body">
+    <span class="clause-title">Descriptive Headings.</span> The descriptive headings used herein are for convenience of reference only and they are not intended to have any effect whatsoever in determining the rights or obligations of the Landlord or Tenant.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">30.</div>
+  <div class="clause-body">
+    <span class="clause-title">Construction.</span> The pronouns used herein shall include, where appropriate, either gender or both, singular and plural.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">31.</div>
+  <div class="clause-body">
+    <span class="clause-title">Non-Waiver.</span> No delay, indulgence, waiver, non-enforcement, election or non-election by Landlord under this Texas Lease Agreement will be deemed to be a waiver of any other breach by Tenant, nor shall it affect Tenant&rsquo;s duties, obligations, and liabilities hereunder.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">32.</div>
+  <div class="clause-body">
+    <span class="clause-title">Modification.</span> The parties hereby agree that this document contains the entire agreement between the parties and this Texas Lease Agreement shall not be modified, changed, altered or amended in any way except through a written amendment signed by all of the parties hereto.
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">33.</div>
+  <div class="clause-body">
+    <span class="clause-title">Notice.</span> Any notice required or permitted under this Lease or under state law shall be delivered to Tenant at the Property address, and to Landlord at the following address:
+    <div class="clause-para">{{ fill(L.landlord_address, '380px') }}</div>
+  </div>
+</div>
+
+<div class="clause">
+  <div class="clause-num">34.</div>
+  <div class="clause-body">
+    <span class="clause-title">Lead-Based Paint Disclosure.</span> If the premises were constructed prior to 1978, Tenant acknowledges receipt of the form entitled &ldquo;LEAD-BASED PAINT DISCLOSURE&rdquo; which contains disclosure of information on lead-based paint and/or lead-based paint hazards.
+  </div>
+</div>
+
+{# ---- Signature Block ---- #}
+<div class="sig-section">
+  <div class="sig-intro">
+    As to Landlord this {{ fill(L.landlord_sign_day, '40px') }} day of {{ fill(L.landlord_sign_month, '120px') }}, 20{{ fill(L.landlord_sign_year, '40px') }}.
+  </div>
+
+  <div class="sig-role">LANDLORD:</div>
+  <div class="sig-row">
+    <div class="sig-field-wrap">
+      <span class="sig-line">&nbsp;</span>
+      <span class="sig-label-text">Sign:</span>
+    </div>
+  </div>
+  <div class="sig-row">
+    <div class="sig-field-wrap" style="flex:1;">
+      <span class="sig-line sig-filled">{{ L.landlord_name | default('') }}</span>
+      <span class="sig-label-text">Print:</span>
+    </div>
+    <div class="sig-field-wrap">
+      <span class="sig-line-short">&nbsp;</span>
+      <span class="sig-label-text">Date:</span>
+    </div>
+  </div>
+
+  <div class="sig-intro" style="margin-top:14px;">
+    As to Tenant, this {{ fill(L.sign_day, '40px') }} day of {{ fill(L.sign_month, '120px') }}, 20{{ fill(L.sign_year, '40px') }}.
+  </div>
+
+  {% for tenant in L.tenants | default([]) %}
+  <div class="sig-role">{% if loop.first %}TENANT{% else %}TENANT:{% endif %}</div>
+  <div class="sig-row">
+    <div class="sig-field-wrap">
+      <span class="sig-line">&nbsp;</span>
+      <span class="sig-label-text">Sign:</span>
+    </div>
+  </div>
+  <div class="sig-row">
+    <div class="sig-field-wrap" style="flex:1;">
+      <span class="sig-line sig-filled">{{ tenant.name }}</span>
+      <span class="sig-label-text">Print:</span>
+    </div>
+    <div class="sig-field-wrap">
+      <span class="sig-line-short">&nbsp;</span>
+      <span class="sig-label-text">Date:</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+</body>
+</html>
