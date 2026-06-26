@@ -6,7 +6,10 @@ import tempfile
 from pathlib import Path
 
 import fitz
-from jinja2 import Environment, FileSystemLoader  # pyright: ignore[reportMissingImports]
+from jinja2 import (  # pyright: ignore[reportMissingImports]
+    Environment,
+    FileSystemLoader,
+)
 
 ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:

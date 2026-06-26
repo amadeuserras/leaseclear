@@ -173,7 +173,9 @@ class Agency:
     listing_firm: str = ""
     listing_agent_represents: Literal["landlord_only", "both"] = "landlord_only"
     leasing_firm: str = ""
-    leasing_agent_represents: Literal["tenant_only", "landlord_only", "both"] = "tenant_only"
+    leasing_agent_represents: Literal["tenant_only", "landlord_only", "both"] = (
+        "tenant_only"
+    )
     lease_exceeds_one_year: bool = False
 
 
@@ -228,13 +230,19 @@ class Lease:
         # Move-in costs table rows
         move_in_rows = []
         for c in self.move_in_costs:
-            move_in_rows.append({
-                "category": c.category,
-                "total_due": _money(c.total_due) if c.total_due is not None else "",
-                "payment_received": _money(c.payment_received) if c.payment_received is not None else "",
-                "balance_due": _money(c.balance_due) if c.balance_due is not None else "",
-                "date_due": c.date_due,
-            })
+            move_in_rows.append(
+                {
+                    "category": c.category,
+                    "total_due": _money(c.total_due) if c.total_due is not None else "",
+                    "payment_received": _money(c.payment_received)
+                    if c.payment_received is not None
+                    else "",
+                    "balance_due": _money(c.balance_due)
+                    if c.balance_due is not None
+                    else "",
+                    "date_due": c.date_due,
+                }
+            )
 
         return {
             "agreement_date": self.agreement_date,
@@ -242,11 +250,13 @@ class Lease:
             "landlord_name": self.landlord.name,
             "landlord_address": self.landlord.address,
             "landlord_phone": self.landlord.phone,
-            "landlord_initials": self.landlord.initials or _initials(self.landlord.name),
+            "landlord_initials": self.landlord.initials
+            or _initials(self.landlord.name),
             "tenant_name": _join_names([t.name for t in self.tenants]),
             "tenant_initials": (
                 first_tenant.initials or _initials(first_tenant.name)
-                if first_tenant else ""
+                if first_tenant
+                else ""
             ),
             "occupants": ", ".join(self.occupants),
             "property_address": self.property.address,
@@ -287,14 +297,18 @@ class Lease:
             "parking_description": self.parking.description,
             "parking_included_in_rent": self.parking.included_in_rent,
             "parking_not_included_in_rent": not self.parking.included_in_rent,
-            "parking_fee": _money(self.parking.monthly_fee) if self.parking.monthly_fee else None,
+            "parking_fee": _money(self.parking.monthly_fee)
+            if self.parking.monthly_fee
+            else None,
             # Storage
             "storage_permitted": self.storage.permitted,
             "storage_not_permitted": not self.storage.permitted,
             "storage_description": self.storage.description,
             "storage_included_in_rent": self.storage.included_in_rent,
             "storage_not_included_in_rent": not self.storage.included_in_rent,
-            "storage_fee": _money(self.storage.monthly_fee) if self.storage.monthly_fee else None,
+            "storage_fee": _money(self.storage.monthly_fee)
+            if self.storage.monthly_fee
+            else None,
             # Late charge
             "late_grace_days": str(self.late_charge.grace_days),
             "late_charge_amount": _money(self.late_charge.amount),
@@ -309,10 +323,14 @@ class Lease:
             "condition_other_desc": self.condition.other_desc,
             # Utilities
             "utilities_additional": self.utilities.additional_charges,
-            "landlord_pays_utilities": ", ".join(self.utilities.landlord_pays) if self.utilities.landlord_pays else "",
+            "landlord_pays_utilities": ", ".join(self.utilities.landlord_pays)
+            if self.utilities.landlord_pays
+            else "",
             # Occupants / pets
             "occupants_list": ", ".join(self.occupants),
-            "pets_exception": self.pets.permitted_description if self.pets.allowed else "",
+            "pets_exception": self.pets.permitted_description
+            if self.pets.allowed
+            else "",
             # HOA
             "is_hoa": self.hoa.applicable,
             "hoa_name": self.hoa.name,
@@ -335,11 +353,14 @@ class Lease:
             "military_ordinance": self.military_ordinance.applicable,
             # Agency
             "listing_firm": self.agency.listing_firm,
-            "listing_represents_landlord_only": self.agency.listing_agent_represents == "landlord_only",
+            "listing_represents_landlord_only": self.agency.listing_agent_represents
+            == "landlord_only",
             "listing_represents_both": self.agency.listing_agent_represents == "both",
             "leasing_firm": self.agency.leasing_firm,
-            "leasing_represents_tenant_only": self.agency.leasing_agent_represents == "tenant_only",
-            "leasing_represents_landlord_only": self.agency.leasing_agent_represents == "landlord_only",
+            "leasing_represents_tenant_only": self.agency.leasing_agent_represents
+            == "tenant_only",
+            "leasing_represents_landlord_only": self.agency.leasing_agent_represents
+            == "landlord_only",
             "leasing_represents_both": self.agency.leasing_agent_represents == "both",
             "lease_exceeds_one_year": self.agency.lease_exceeds_one_year,
             # Broker signatures

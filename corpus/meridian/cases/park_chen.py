@@ -71,7 +71,9 @@ LEASE = Lease(
     insurance=Insurance(required=False, amount=0.0),
     condition_rows=[
         ConditionRow("Living area", "Satisfactory", ""),
-        ConditionRow("Kitchen / appliances", "Satisfactory", "microwave door latch stiff"),
+        ConditionRow(
+            "Kitchen / appliances", "Satisfactory", "microwave door latch stiff"
+        ),
         ConditionRow("Bathroom(s)", "Satisfactory", ""),
         ConditionRow("Flooring / walls", "Satisfactory", ""),
     ],

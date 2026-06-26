@@ -1,12 +1,12 @@
 from california.model import (
+    HOA,
     Agency,
     Broker,
     ConditionOfPremises,
     Deposit,
-    HOA,
     Keys,
-    LateCharge,
     Landlord,
+    LateCharge,
     Lease,
     Maintenance,
     MilitaryOrdinance,
@@ -112,7 +112,9 @@ LEASE = Lease(
         garage_remotes=1,
         rekeyed=True,
     ),
-    pets=PetPolicy(allowed=True, permitted_description="one domestic cat, neutered, under 12 lbs"),
+    pets=PetPolicy(
+        allowed=True, permitted_description="one domestic cat, neutered, under 12 lbs"
+    ),
     lead_paint=False,
     military_ordinance=MilitaryOrdinance(applicable=False),
     agency=Agency(
