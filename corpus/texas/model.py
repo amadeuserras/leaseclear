@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Literal
+from dataclasses import dataclass
 
 
 def _money(x: float | None) -> str | None:
@@ -92,7 +91,6 @@ class Lease:
     sign_date: str = ""
 
     def to_context(self) -> dict:
-        first_tenant = self.tenants[0] if self.tenants else None
         tenant_name = _join_names([t.name for t in self.tenants])
 
         sign_day, sign_month, sign_year = _date_parts(self.sign_date or "")

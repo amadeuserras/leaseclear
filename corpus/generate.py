@@ -7,6 +7,7 @@ from pathlib import Path
 
 import fitz
 from jinja2 import (  # pyright: ignore[reportMissingImports]
+    ChoiceLoader,
     Environment,
     FileSystemLoader,
 )
@@ -16,7 +17,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 OUTPUT_DIR = ROOT / "generated"
-MARGIN = 54
+MARGIN = 20
 
 
 def load_case(case_path: Path):
@@ -31,7 +32,12 @@ def load_case(case_path: Path):
 
 def render_html(template_dir: Path, context: dict) -> str:
     env = Environment(
-        loader=FileSystemLoader(str(template_dir)),
+        loader=ChoiceLoader(
+            [
+                FileSystemLoader(str(template_dir)),
+                FileSystemLoader(str(ROOT)),
+            ]
+        ),
         autoescape=False,
         trim_blocks=True,
         lstrip_blocks=True,

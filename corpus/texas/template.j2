@@ -18,13 +18,9 @@
   ============================================================================
 -#}
 
+{%- from 'macros.j2' import fill as _fill -%}
 {%- macro fill(value, width='140px') -%}
-  {%- set wc = 'fw-' ~ (width | replace('px','')) -%}
-  {%- if value is not none and value|string|trim != '' -%}
-    <span class="field filled {{ wc }}">{{ value }}</span>
-  {%- else -%}
-    <span class="field blank {{ wc }}">&nbsp;</span>
-  {%- endif -%}
+  {{- _fill(value, width, 6) -}}
 {%- endmacro -%}
 
 {%- set L = lease | default({}) -%}
@@ -111,30 +107,10 @@
 
   /* ---- fill-in fields ---- */
   .field {
-    display: inline-block;
-    border-bottom: 0.75px solid #000;
-    padding: 0 2px;
-    min-height: 12px;
-    vertical-align: baseline;
+    text-decoration: underline;
+    text-underline-offset: 4px;
   }
   .field.filled { font-style: italic; font-weight: bold; }
-  .fw-30  { min-width: 30px; }
-  .fw-40  { min-width: 40px; }
-  .fw-50  { min-width: 50px; }
-  .fw-60  { min-width: 60px; }
-  .fw-80  { min-width: 80px; }
-  .fw-100 { min-width: 100px; }
-  .fw-120 { min-width: 120px; }
-  .fw-140 { min-width: 140px; }
-  .fw-160 { min-width: 160px; }
-  .fw-180 { min-width: 180px; }
-  .fw-200 { min-width: 200px; }
-  .fw-240 { min-width: 240px; }
-  .fw-260 { min-width: 260px; }
-  .fw-300 { min-width: 300px; }
-  .fw-340 { min-width: 340px; }
-  .fw-380 { min-width: 380px; }
-  .fw-420 { min-width: 420px; }
 
   /* ---- bold sub-header inside clause body (§4 REFUND) ---- */
   .sub-header { font-weight: bold; text-transform: uppercase; }
