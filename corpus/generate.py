@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import importlib
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -14,16 +16,14 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from meridian.data import LEASE  # noqa: E402
-
 OUTPUT_DIR = ROOT / "generated"
-TEMPLATE_DIR = ROOT / "meridian"
-MARGIN = 54
+MARGIN = 20
+PACKAGES = ("meridian", "california")
 
 
-def render_html(context: dict) -> str:
+def render_html(context: dict, template_dir: Path) -> str:
     env = Environment(
-        loader=FileSystemLoader(TEMPLATE_DIR),
+        loader=FileSystemLoader(template_dir),
         autoescape=False,
         trim_blocks=True,
         lstrip_blocks=True,
@@ -61,11 +61,30 @@ def render_pdf(html: str, output_path: Path) -> None:
     tmp_path.unlink()
 
 
-def main() -> None:
-    html = render_html(LEASE.to_context())
-    output_path = OUTPUT_DIR / f"{LEASE.filename}.pdf"
+def generate_package(name: str) -> None:
+    lease = importlib.import_module(f"{name}.data").LEASE
+    html = render_html(lease.to_context(), ROOT / name)
+    output_path = OUTPUT_DIR / name / f"{lease.filename}.pdf"
     render_pdf(html, output_path)
     print(f"generated {output_path}")
+
+    if name == "meridian":
+        legacy_path = OUTPUT_DIR / f"{lease.filename}.pdf"
+        if legacy_path != output_path:
+            shutil.copy(output_path, legacy_path)
+            print(f"generated {legacy_path}")
+
+
+def main() -> None:
+    names = sys.argv[1:] or list(PACKAGES)
+    unknown = set(names) - set(PACKAGES)
+    if unknown:
+        print(f"unknown package(s): {', '.join(sorted(unknown))}", file=sys.stderr)
+        print(f"available: {', '.join(PACKAGES)}", file=sys.stderr)
+        sys.exit(1)
+
+    for name in names:
+        generate_package(name)
 
 
 if __name__ == "__main__":
