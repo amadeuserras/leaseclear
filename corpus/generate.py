@@ -22,6 +22,8 @@ MARGIN = 54
 def load_case(case_path: Path):
     """Import a case file and return its LEASE object."""
     spec = importlib.util.spec_from_file_location(case_path.stem, case_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load case module from {case_path}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.LEASE
