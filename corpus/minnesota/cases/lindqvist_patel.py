@@ -1,0 +1,56 @@
+from minnesota.model import Lease, Notices, Owner, Pets, Tenant, Term, Utilities
+
+LEASE = Lease(
+    filename="minnesota-lindqvist_patel",
+    date="March 15, 2025",
+    total_pages=6,
+    owner=Owner(
+        name="Nordic Crest Properties LLC",
+        address="820 Washington Avenue S, Suite 300, Minneapolis, MN 55415",
+        phone="(612) 555-0174",
+    ),
+    tenants=[
+        Tenant(name="Astrid Lindqvist"),
+        Tenant(name="Ravi Patel"),
+    ],
+    property_address="3712 Lake Harriet Pkwy, Unit 2B",
+    property_city="Minneapolis",
+    property_county="Hennepin",
+    has_garage=True,
+    has_storage_unit=False,
+    has_parking_stall=False,
+    garage_stall_number="G-7",
+    term=Term(
+        is_month_to_month=False,
+        months=12,
+        start="April 1, 2025",
+        end="March 31, 2026",
+    ),
+    rent_amount=1950.00,
+    utilities=Utilities(
+        paid_by_tenant=False,
+        paid_by_owner=False,
+        split=True,
+        tenant_pays="gas, electricity, and cable",
+        owner_pays="water, sewer, and trash removal",
+    ),
+    deposit_amount=1950.00,
+    late_fee_amount=100.00,
+    pets=Pets(
+        allowed=True,
+        cat_count=2,
+        dog_count=0,
+        max_weight_lbs=None,
+        description="up to two cats",
+    ),
+    occupants="Astrid Lindqvist and Ravi Patel",
+    is_cic=True,
+    notices=Notices(
+        owner_address="820 Washington Avenue S, Suite 300, Minneapolis, MN 55415",
+        owner_phone="(612) 555-0174",
+        tenant_address="3712 Lake Harriet Pkwy, Unit 2B, Minneapolis, MN 55410",
+        tenant_phone="(651) 555-0293",
+    ),
+    lead_paint=False,
+    sign_date="March 15, 2025",
+)
