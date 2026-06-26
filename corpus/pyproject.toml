@@ -18,6 +18,9 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+"**/cases/*.py" = ["E501"]
+
 [tool.pyright]
 include = ["generate.py", "model.py", "data.py"]
 pythonVersion = "3.12"
