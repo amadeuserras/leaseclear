@@ -9,8 +9,8 @@ from california.model import (
     Landlord,
     Lease,
     Maintenance,
-    MoveInCost,
     MilitaryOrdinance,
+    MoveInCost,
     Parking,
     PetPolicy,
     Property,
@@ -22,7 +22,7 @@ from california.model import (
 )
 
 LEASE = Lease(
-    filename="lease",
+    filename="california-vega_whitfield",
     agreement_date="June 14, 2025",
     landlord=Landlord(
         name="Solano Bay Properties LLC",
@@ -62,10 +62,7 @@ LEASE = Lease(
         payment_hours_end="5:00 PM",
         payment_days="Monday through Friday",
     ),
-    deposit=Deposit(
-        amount=2650.00,
-        held_by="owner",
-    ),
+    deposit=Deposit(amount=2650.00, held_by="owner"),
     move_in_costs=[
         MoveInCost(
             category="Rent from July 1 to July 31, 2025",
@@ -93,11 +90,7 @@ LEASE = Lease(
         included_in_rent=False,
         monthly_fee=45.00,
     ),
-    late_charge=LateCharge(
-        grace_days=5,
-        amount=100.00,
-        nsf_fee=25.00,
-    ),
+    late_charge=LateCharge(grace_days=5, amount=100.00, nsf_fee=25.00),
     condition=ConditionOfPremises(
         option="A",
         exceptions="minor scuff on kitchen wall near door; small chip in master bathroom tile",
@@ -105,15 +98,11 @@ LEASE = Lease(
     utilities=Utilities(
         tenant_pays_all=True,
         landlord_pays=["trash collection", "water/sewer"],
-        additional_charges="",
     ),
-    hoa=HOA(
-        applicable=False,
-    ),
+    hoa=HOA(applicable=False),
     maintenance=Maintenance(
         watering_by="tenant",
         maintenance_by="landlord",
-        watering_exceptions="",
         maintenance_exceptions="Tenant responsible for patio container plants",
     ),
     keys=Keys(
@@ -123,10 +112,7 @@ LEASE = Lease(
         garage_remotes=1,
         rekeyed=True,
     ),
-    pets=PetPolicy(
-        allowed=True,
-        permitted_description="one domestic cat, neutered, under 12 lbs",
-    ),
+    pets=PetPolicy(allowed=True, permitted_description="one domestic cat, neutered, under 12 lbs"),
     lead_paint=False,
     military_ordinance=MilitaryOrdinance(applicable=False),
     agency=Agency(
