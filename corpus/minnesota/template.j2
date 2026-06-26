@@ -123,15 +123,7 @@
   .preamble {
     margin-bottom: 8px;
     text-align: justify;
-  }
-  .preamble p {
-    margin: 3px 0;
-  }
-
-  /* ---- premises includes row ---- */
-  .premises-row {
-    margin: 4px 0 8px 0;
-    font-size: 9pt;
+    line-height: 1.6;
   }
 
   /* ---- section 1 terms block ---- */
@@ -145,11 +137,12 @@
   .sub-clause .sub-label {
     font-weight: bold;
   }
-  .check-line {
-    margin: 3px 0 3px 28px;
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
+  /* option lines: simple indented block, text flows inline */
+  .opt-line {
+    margin: 2px 0 2px 20px;
+  }
+  .opt-cont {
+    margin: 2px 0 2px 38px;
   }
   .check-note {
     font-size: 7.5pt;
@@ -319,22 +312,7 @@
 
 {# ===== OPENING PREAMBLE ===== #}
 <div class="preamble">
-  <p>Lease Agreement (Lease), dated {{ fill(L.date_month ~ ' ' ~ L.date_day, '140px') }}, 20{{ fill(L.date_year, '60px') }}, pertaining to the lease of the property located at Street Address: {{ fill(L.property_address, '300px') }}</p>
-  <p>{{ fill(L.property_address, '300px') }} City of {{ fill(L.property_city, '180px') }},</p>
-  <p>County of {{ fill(L.property_county, '200px') }}, State of Minnesota (Premises), by and between</p>
-  <p><em>(list all Tenants)</em>&nbsp;&nbsp;{{ fill(L.tenant_name, '360px') }}</p>
-  <p>{{ fill(L.tenant_name, '400px') }} (Tenant)</p>
-  <p>and {{ fill(L.owner_name, '300px') }} (Owner). The</p>
-</div>
-
-{# ===== PREMISES INCLUDES ===== #}
-<div class="premises-row">
-  Premises include(s) a&nbsp;&nbsp;
-  {{ box(L.has_garage) }} <b>garage</b>&nbsp;&nbsp;
-  {{ box(L.has_storage_unit) }} <b>storage unit</b>&nbsp;&nbsp;
-  {{ box(L.has_parking_stall) }} <b>parking stall</b>
-  &nbsp;&nbsp;identified as garage/unit/stall number {{ fill(L.garage_stall_number, '80px') }}
-  &nbsp;<span class="check-note">---- (Check all that apply.) ----</span>
+  Lease Agreement (Lease), dated {{ fill(L.date_month ~ ' ' ~ L.date_day, '130px') }}, 20{{ fill(L.date_year, '55px') }}, pertaining to the lease of the property located at Street Address: {{ fill(L.property_address, '280px') }} City of {{ fill(L.property_city, '160px') }}, County of {{ fill(L.property_county, '180px') }}, State of Minnesota (Premises), by and between <em>(list all Tenants)</em> {{ fill(L.tenant_name, '260px') }} (Tenant) and {{ fill(L.owner_name, '260px') }} (Owner). The Premises include(s) a&nbsp; {{ box(L.has_garage) }}&nbsp;<b>garage</b>&nbsp;&nbsp;{{ box(L.has_storage_unit) }}&nbsp;<b>storage unit</b>&nbsp;&nbsp;{{ box(L.has_parking_stall) }}&nbsp;<b>parking stall</b>&nbsp;&nbsp;identified as garage/unit/stall number {{ fill(L.garage_stall_number, '70px') }}&nbsp;<span class="check-note">---- (Check all that apply.) ----</span>
 </div>
 
 <hr class="divider">
@@ -347,76 +325,45 @@
 {# (a) Term #}
 <div class="sub-clause">
   <span class="sub-label">(a) Term:</span> The term means <em>(check only one)</em>:
-  <div class="check-line">
-    {{ box(L.term_is_fixed) }}
-    the period of {{ fill(L.term_months, '60px') }} months commencing {{ fill(L.term_start, '180px') }}
-  </div>
-  <div class="check-line" style="margin-left:56px;">
-    and terminating {{ fill(L.term_end, '200px') }}
-  </div>
-  <div class="check-line">
-    {{ box(L.term_is_month_to_month) }}
-    month-to-month lease commencing {{ fill(L.term_start, '200px') }}
-  </div>
+  <p class="opt-line">{{ box(L.term_is_fixed) }} the period of {{ fill(L.term_months, '55px') }} months commencing {{ fill(L.term_start, '160px') }}</p>
+  <p class="opt-cont">and terminating {{ fill(L.term_end, '180px') }}</p>
+  <p class="opt-line">{{ box(L.term_is_month_to_month) }} month-to-month lease commencing {{ fill(L.term_start, '180px') }}</p>
 </div>
 
 {# (b) Rent #}
 <div class="sub-clause">
-  <span class="sub-label">(b) Rent:</span> The rent is {{ fill(L.rent_amount, '160px') }} per month.
+  <span class="sub-label">(b) Rent:</span> The rent is {{ fill(L.rent_amount, '150px') }} per month.
 </div>
 
 {# (c) Utilities #}
 <div class="sub-clause">
   <span class="sub-label">(c) Utilities:</span> (see Paragraph 6):
-  <div class="check-line">
-    {{ box(L.utilities_by_tenant or L.utilities_by_owner) }}
-    Paid by&nbsp;
-    {{ box(L.utilities_by_tenant) }} <b>Tenant</b>&nbsp;&nbsp;
-    {{ box(L.utilities_by_owner) }} <b>Owner</b>
-    &nbsp;<span class="check-note">---- (Check one.) ----</span>
-  </div>
-  <div class="check-line">
-    {{ box(L.utilities_split) }}
-    Paid in part by each with Tenant to pay for {{ fill(L.utilities_tenant_pays, '200px') }}
-  </div>
-  <div class="check-line" style="margin-left:56px;">
-    and Owner to pay for {{ fill(L.utilities_owner_pays, '200px') }}
-  </div>
+  <p class="opt-line">{{ box(L.utilities_by_tenant or L.utilities_by_owner) }} Paid by {{ box(L.utilities_by_tenant) }}&nbsp;<b>Tenant</b>&nbsp;&nbsp;{{ box(L.utilities_by_owner) }}&nbsp;<b>Owner</b>&nbsp;&nbsp;<span class="check-note">---- (Check one.) ----</span></p>
+  <p class="opt-line">{{ box(L.utilities_split) }} Paid in part by each with Tenant to pay for {{ fill(L.utilities_tenant_pays, '190px') }}</p>
+  <p class="opt-cont">and Owner to pay for {{ fill(L.utilities_owner_pays, '190px') }}</p>
 </div>
 
 {# (d) Security Deposit #}
 <div class="sub-clause">
-  <span class="sub-label">(d) Security Deposit:</span> The security deposit is {{ fill(L.deposit_amount, '180px') }}
+  <span class="sub-label">(d) Security Deposit:</span> The security deposit is {{ fill(L.deposit_amount, '170px') }}
 </div>
 
 {# (e) Late Fee #}
 <div class="sub-clause">
-  <span class="sub-label">(e) Late Fee:</span> The late fee is {{ fill(L.late_fee_amount, '160px') }} (not to exceed eight percent (8%) of the overdue rent amount).
+  <span class="sub-label">(e) Late Fee:</span> The late fee is {{ fill(L.late_fee_amount, '150px') }} (not to exceed eight percent (8%) of the overdue rent amount).
 </div>
 
 {# (f) Pets #}
 <div class="sub-clause">
   <span class="sub-label">(f) Pets:</span> (see Paragraph 14):
-  <div class="check-line">
-    {{ box(L.pets_not_allowed) }} Pets are not allowed.
-  </div>
-  <div class="check-line">
-    {{ box(L.pets_allowed) }}
-    Pets are allowed and Tenant may have {{ fill(L.pets_cat_count, '40px') }} cats and {{ fill(L.pets_dog_count, '40px') }} dogs in the Premises and no pet
-  </div>
-  <div class="check-line" style="margin-left:56px;">
-    may weigh more than {{ fill(L.pets_max_weight, '50px') }} pounds. Tenant shall be allowed to have {{ fill(L.pets_description, '180px') }}
-  </div>
-  <div class="check-line" style="margin-left:56px;">
-    in the Premises.
-  </div>
+  <p class="opt-line">{{ box(L.pets_not_allowed) }} Pets are not allowed.</p>
+  <p class="opt-line">{{ box(L.pets_allowed) }} Pets are allowed and Tenant may have {{ fill(L.pets_cat_count, '38px') }} cats and {{ fill(L.pets_dog_count, '38px') }} dogs in the Premises and no pet may weigh more than {{ fill(L.pets_max_weight, '45px') }} pounds. Tenant shall be allowed to have {{ fill(L.pets_description, '160px') }} in the Premises.</p>
 </div>
 
 {# (g) Occupants #}
 <div class="sub-clause">
-  <span class="sub-label">(g) Occupants:</span> The occupants of the Premises are
-  <div style="margin: 3px 0 3px 12px;">{{ fill(L.occupants, '400px') }}</div>
-  <div style="border-bottom:1px solid #000; min-height:14px; margin: 3px 0;"></div>
+  <span class="sub-label">(g) Occupants:</span> The occupants of the Premises are {{ fill(L.occupants, '320px') }}
+  <div style="border-bottom:1px solid #000; min-height:13px; margin: 4px 0;"></div>
 </div>
 
 {# ===== PAGE 2 CONTINUATION HEADER ===== #}
@@ -462,14 +409,8 @@
 
 {# (j) Lead-Based Paint #}
 <div class="sub-clause">
-  <span class="sub-label">(j) Lead-Based Paint:</span> The Premises
-  {{ box(L.lead_paint) }} <b>WERE</b>&nbsp;&nbsp;{{ box(not L.lead_paint) }} <b>WERE NOT</b> built before 1978. If &ldquo;were&rdquo; is checked,
-  <span class="check-note">---- (Check one) ----</span>
-  <div style="margin: 3px 0 3px 12px;">
-    Tenant acknowledges receipt of a copy of the disclosure identified in Paragraph 27.
-    &nbsp;&nbsp;{{ fill(L.tenant_initials, '80px') }}
-    <span class="check-note">(Tenant&rsquo;s initials.)</span>
-  </div>
+  <span class="sub-label">(j) Lead-Based Paint:</span> The Premises {{ box(L.lead_paint) }}&nbsp;<b>WERE</b>&nbsp;&nbsp;{{ box(not L.lead_paint) }}&nbsp;<b>WERE NOT</b> built before 1978. If &ldquo;were&rdquo; is checked, <span class="check-note">---- (Check one) ----</span>
+  <p class="opt-cont">Tenant acknowledges receipt of a copy of the disclosure identified in Paragraph 27.&nbsp;&nbsp;{{ fill(L.tenant_initials, '75px') }}&nbsp;<span class="check-note">(Tenant&rsquo;s initials.)</span></p>
 </div>
 
 <hr class="divider">
