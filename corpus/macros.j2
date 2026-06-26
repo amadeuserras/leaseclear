@@ -2,7 +2,8 @@
   Shared fill-in macro for PyMuPDF Story PDF rendering.
   Story only draws underlines on inline spans via text-decoration (not border-bottom).
   Blank/filled width is approximated with non-breaking spaces; filled values get side
-  pad plus extra spaces when shorter than the requested width.
+  pad plus extra spaces when shorter than the requested width. Internal word spaces
+  are also rendered as &nbsp; so PyMuPDF Story underlines stay continuous.
 -#}
 {%- macro fill(value, width='140px', px_per_nbsp=6) -%}
   {%- set px = (width | replace('px', '') | int) -%}
@@ -16,7 +17,7 @@
     {%- if extra < 0 -%}{%- set extra = 0 -%}{%- endif -%}
     {%- set left = side + (extra // 2) -%}
     {%- set right = side + (extra - (extra // 2)) -%}
-    <span class="field filled">{%- for _ in range(left) -%}&nbsp;{%- endfor -%}{{ content }}{%- for _ in range(right) -%}&nbsp;{%- endfor -%}</span>
+    <span class="field filled">{%- for _ in range(left) -%}&nbsp;{%- endfor -%}{%- for part in content.split(' ') -%}{%- if not loop.first -%}&nbsp;{%- endif -%}{{ part }}{%- endfor -%}{%- for _ in range(right) -%}&nbsp;{%- endfor -%}</span>
   {%- else -%}
     <span class="field blank">{%- for _ in range(n) -%}&nbsp;{%- endfor -%}</span>
   {%- endif -%}
