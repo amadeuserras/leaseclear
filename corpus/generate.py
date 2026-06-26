@@ -14,15 +14,16 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from data import LEASE  # noqa: E402
+from meridian.data import LEASE  # noqa: E402
 
 OUTPUT_DIR = ROOT / "generated"
+TEMPLATE_DIR = ROOT / "meridian"
 MARGIN = 54
 
 
 def render_html(context: dict) -> str:
     env = Environment(
-        loader=FileSystemLoader(ROOT),
+        loader=FileSystemLoader(TEMPLATE_DIR),
         autoescape=False,
         trim_blocks=True,
         lstrip_blocks=True,

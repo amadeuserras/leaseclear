@@ -1,4 +1,4 @@
-from model import (
+from meridian.model import (
     ConditionRow,
     Deposit,
     Disclosures,
