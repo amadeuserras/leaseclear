@@ -180,35 +180,52 @@
   .sig-section {
     margin-top: 20px;
   }
-  .sig-row {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 18px;
-    align-items: flex-end;
+  .sig-table {
+    width: 100%;
+    border-collapse: collapse;
   }
-  .sig-cell {
-    flex: 1;
+  /* MuPDF Story ignores CSS column widths; a zero-height sizer row sets proportions. */
+  .sig-sizer-row {
+    font-size: 0;
+    line-height: 0;
+    height: 0;
+  }
+  .sig-sizer-row td {
+    padding: 0;
+    overflow: hidden;
+    vertical-align: top;
+  }
+  .sig-sizer-row span {
+    font-size: 0;
+    line-height: 0;
+  }
+  .sig-table > tbody > tr:not(.sig-sizer-row) > td {
+    vertical-align: bottom;
+    padding-bottom: 18px;
+  }
+  .sig-table .sig-owner-date {
+    padding-right: 20px;
+  }
+  .sig-table .sig-tenant-name {
+    padding-left: 20px;
   }
   .sig-line {
     border-bottom: 1px solid #000;
     min-height: 18px;
     margin-bottom: 2px;
     font-size: 9pt;
+    font-style: italic;
     padding: 1px 0;
   }
   .sig-caption {
     font-size: 7.5pt;
     font-style: italic;
-    text-align: center;
-  }
-  .sig-date-cell {
-    width: 130px;
-    flex-shrink: 0;
+    text-align: left;
   }
 
   /* ---- disclaimer ---- */
   .disclaimer {
-    margin-top: 18px;
+    margin-top: 58px;
     text-align: center;
     font-weight: bold;
     font-size: 8.5pt;
@@ -558,103 +575,41 @@
 </div>
 
 {# ===== SIGNATURE BLOCK ===== #}
+{%- set _sig_name_pad = '&nbsp;' * 74 -%}
+{%- set _sig_date_pad = '&nbsp;' * 13 -%}
 <div class="sig-section">
-  {# Owner row 1 #}
-  <div class="sig-row">
-    <div class="sig-cell">
-      <div class="sig-line">{{ L.owner_name or '' }}</div>
-      <div class="sig-caption">(Owner)</div>
-    </div>
-    <div class="sig-date-cell">
-      <div class="sig-line">{{ L.sign_date or '' }}</div>
-      <div class="sig-caption">(Date)</div>
-    </div>
-    {% if L.tenants and L.tenants|length >= 1 %}
-    <div class="sig-cell">
-      <div class="sig-line">{{ L.tenants[0].name }}</div>
-      <div class="sig-caption">(Tenant)</div>
-    </div>
-    <div class="sig-date-cell">
-      <div class="sig-line">{{ L.sign_date or '' }}</div>
-      <div class="sig-caption">(Date)</div>
-    </div>
-    {% endif %}
-  </div>
-
-  {# Owner row 2 / Tenant row 2 #}
-  <div class="sig-row">
-    <div class="sig-cell">
-      <div class="sig-line"></div>
-      <div class="sig-caption">(Owner)</div>
-    </div>
-    <div class="sig-date-cell">
-      <div class="sig-line"></div>
-      <div class="sig-caption">(Date)</div>
-    </div>
-    {% if L.tenants and L.tenants|length >= 2 %}
-    <div class="sig-cell">
-      <div class="sig-line">{{ L.tenants[1].name }}</div>
-      <div class="sig-caption">(Tenant)</div>
-    </div>
-    <div class="sig-date-cell">
-      <div class="sig-line">{{ L.sign_date or '' }}</div>
-      <div class="sig-caption">(Date)</div>
-    </div>
-    {% else %}
-    <div class="sig-cell">
-      <div class="sig-line"></div>
-      <div class="sig-caption">(Tenant)</div>
-    </div>
-    <div class="sig-date-cell">
-      <div class="sig-line"></div>
-      <div class="sig-caption">(Date)</div>
-    </div>
-    {% endif %}
-  </div>
-
-  {# Extra tenant rows if needed #}
-  {% if L.tenants and L.tenants|length >= 3 %}
-  <div class="sig-row">
-    <div class="sig-cell" style="flex:0; min-width:200px;"></div>
-    <div class="sig-date-cell"></div>
-    <div class="sig-cell">
-      <div class="sig-line">{{ L.tenants[2].name }}</div>
-      <div class="sig-caption">(Tenant)</div>
-    </div>
-    <div class="sig-date-cell">
-      <div class="sig-line">{{ L.sign_date or '' }}</div>
-      <div class="sig-caption">(Date)</div>
-    </div>
-  </div>
-  {% else %}
-  <div class="sig-row">
-    <div class="sig-cell" style="flex:0; min-width:200px;"></div>
-    <div class="sig-date-cell"></div>
-    <div class="sig-cell">
-      <div class="sig-line"></div>
-      <div class="sig-caption">(Tenant)</div>
-    </div>
-    <div class="sig-date-cell">
-      <div class="sig-line"></div>
-      <div class="sig-caption">(Date)</div>
-    </div>
-  </div>
-  {% endif %}
-
-  {% if L.tenants and L.tenants|length >= 4 %}
-  <div class="sig-row">
-    <div class="sig-cell" style="flex:0; min-width:200px;"></div>
-    <div class="sig-date-cell"></div>
-    <div class="sig-cell">
-      <div class="sig-line">{{ L.tenants[3].name }}</div>
-      <div class="sig-caption">(Tenant)</div>
-    </div>
-    <div class="sig-date-cell">
-      <div class="sig-line">{{ L.sign_date or '' }}</div>
-      <div class="sig-caption">(Date)</div>
-    </div>
-  </div>
-  {% endif %}
+  <table class="sig-table">
+    <tr class="sig-sizer-row">
+      <td class="sig-name-col"><span>{{ _sig_name_pad }}</span></td>
+      <td class="sig-date-col sig-owner-date"><span>{{ _sig_date_pad }}</span></td>
+      <td class="sig-name-col sig-tenant-name"><span>{{ _sig_name_pad }}</span></td>
+      <td class="sig-date-col"><span>{{ _sig_date_pad }}</span></td>
+    </tr>
+    {% for i in range(4) %}
+    <tr>
+      <td class="sig-name-col">
+        {% if i < 2 %}
+        <div class="sig-line">{% if i == 0 %}{{ L.owner_name or '&nbsp;' }}{% else %}&nbsp;{% endif %}</div>
+        <div class="sig-caption">(Owner)</div>
+        {% endif %}
+      </td>
+      <td class="sig-date-col sig-owner-date">
+        {% if i < 2 %}
+        <div class="sig-line">{% if i == 0 %}{{ L.sign_date or '&nbsp;' }}{% else %}&nbsp;{% endif %}</div>
+        <div class="sig-caption">(Date)</div>
+        {% endif %}
+      </td>
+      <td class="sig-name-col sig-tenant-name">
+        <div class="sig-line">{% if L.tenants and L.tenants|length > i %}{{ L.tenants[i].name }}{% else %}&nbsp;{% endif %}</div>
+        <div class="sig-caption">(Tenant)</div>
+      </td>
+      <td class="sig-date-col">
+        <div class="sig-line">{% if L.tenants and L.tenants|length > i %}{{ L.sign_date or '&nbsp;' }}{% else %}&nbsp;{% endif %}</div>
+        <div class="sig-caption">(Date)</div>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
 </div>
 
 {# ===== DISCLAIMER ===== #}
