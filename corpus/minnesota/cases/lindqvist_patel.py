@@ -53,4 +53,5 @@ LEASE = Lease(
     ),
     lead_paint=False,
     sign_date="March 15, 2025",
+    additional_terms="Garage stall G-7 is for one passenger vehicle only; no storage of flammable materials. Tenant agrees to comply with the condominium association rules attached as Addendum A. Tenant must maintain renter's insurance with $100,000 liability minimum.",
 )

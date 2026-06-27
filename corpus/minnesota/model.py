@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Literal
+from dataclasses import dataclass
 
 
 def _money(x: float | None) -> str | None:
@@ -26,6 +25,24 @@ def _date_parts(date_str: str) -> tuple[str, str, str]:
         return parts[0], parts[1], parts[2]
     except (IndexError, AttributeError):
         return ("", "", "")
+
+
+def _additional_terms_lines(
+    text: str,
+    *,
+    max_lines: int = 5,
+    words_per_line: int = 20,
+) -> list[str]:
+    words = (text or "").split()
+    if not words:
+        return [""] * max_lines
+
+    lines = [
+        " ".join(words[i : i + words_per_line])
+        for i in range(0, len(words), words_per_line)
+    ]
+    lines = lines[:max_lines]
+    return lines + [""] * (max_lines - len(lines))
 
 
 @dataclass
@@ -145,9 +162,15 @@ class Lease:
             # pets
             "pets_allowed": self.pets.allowed,
             "pets_not_allowed": not self.pets.allowed,
-            "pets_cat_count": str(self.pets.cat_count) if self.pets.cat_count is not None else None,
-            "pets_dog_count": str(self.pets.dog_count) if self.pets.dog_count is not None else None,
-            "pets_max_weight": str(self.pets.max_weight_lbs) if self.pets.max_weight_lbs is not None else None,
+            "pets_cat_count": str(self.pets.cat_count)
+            if self.pets.cat_count is not None
+            else None,
+            "pets_dog_count": str(self.pets.dog_count)
+            if self.pets.dog_count is not None
+            else None,
+            "pets_max_weight": str(self.pets.max_weight_lbs)
+            if self.pets.max_weight_lbs is not None
+            else None,
             "pets_description": self.pets.description or None,
             # occupants
             "occupants": self.occupants,
@@ -162,7 +185,7 @@ class Lease:
             "lead_paint": self.lead_paint,
             "tenant_initials": self.tenant_initials or None,
             # misc
-            "additional_terms": self.additional_terms or None,
+            "additional_terms_lines": _additional_terms_lines(self.additional_terms),
             "sign_date": self.sign_date or self.date,
             "sign_month": sign_month,
             "sign_day": sign_day,
