@@ -1,22 +1,3 @@
-{#-
-  ============================================================================
-  CALIFORNIA ASSOCIATION OF REALTORS® — Residential Lease or
-  Month-to-Month Rental Agreement (LR-11) — Jinja2 / HTML template
-  ----------------------------------------------------------------------------
-  Structural features intentionally reproduced (chunker test cases):
-    - CAR-style header with logo and form number; per-page footer boilerplate
-    - 42 numbered clauses mirroring LR-11 order; short clauses alongside long
-    - Nested sub-clauses A./B./C./D. and inline conditionals
-    - Checkbox "Check A or B" patterns (term type, parking, storage, condition)
-    - Checkbox-gated clauses (lead paint §22, military ordinance §34, HOA §15)
-    - Fill-in-the-blank underline fields (empty ⇒ ruled line via fill() macro)
-    - Move-in costs table (§5) with Category / Total Due / Received / Balance
-    - Keys receipt sub-table (§18)
-    - Signature block with multi-tenant and dual-broker rows
-    - Cross-references to other paragraphs ("as specified in paragraph 2A")
-  ============================================================================
--#}
-
 {#- ---------- macros ---------- -#}
 {%- from 'macros.j2' import fill as _fill -%}
 {%- macro fill(value, width='160px') -%}

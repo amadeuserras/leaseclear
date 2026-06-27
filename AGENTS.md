@@ -4,7 +4,7 @@ Production RAG for residential lease Q&A: cited answers, honest refusals, publis
 
 - Progress and build guide, start here: **[PROGRESS.md](./PROGRESS.md)**
 - Backend and corpus specific instructions **[AGENTS.md](./backend/AGENTS.md)**
-- Frontend specific insutrctions -> not built yet
+- Frontend specific insutrctions **[AGENTS.md](./frontend/AGENTS.md)**
 
 ## Commit style
 

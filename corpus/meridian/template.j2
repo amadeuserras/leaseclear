@@ -1,30 +1,3 @@
-{#-
-  ============================================================================
-  SYNTHETIC RESIDENTIAL LEASE — Jinja2 / HTML template (render to PDF via WeasyPrint)
-  ----------------------------------------------------------------------------
-  Purpose: a small (~4 page) but structurally REALISTIC lease for developing and
-  testing a document-Q&A / RAG ingestion pipeline. It deliberately reproduces the
-  *behaviours* that make real leases hard to chunk — NOT the text of any real form.
-
-  Structural features intentionally included (each is a chunker test case):
-    - Header logo + horizontal rule; repeating per-page footer boilerplate (noise)
-    - Numbered clauses 1..N in the main lease
-    - SHORT clauses (one sentence) next to LONG clauses (~400-800 tokens)
-    - Nested sub-clauses: A./B./C. and (i)/(ii)/(iii) and (a)/(b)
-    - Checkbox UI: ☒ / ☐ glyphs, plus a "Check A or B" conditional pattern
-    - A checkbox-GATED clause whose applicability depends on a box (refusal test)
-    - Fill-in-the-blank underline fields driven by Jinja vars (empty => ruled line)
-    - Cross-references to other clauses ("as described in Section 4") and to an
-      attached addendum, plus a statute-style reference
-    - A nested ADDENDUM with its OWN clause numbering reset (1..M) => multi-doc /
-      renumbering behaviour in miniature
-
-  Render contract: pass a dict `lease`. Every field is optional; missing scalar
-  fields fall back to an empty ruled line via the fill() macro, mimicking a blank
-  form. Checkbox booleans default to False (unchecked).
-  ============================================================================
--#}
-
 {#- ---------- macros ---------- -#}
 {%- from 'macros.j2' import fill as _fill -%}
 {%- macro fill(value, width='180px') -%}

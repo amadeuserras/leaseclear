@@ -1,35 +1,3 @@
-{#-
-  ============================================================================
-  MINNESOTA RESIDENTIAL LEASE AGREEMENT — Jinja2 / HTML template
-  ----------------------------------------------------------------------------
-  Styled after the Minnesota Association of Realtors RE:RLA form.
-  Line numbers from the reference PDF are omitted per corpus convention.
-  Logo replaced with a plain text header box (not a trademarked design).
-  Structural features intentionally reproduced (chunker test cases):
-    - Simplified header box (top-left) + bold right-aligned title (top-right)
-    - Page-1 header: Date and "Page 1 of N" inline fields
-    - Opening preamble: Lease dated..., address, Tenant & Owner lines
-    - Premises include(s) checkboxes: garage / storage unit / parking stall
-    - §1 TERMS OF LEASE summary block with lettered sub-clauses (a)–(j)
-    - §1(a) Term: two checkbox options (fixed-period vs. month-to-month)
-    - §1(c) Utilities: three checkbox options (Tenant / Owner / split)
-    - §1(f) Pets: two checkbox options with fill-in counts/weight
-    - §1(h) CIC: ARE / ARE NOT checkbox pair
-    - §1(i) Notices: two-column Owner / Tenant address block
-    - §1(j) Lead-Based Paint: WERE / WERE NOT checkboxes + tenant initials
-    - Continuation header on pages 2+: bold title + "Page N  Date ___" + Premises
-    - Page breaks at §2, §11, §20, §27, §28 (balanced fill across 6 pages)
-    - §2–§31 numbered body clauses with bold inline titles
-    - §22 Breach of Lease: roman-numeral sub-clauses (i)/(ii)/(iii)
-    - §24 Miscellaneous: lettered sub-clauses (a)/(b)/(c)
-    - §13 Covenants of Tenant: (i)–(x) roman sub-clauses
-    - §12 Covenants of Owner: (i)–(iii) roman sub-clauses
-    - Signature block: two Owner rows + up to four Tenant rows side by side
-    - Centered bold disclaimer paragraph at bottom
-    - Cross-references: §1(b)→§5, §1(c)→§6, §1(f)→§14, §1(j)→§27
-  ============================================================================
--#}
-
 {%- from 'macros.j2' import fill as _fill -%}
 {%- macro fill(value, width='160px') -%}
   {{- _fill(value, width, 5) -}}
