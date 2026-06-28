@@ -95,7 +95,6 @@ class Notices:
 class Lease:
     filename: str
     date: str
-    total_pages: int
     owner: Owner
     tenants: list[Tenant]
     property_address: str
@@ -129,7 +128,6 @@ class Lease:
             "date_month": date_month,
             "date_day": date_day,
             "date_year": date_year,
-            "total_pages": str(self.total_pages),
             "owner_name": self.owner.name,
             "owner_address": self.owner.address,
             "owner_phone": self.owner.phone,

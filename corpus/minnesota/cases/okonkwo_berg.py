@@ -3,7 +3,6 @@ from minnesota.model import Lease, Notices, Owner, Pets, Tenant, Term, Utilities
 LEASE = Lease(
     filename="minnesota-okonkwo_berg",
     date="July 1, 2025",
-    total_pages=6,
     owner=Owner(
         name="Riverside Property Management Inc.",
         address="2200 University Avenue W, Saint Paul, MN 55114",

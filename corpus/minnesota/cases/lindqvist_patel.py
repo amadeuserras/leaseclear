@@ -3,7 +3,6 @@ from minnesota.model import Lease, Notices, Owner, Pets, Tenant, Term, Utilities
 LEASE = Lease(
     filename="minnesota-lindqvist_patel",
     date="March 15, 2025",
-    total_pages=6,
     owner=Owner(
         name="Nordic Crest Properties LLC",
         address="820 Washington Avenue S, Suite 300, Minneapolis, MN 55415",

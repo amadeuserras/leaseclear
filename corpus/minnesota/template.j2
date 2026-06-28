@@ -92,6 +92,7 @@
 
   /* ---- preamble / opening block ---- */
   .preamble {
+    margin-top: 10px;
     margin-bottom: 8px;
     text-align: justify;
     line-height: 1.6;
@@ -270,8 +271,8 @@
     <div class="doc-title">RESIDENTIAL LEASE AGREEMENT</div>
     <div class="pg1-fields">
       <table>
-        <tr><td>1.&nbsp;&nbsp;Date</td><td>{{ fill(L.date, '180px') }}</td></tr>
-        <tr><td>2.&nbsp;&nbsp;Page 1 of</td><td>{{ fill(L.total_pages, '80px') }}</td></tr>
+        <tr style="text-align: left;"><td>1.&nbsp;&nbsp;Date</td><td>{{ fill(L.date, '180px') }}</td></tr>
+        <tr style="text-align: left;"><td>2.&nbsp;&nbsp;Page 1 of</td><td>{{ fill('5', '80px') }}</td></tr>
       </table>
     </div>
   </div>
