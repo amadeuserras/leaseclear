@@ -5,7 +5,7 @@ import pytest
 
 from leaseclear.retrieval.vector import search
 from leaseclear.types import ChunkBase
-from tests.ingestion.corpus import CORPUS_LEASE_DOCUMENT_ID
+from tests.conftest import CORPUS_LEASE_DOCUMENT_ID
 from tests.retrieval.data.vector_search_cases import as_pytest_params
 
 

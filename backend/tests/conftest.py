@@ -11,7 +11,9 @@ from leaseclear.core.config import settings
 from leaseclear.db.connection import apply_schema
 from leaseclear.ingestion.store import store_chunks, store_document
 from leaseclear.types import EmbeddedChunk
-from tests.ingestion.corpus import CORPUS_LEASE_DOCUMENT_ID
+
+CORPUS_LEASE_PDF = Path(__file__).resolve().parent / "fixtures" / "test_lease.pdf"
+CORPUS_LEASE_DOCUMENT_ID = "test_lease"
 
 FIXTURE_PATH = Path(__file__).resolve().parent / "fixtures" / "seed_corpus.json"
 _fixture_data = json.loads(FIXTURE_PATH.read_text())
@@ -62,7 +64,7 @@ async def seeded_db(
     try:
         await apply_schema(conn)
         await conn.execute("TRUNCATE chunks, logs, users, documents")
-        await store_document(conn, CORPUS_LEASE_DOCUMENT_ID, "test_lease.pdf")
+        await store_document(conn, CORPUS_LEASE_DOCUMENT_ID, CORPUS_LEASE_PDF.name)
         await store_chunks(conn, SEED_CHUNKS)
         yield conn
     finally:
