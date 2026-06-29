@@ -12,7 +12,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 OUT = REPO_ROOT / "backend" / "tests" / "fixtures" / "seed_corpus.json"
 
 SOURCES: list[tuple[Path, str]] = [
-    (REPO_ROOT / "corpus" / "generated" / "lease.pdf", "lease"),
+    (
+        REPO_ROOT / "corpus" / "generated" / "meridian-nadkarni_osei.pdf",
+        "meridian-nadkarni_osei",
+    ),
 ]
 
 # Queries used by default (non-real_api) tests that call embed_texts at search time.

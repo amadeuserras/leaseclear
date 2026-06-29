@@ -1,0 +1,627 @@
+{%- from 'macros.j2' import fill as _fill -%}
+{%- macro fill(value, width='160px') -%}
+  {{- _fill(value, width, 5) -}}
+{%- endmacro -%}
+
+{%- macro box(checked) -%}
+  <span class="cb">{{ '&#9746;' if (checked is defined and checked) else '&#9744;' }}</span>
+{%- endmacro -%}
+
+{%- set L = lease | default({}) -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    line-height: 1.36;
+    color: #000;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ---- page 1 header ---- */
+  .pg1-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .org-box {
+    border: 1.5px solid #000;
+    padding: 6px 10px;
+    font-size: 8pt;
+    line-height: 1.3;
+    width: 210px;
+  }
+  .org-box .org-name {
+    font-size: 10pt;
+    font-weight: bold;
+    letter-spacing: 0.3px;
+  }
+  .org-box .org-sub {
+    font-size: 7.5pt;
+    color: #333;
+  }
+  .pg1-title-block {
+    text-align: right;
+  }
+  .doc-title {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+  .pg1-fields {
+    font-size: 8.5pt;
+  }
+  .pg1-fields table {
+    margin-left: auto;
+    border-collapse: collapse;
+  }
+  .pg1-fields td {
+    padding: 1px 4px;
+    white-space: nowrap;
+  }
+
+  /* ---- continuation header (pages 2+) ---- */
+  .page-break { page-break-before: always; }
+  .cont-header {
+    page-break-before: always;
+    border-bottom: 0.5px solid #000;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+  .cont-header .cont-title {
+    font-weight: bold;
+    font-size: 10pt;
+    text-align: right;
+  }
+  .cont-header .cont-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8.5pt;
+    margin-top: 2px;
+  }
+  .cont-header .cont-premises {
+    font-size: 8.5pt;
+    margin-top: 2px;
+  }
+
+  /* ---- preamble / opening block ---- */
+  .preamble {
+    margin-top: 10px;
+    margin-bottom: 8px;
+    text-align: justify;
+    line-height: 1.6;
+  }
+
+  /* ---- numbered clauses ---- */
+  .clause {
+    margin: 6px 0;
+    text-align: justify;
+  }
+  .sub-clause {
+    margin: 5px 0 5px 16px;
+  }
+  .sub-clause .sub-label {
+    font-weight: bold;
+  }
+  /* option lines: simple indented block, text flows inline */
+  .opt-line {
+    margin: 2px 0 2px 20px;
+  }
+  .opt-cont {
+    margin: 2px 0 2px 38px;
+  }
+  .check-note {
+    font-size: 7.5pt;
+    font-style: italic;
+    color: #444;
+  }
+
+  /* ---- §28 additional terms fill-in lines ---- */
+  .clause.additional-terms {
+    text-align: left;
+  }
+  .additional-term-line {
+    display: block;
+    border-bottom: 1px solid #000;
+    height: 12px;
+    line-height: 12px;
+    margin: 0 0 9px;
+    padding: 0;
+    white-space: nowrap;
+    text-align: left;
+    font-style: italic;
+  }
+  .additional-terms .additional-term-line:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ---- notices two-column ---- */
+  .notices-grid {
+    display: flex;
+    gap: 20px;
+    margin: 4px 0 4px 28px;
+  }
+  .notices-col {
+    flex: 1;
+  }
+  .notices-col .col-label {
+    font-style: italic;
+    font-size: 8.5pt;
+    margin-bottom: 2px;
+  }
+  .notices-col .addr-line {
+    border-bottom: 1px solid #000;
+    min-height: 16px;
+    margin-bottom: 3px;
+    font-size: 9pt;
+    padding: 1px 0;
+  }
+  .notices-col .phone-label {
+    font-size: 7.5pt;
+    font-style: italic;
+  }
+
+  /* ---- roman sub-clauses ---- */
+  .roman-list {
+    margin: 4px 0 0 0;
+  }
+
+  /* ---- letter sub-clauses ---- */
+  .letter-list {
+    margin: 4px 0 0 0;
+  }
+
+  /* ---- signature block ---- */
+  .sig-section {
+    margin-top: 20px;
+  }
+  .sig-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  /* MuPDF Story ignores CSS column widths; a zero-height sizer row sets proportions. */
+  .sig-sizer-row {
+    font-size: 0;
+    line-height: 0;
+    height: 0;
+  }
+  .sig-sizer-row td {
+    padding: 0;
+    overflow: hidden;
+    vertical-align: top;
+  }
+  .sig-sizer-row span {
+    font-size: 0;
+    line-height: 0;
+  }
+  .sig-table > tbody > tr:not(.sig-sizer-row) > td {
+    vertical-align: bottom;
+    padding-bottom: 18px;
+  }
+  .sig-table .sig-owner-date {
+    padding-right: 20px;
+  }
+  .sig-table .sig-tenant-name {
+    padding-left: 20px;
+  }
+  .sig-line {
+    border-bottom: 1px solid #000;
+    min-height: 18px;
+    margin-bottom: 2px;
+    font-size: 9pt;
+    font-style: italic;
+    padding: 1px 0;
+  }
+  .sig-caption {
+    font-size: 7.5pt;
+    font-style: italic;
+    text-align: left;
+  }
+
+  /* ---- disclaimer ---- */
+  .disclaimer {
+    margin-top: 58px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 8.5pt;
+    line-height: 1.5;
+  }
+
+  /* ---- field spans ---- */
+  .field {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    line-height: 1.1;
+  }
+  .field.filled {
+    font-style: italic;
+  }
+  .field.blank {
+    color: transparent;
+    background: transparent;
+  }
+  .cb {
+    font-size: 10pt;
+    line-height: 1;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #000;
+    margin: 10px 0;
+  }
+</style>
+</head>
+<body>
+
+{# ===== PAGE 1 HEADER ===== #}
+<div class="pg1-header">
+  <div class="org-box">
+    <div class="org-name">Minnesota Residential Realty</div>
+    <div class="org-sub">Standard Forms Committee</div>
+    <div class="org-sub" style="margin-top:4px;font-size:7pt;">Form RLA &mdash; Residential Lease Agreement</div>
+  </div>
+  <div class="pg1-title-block">
+    <div class="doc-title">RESIDENTIAL LEASE AGREEMENT</div>
+    <div class="pg1-fields">
+      <table>
+        <tr style="text-align: left;"><td>1.&nbsp;&nbsp;Date</td><td>{{ fill(L.date, '180px') }}</td></tr>
+        <tr style="text-align: left;"><td>2.&nbsp;&nbsp;Page 1 of</td><td>{{ fill('5', '80px') }}</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# ===== OPENING PREAMBLE ===== #}
+<div class="preamble">
+  Lease Agreement (Lease), dated {{ fill(L.date_month ~ ' ' ~ L.date_day, '130px') }}, 20{{ fill(L.date_year, '55px') }}, pertaining to the lease of the property located at Street Address: {{ fill(L.property_address, '280px') }} City of {{ fill(L.property_city, '160px') }}, County of {{ fill(L.property_county, '180px') }}, State of Minnesota (Premises), by and between <em>(list all Tenants)</em> {{ fill(L.tenant_name, '260px') }} (Tenant) and {{ fill(L.owner_name, '260px') }} (Owner). The Premises include(s) a&nbsp; {{ box(L.has_garage) }}&nbsp;<b>garage</b>&nbsp;&nbsp;{{ box(L.has_storage_unit) }}&nbsp;<b>storage unit</b>&nbsp;&nbsp;{{ box(L.has_parking_stall) }}&nbsp;<b>parking stall</b>&nbsp;&nbsp;identified as garage/unit/stall number {{ fill(L.garage_stall_number, '70px') }}&nbsp;<span class="check-note">(Check all that apply.)</span>
+</div>
+
+<hr class="divider">
+
+{# ===== §1 TERMS OF LEASE ===== #}
+<div class="clause">
+  <b>1.&nbsp;&nbsp;TERMS OF LEASE:</b> The following provisions and definitions apply to this Lease. They are modified and supplemented by the remaining terms of this Lease.
+</div>
+
+{# (a) Term #}
+<div class="sub-clause">
+  <span class="sub-label">(a) Term:</span> The term means <em>(check only one)</em>:
+  <p class="opt-line">{{ box(L.term_is_fixed) }} the period of {{ fill(L.term_months, '55px') }} months commencing {{ fill(L.term_start, '160px') }} and terminating {{ fill(L.term_end, '180px') }}</p>
+  <p class="opt-line">{{ box(L.term_is_month_to_month) }} month-to-month lease commencing {{ fill(L.term_start, '180px') }}</p>
+</div>
+
+{# (b) Rent #}
+<div class="sub-clause">
+  <span class="sub-label">(b) Rent:</span> The rent is {{ fill(L.rent_amount, '150px') }} per month.
+</div>
+
+{# (c) Utilities #}
+<div class="sub-clause">
+  <span class="sub-label">(c) Utilities:</span> (see Paragraph 6):
+  <p class="opt-line">{{ box(L.utilities_by_tenant or L.utilities_by_owner) }} Paid by {{ box(L.utilities_by_tenant) }}&nbsp;<b>Tenant</b>&nbsp;&nbsp;{{ box(L.utilities_by_owner) }}&nbsp;<b>Owner</b>&nbsp;&nbsp;<span class="check-note">(Check one.)</span></p>
+  <p class="opt-line">{{ box(L.utilities_split) }} Paid in part by each with Tenant to pay for {{ fill(L.utilities_tenant_pays, '190px') }} and Owner to pay for {{ fill(L.utilities_owner_pays, '190px') }}</p>
+</div>
+
+{# (d) Security Deposit #}
+<div class="sub-clause">
+  <span class="sub-label">(d) Security Deposit:</span> The security deposit is {{ fill(L.deposit_amount, '170px') }}
+</div>
+
+{# (e) Late Fee #}
+<div class="sub-clause">
+  <span class="sub-label">(e) Late Fee:</span> The late fee is {{ fill(L.late_fee_amount, '150px') }} (not to exceed eight percent (8%) of the overdue rent amount).
+</div>
+
+{# (f) Pets #}
+<div class="sub-clause">
+  <span class="sub-label">(f) Pets:</span> (see Paragraph 14):
+  <p class="opt-line">{{ box(L.pets_not_allowed) }} Pets are not allowed.</p>
+  <p class="opt-line">{{ box(L.pets_allowed) }} Pets are allowed and Tenant may have {{ fill(L.pets_cat_count, '38px') }} cats and {{ fill(L.pets_dog_count, '38px') }} dogs in the Premises and no pet may weigh more than {{ fill(L.pets_max_weight, '45px') }} pounds. Tenant shall be allowed to have {{ fill(L.pets_description, '160px') }} in the Premises.</p>
+</div>
+
+{# (g) Occupants #}
+<div class="sub-clause">
+  <span class="sub-label">(g) Occupants:</span> The occupants of the Premises are {{ fill(L.occupants, '320px') }}
+  <div style="border-bottom:1px solid #000; min-height:13px; margin: 4px 0;"></div>
+</div>
+
+{# (h) CIC #}
+<div class="sub-clause">
+  <span class="sub-label">(h) Common Interest Community (CIC):</span> The Premises
+  {{ box(L.is_cic) }} <b>ARE</b>&nbsp;&nbsp;{{ box(not L.is_cic) }} <b>ARE NOT</b> part of a CIC.
+  &nbsp;<span class="check-note">(Check one.)</span>
+</div>
+
+{# (i) Notices #}
+<div class="sub-clause">
+  <span class="sub-label">(i) Notices:</span> Addresses for Notices:
+  <div class="notices-grid">
+    <div class="notices-col">
+      <div class="col-label">If to Owner:</div>
+      <div class="addr-line">{{ L.owner_notice_address or '' }}</div>
+      <div class="phone-label">(Phone)</div>
+      <div class="addr-line">{{ L.owner_notice_phone or '' }}</div>
+    </div>
+    <div class="notices-col">
+      <div class="col-label">If to Tenant:</div>
+      <div class="addr-line">{{ L.tenant_notice_address or '' }}</div>
+      <div class="phone-label">(Phone)</div>
+      <div class="addr-line">{{ L.tenant_notice_phone or '' }}</div>
+    </div>
+  </div>
+</div>
+
+{# (j) Lead-Based Paint #}
+<div class="sub-clause">
+  <span class="sub-label">(j) Lead-Based Paint:</span> The Premises {{ box(L.lead_paint) }}&nbsp;<b>WERE</b>&nbsp;&nbsp;{{ box(not L.lead_paint) }}&nbsp;<b>WERE NOT</b> built before 1978. If &ldquo;were&rdquo; is checked, <span class="check-note">(Check one)</span>
+  <p class="opt-cont">Tenant acknowledges receipt of a copy of the disclosure identified in Paragraph 27.&nbsp;&nbsp;{{ fill(L.tenant_initials, '75px') }}&nbsp;<span class="check-note">(Tenant&rsquo;s initials.)</span></p>
+</div>
+
+
+{# ===== PAGE 2 CONTINUATION HEADER ===== #}
+<div class="cont-header">
+  <div class="cont-title">RESIDENTIAL LEASE AGREEMENT</div>
+  <div class="cont-meta">
+    <span>Page 2&nbsp;&nbsp;Date {{ fill(L.date, '180px') }}</span>
+  </div>
+  <div class="cont-premises">
+    Premises located at {{ fill(L.property_address ~ ', ' ~ L.property_city ~ ', MN', '400px') }}
+  </div>
+</div>
+
+{# ===== BODY CLAUSES §2–§31 ===== #}
+
+<div class="clause">
+  <b>2.&nbsp;&nbsp;TERM:</b> This Lease is for the term set forth in Paragraph 1(a), unless sooner terminated as provided herein, or unless extended by written agreement by Tenant and Owner prior to the end of Lease term. If Owner and Tenant fail to agree to mutually acceptable extension/renewal terms, this Lease shall terminate according to its original term.
+</div>
+
+<div class="clause">
+  <b>3.&nbsp;&nbsp;OCCUPANCY:</b> Only Tenant and the occupants listed in Paragraph 1(g) may reside in the Premises, unless otherwise permitted by law. The number of occupants is restricted in accordance with the Minnesota State Building Code and/or local building code.
+</div>
+
+<div class="clause">
+  <b>4.&nbsp;&nbsp;USE OF THE PREMISES:</b> The Premises, and all utilities, shall be used by Tenant and occupants exclusively as a private, single family dwelling for residential purposes only. The Premises may not be used for transient, hotel, commercial, business or other non-residential purposes.
+</div>
+
+<div class="clause">
+  <b>5.&nbsp;&nbsp;RENT:</b> During the term of this Lease, Tenant shall pay the rent specified in Paragraph 1(b). Rent shall be paid by Tenant to Owner on or before the first day of each and every month during the Lease term. Rent is considered paid when received by Owner. Each Tenant is individually responsible for payment of the full amount of the rent to Owner, including additional rent as defined in this Lease. Tenant&rsquo;s obligation to pay rent shall survive the termination of this Lease. Tenant must continue to pay all rent even if Tenant surrenders the Premises or is evicted by Owner. Rent for any partial month during the term of this Lease shall be prorated.
+</div>
+
+<div class="clause">
+  <b>6.&nbsp;&nbsp;UTILITIES:</b> If the &ldquo;Paid by Tenant&rdquo; box is checked in Paragraph 1(c), then Tenant shall pay all utilities directly to the service provider, including water, sewer, gas, electricity, fuel oil, trash removal, recycling, telephone, cable and association dues. Tenant shall be responsible to Owner for any utilities payments that have not been paid, including late charges or fees imposed by the service provider.
+    <br><br>
+    If the &ldquo;Paid in part by each&rdquo; box is checked in Paragraph 1(c), then Tenant shall pay directly to the service provider the utilities noted in Paragraph 1(c) to be paid for by Tenant and shall be responsible to Owner for any utilities payments that have not been paid, including late charges or fees imposed by the service provider, and Owner shall pay directly to the service provider the utilities noted in Paragraph 1(c) to be paid for by Owner. Tenant is responsible for contracting for and paying for any other utilities desired. No modification to the Premises to install or add utilities may occur without Owner consent in writing. Any utilities not specified to be paid by Owner shall be paid by Tenant.
+    <br><br>
+    If utilities Tenant is to pay for are provided or paid for by Owner, then Tenant shall pay Owner for such utilities upon demand in the amounts due as identified in statements covering the period during which this Lease is in effect.
+</div>
+
+<div class="clause">
+  <b>7.&nbsp;&nbsp;COMMON INTEREST COMMUNITY:</b> If the Premises are part of a CIC as noted in Paragraph 1(h), then the Premises are subject to the declaration, bylaws, rules and regulations and other governing documents of the CIC (the Governing Documents). Copies of the current Governing Documents have been provided to Tenant and Tenant acknowledges receipt of the Governing Documents. Tenant shall comply with the Governing Documents, including any modifications which may be made from time to time by the CIC. Tenant acknowledges that the CIC may have a right to evict Tenant for failure to comply with the terms of the Governing Documents.
+</div>
+
+<div class="clause">
+  <b>8.&nbsp;&nbsp;LATE FEES:</b> If Owner does not receive the rent on or before the fifth (5th) day of any month, Tenant shall pay a late fee in the amount stated in Paragraph 1(e) to compensate Owner for the time, expense and administrative burdens resulting from such late payment. In the event the amount in Paragraph 1(e) exceeds eight percent (8%) of the overdue rent payment, the late fee shall be eight percent (8%) of the overdue amount in order to comply with MN Statute Chapter 504B. The late fee shall be considered additional rent. Tenant shall be assessed a returned check fee in the amount of $40 as additional rent for each unpaid check which is returned by the Tenant&rsquo;s bank.
+</div>
+
+<div class="clause">
+  <b>9.&nbsp;&nbsp;SECURITY DEPOSIT:</b> Owner acknowledges receipt of the security deposit from Tenant in the amount set forth in Paragraph 1(d). Owner shall retain the security deposit for the entire term of this Lease, including any extensions. Owner may use the security deposit as permitted by Minnesota law, and shall, to the extent required by Minnesota law, return any remaining portion of the security deposit, as well as any required interest, to Tenant following the termination of this Lease. If Owner uses a portion of the security deposit during the Lease to cure a default by Tenant, Tenant shall replenish the security deposit to the full amount, upon request by Owner.
+</div>
+
+<div class="clause">
+  <b>10.&nbsp;&nbsp;DAMAGE TO THE PREMISES:</b> Tenant shall pay for all loss, damage, costs or expenses (including but not limited to problems with or damage to plumbing, electrical and appliances) caused by Tenant&rsquo;s willful or negligent conduct, or the conduct of any occupant, guest or person under Tenant&rsquo;s or any occupant&rsquo;s direction or control. Tenant shall promptly notify Owner of any conditions which may cause damage to the Premises or waste of utilities or other services provided by Owner. The Premises may not be modified, altered, improved or repaired without prior authorization from Owner, in writing. Modification includes but is not limited to modification of floor covering or wall covering, changing/replacing/adding fixtures or attachments, painting or anything which creates a hole or mark that cannot be remedied without expense to the Owner.
+</div>
+
+{# ===== PAGE 3 CONTINUATION HEADER ===== #}
+<div class="cont-header">
+  <div class="cont-title">RESIDENTIAL LEASE AGREEMENT</div>
+  <div class="cont-meta">
+    <span>Page 3&nbsp;&nbsp;Date {{ fill(L.date, '180px') }}</span>
+  </div>
+  <div class="cont-premises">
+    Premises located at {{ fill(L.property_address ~ ', ' ~ L.property_city ~ ', MN', '400px') }}
+  </div>
+</div>
+
+<div class="clause">
+  <b>11.&nbsp;&nbsp;INSPECTION OF THE PREMISES AND RIGHT OF ENTRY:</b> Owner, or Owner&rsquo;s designee, may enter upon the Premises for any reasonable business purpose, including to inspect the Premises from time to time. Owner shall make a reasonable effort to give reasonable notice to Tenant before entering the Premises, except in the case of an emergency. In the event Owner enters the Premises for emergency purposes, Owner shall provide written confirmation to Tenant of the emergency entry, which confirmation shall include the date, time and purpose of the emergency entry.
+</div>
+
+<div class="clause">
+  <b>12.&nbsp;&nbsp;COVENANTS OF OWNER:</b> Owner covenants and promises that:
+  <div class="roman-list">
+    <div class="sub-clause"><span class="sub-label">(i)</span> the Premises are fit for residential use as a single family dwelling;</div>
+    <div class="sub-clause"><span class="sub-label">(ii)</span> Owner will make all necessary repairs to the Premises during the term of the Lease, except where damage is caused by Tenant, any occupant and/or any guest or person under Tenant&rsquo;s or any occupant&rsquo;s direction or control;</div>
+    <div class="sub-clause"><span class="sub-label">(iii)</span> Owner shall keep the Premises up to applicable federal, state and local codes, except where a code violation is caused by Tenant, any occupant and/or any guest or person under Tenant&rsquo;s or any occupant&rsquo;s direction or control, in which case Tenant shall correct the code violation at Tenant&rsquo;s sole cost. Tenant shall notify Owner in writing of any necessary repairs before engaging in such repair.</div>
+  </div>
+</div>
+
+<div class="clause">
+  <b>13.&nbsp;&nbsp;COVENANTS OF TENANT:</b> Tenant covenants and promises that:
+  <div class="roman-list">
+    <div class="sub-clause"><span class="sub-label">(i)</span> Tenant will not cause damage to the Premises or allow the Premises to be damaged by others;</div>
+    <div class="sub-clause"><span class="sub-label">(ii)</span> Tenant will not make alterations or additions to the Premises (including but not limited to such issues as are identified in Paragraph 10) without the prior written consent of Owner;</div>
+    <div class="sub-clause"><span class="sub-label">(iii)</span> Tenant will not remove any of Owner&rsquo;s personal property from the Premises (including but not limited to appliances);</div>
+    <div class="sub-clause"><span class="sub-label">(iv)</span> Tenant will maintain the Premises in a clean and habitable condition;</div>
+    <div class="sub-clause"><span class="sub-label">(v)</span> Tenant will not disturb the peace and quiet of other tenants in the building and/or neighbors, or allow any occupant or guest to do so;</div>
+    <div class="sub-clause"><span class="sub-label">(vi)</span> Tenant will not store hazardous or flammable substances on the Premises;</div>
+    <div class="sub-clause"><span class="sub-label">(vii)</span> Tenant will not use the Premises for illegal or unlawful activities, or in an illegal manner, or in a manner which would cause cancellation, restriction or increase in premiums for Owner&rsquo;s insurance, or such use as which would constitute a violation of applicable code or ordinance;</div>
+    <div class="sub-clause"><span class="sub-label">(viii)</span> Tenant shall not have water beds or any water-filled furniture in the Premises;</div>
+    <div class="sub-clause"><span class="sub-label">(ix)</span> Tenant will not smoke in the Premises or permit smoking to occur in the Premises; and</div>
+    <div class="sub-clause"><span class="sub-label">(x)</span> Tenant will not interfere with Owner in the management of the Premises or the property surrounding the Premises.</div>
+  </div>
+</div>
+
+<div class="clause">
+  <b>14.&nbsp;&nbsp;PETS:</b> If the &ldquo;Pets are not allowed&rdquo; box is checked in Paragraph 1(f), Tenant shall not have animals or pets of any kind in the Premises. If the &ldquo;Pets are allowed&rdquo; box is checked in Paragraph 1(f), Tenant may have in the Premises the pets noted in Paragraph 1(f).
+</div>
+
+<div class="clause">
+  <b>15.&nbsp;&nbsp;VEHICLE STORAGE:</b> Neither Tenant nor any occupant shall store or park any unlicensed or inoperable vehicle, or any motor home, camper, trailer, boat or other recreational vehicle on or around the Premises. Neither Tenant nor any occupant shall store or park any commercial truck on or around the Premises. If, after three (3) days notice to Tenant, Tenant fails to remove an unauthorized vehicle from on or around the Premises, Owner may remove and store the vehicle, and Tenant shall pay the removal and storage expenses as additional rent.
+</div>
+
+<div class="clause">
+  <b>16.&nbsp;&nbsp;LOCKS:</b> Tenant may not add or change any locks on the Premises. At Tenant&rsquo;s request, Owner shall change or re-key the locks at Tenant&rsquo;s expense. Tenant shall pay a $150 fee for Owner to re-key the Premises, in the event a key is lost or missing.
+</div>
+
+<div class="clause">
+  <b>17.&nbsp;&nbsp;TRANSFER OF LEASE:</b> Tenant may not sublet all or part of the Premises without Owner&rsquo;s prior written consent. Tenant may not assign or sell this Lease without Owner&rsquo;s prior written consent.
+</div>
+
+<div class="clause">
+  <b>18.&nbsp;&nbsp;DAMAGE TO TENANT&rsquo;S PROPERTY:</b> Owner shall not be responsible for any damage to Tenant&rsquo;s property, unless such damage is caused by Owner&rsquo;s willful or grossly negligent conduct.
+</div>
+
+<div class="clause">
+  <b>19.&nbsp;&nbsp;HOLDING OVER:</b> Tenant may not continue to occupy the Premises after the initial term of this Lease unless this Lease has been renewed in writing, or unless Owner consents to Tenant holding over. If Owner consents to Tenant holding over without a written Lease extension, all provisions herein shall remain applicable except that the term of the Lease shall be month-to-month. If Lease becomes month-to-month, written notice to terminate is required by Owner or Tenant to end the Lease. Such written notice must end the Lease on the last day of a month, and must be received before the first day of that month (e.g., notice to terminate the Lease on July 31st must be given on or before the preceding June 30th).
+</div>
+
+{# ===== PAGE 4 CONTINUATION HEADER ===== #}
+<div class="cont-header">
+  <div class="cont-title">RESIDENTIAL LEASE AGREEMENT</div>
+  <div class="cont-meta">
+    <span>Page 4&nbsp;&nbsp;Date {{ fill(L.date, '180px') }}</span>
+  </div>
+  <div class="cont-premises">
+    Premises located at {{ fill(L.property_address ~ ', ' ~ L.property_city ~ ', MN', '400px') }}
+  </div>
+</div>
+
+<div class="clause">
+  <b>20.&nbsp;&nbsp;MOVING OUT:</b> Tenant and occupants shall move out not later than 12:00 p.m. (noon) on the last day of the Lease term, or any extension thereof. Tenant must leave the Premises in the same condition as it was as of the date of commencement of the Lease term, ordinary wear and tear excepted. Tenant shall remove all personal property of Tenant and occupants, including trash, from the Premises (including any storage unit, garage or parking space). Tenant shall provide Owner with Tenant&rsquo;s forwarding address. If Tenant fails to return to Owner all keys and garage door openers within 24 hours of moving out, Tenant shall pay the costs of changing the locks and reprogramming the garage opener.
+</div>
+
+<div class="clause">
+  <b>21.&nbsp;&nbsp;DESTRUCTION OF PREMISES:</b> If the Premises are destroyed or become uninhabitable or unfit for occupancy, this Lease shall terminate upon reasonable written notice to Tenant, unless Owner, in Owner&rsquo;s reasonable discretion, believes Owner can complete necessary repairs to the Premises in a reasonable period of time. If the damage or destruction was not a result of any fault or negligence of Tenant, Tenant shall not be responsible for payment of rent for the period of time in which the Premises are uninhabitable or unfit for occupancy provided such determination has been agreed by Owner and Tenant or by a court of competent jurisdiction.
+</div>
+
+<div class="clause">
+  <b>22.&nbsp;&nbsp;BREACH OF LEASE:</b> In the event of Tenant&rsquo;s breach of any term of this Lease, Owner has a right of re-entry and may pursue all remedies available by law, including but not limited to the following:
+  <div class="roman-list">
+    <div class="sub-clause"><span class="sub-label">(i)</span> bring an eviction action immediately to remove Tenant and occupant from the Premises; or</div>
+    <div class="sub-clause"><span class="sub-label">(ii)</span> demand in writing that Tenant immediately, or at some specified future date, surrender the Premises to Owner and if Tenant fails to do so, Owner may bring an eviction action; or</div>
+    <div class="sub-clause"><span class="sub-label">(iii)</span> terminate this Lease upon five (5) days written notice to Tenant. Owner&rsquo;s acceptance of rent or additional rent during the time Tenant continues to occupy the Premises shall not be construed as a waiver of Owner&rsquo;s right to evict Tenant. Tenant&rsquo;s obligation to pay rent shall continue after Tenant&rsquo;s eviction from the Premises, through the expiration of the Lease term.</div>
+  </div>
+</div>
+
+<div class="clause">
+  <b>23.&nbsp;&nbsp;ELECTION OF REMEDIES:</b> Either Owner or Tenant may exercise any or all of its legal rights and remedies at any time or from time to time, and the exercise of a particular remedy shall not be construed as a waiver of that party&rsquo;s right to exercise some other remedy or as an election of remedies.
+</div>
+
+<div class="clause">
+  <b>24.&nbsp;&nbsp;MISCELLANEOUS:</b>
+  <div class="letter-list">
+    <div class="sub-clause"><span class="sub-label">(a)</span> This Lease is subordinate to any mortgage on the Premises. Tenant shall sign any documents reasonably requested by Owner, and hereby appoints Owner as Tenant&rsquo;s attorney-in-fact to execute such documents as may be requested by a mortgagee.</div>
+    <div class="sub-clause"><span class="sub-label">(b)</span> Any attachments to this Lease, such as rules and regulations, are part of this Lease.</div>
+    <div class="sub-clause"><span class="sub-label">(c)</span> This Lease and any attachments comprise the entire agreement between Owner and Tenant. No oral representations have been made. This Lease may not be modified except by written agreement of the parties.</div>
+  </div>
+</div>
+
+<div class="clause">
+  <b>25.&nbsp;&nbsp;NOTICES:</b> All notices and communications from Owner or Tenant to the other, required or permitted hereunder, shall be in writing and shall be considered to have been duly given if personally delivered or if sent by first class mail, postage prepaid, to the other party at the address set forth in paragraph 1(i), or to such other address as such party may hereafter designate by notice to the other party. Notice given to one Tenant shall be considered given to all Tenants.
+</div>
+
+<div class="clause">
+  <b>26.&nbsp;&nbsp;PROHIBITIONS AND STATUTORY NOTICES:</b> Owner and Tenant covenant and agree that neither will:
+  <div class="roman-list">
+    <div class="sub-clause"><span class="sub-label">(i)</span> unlawfully allow controlled substances in the Premises or in the common area and lawn area of the Premises;</div>
+    <div class="sub-clause"><span class="sub-label">(ii)</span> allow prostitution or prostitution-related activity as defined in MN Statute 617.80, Subd. 4, to occur on the Premises or in the common area and lawn area of the Premises;</div>
+    <div class="sub-clause"><span class="sub-label">(iii)</span> allow the unlawful use or possession of a firearm in violation of section 609.66, Subd. 1(a), 609.67 or 624.713, on the Premises or in the common area and lawn area of the Premises; or</div>
+    <div class="sub-clause"><span class="sub-label">(iv)</span> allow stolen property or property obtained by robbery in the Premises or in the common area and lawn area of the Premises.</div>
+  </div>
+  <br>
+  Owner and Tenant further agree that neither they nor any person under their control will use the common area and lawn area of the Premises to manufacture, sell, give away, barter, deliver, exchange, distribute, purchase or possess a controlled substance in violation of any criminal provision of MN Statute Chapter 152. This covenant is not violated when a person other than the Owner or Tenant possesses or allows controlled substances in the Premises, common area or lawn area unless the Owner or Tenant knew or had reason to know of that activity.
+  The following notice is required by MN Statute 504B.305:
+  A seizure under MN Statute 609.5317, Subd. 1, for which there is not a defense under MN Statute 609.5317, Subd. 3, constitutes unlawful detention by Tenant.
+</div>
+
+{# ===== PAGE 5 CONTINUATION HEADER ===== #}
+<div class="cont-header">
+  <div class="cont-title">RESIDENTIAL LEASE AGREEMENT</div>
+  <div class="cont-meta">
+    <span>Page 5&nbsp;&nbsp;Date {{ fill(L.date, '180px') }}</span>
+  </div>
+  <div class="cont-premises">
+    Premises located at {{ fill(L.property_address ~ ', ' ~ L.property_city ~ ', MN', '400px') }}
+  </div>
+</div>
+
+<div class="clause">
+  <b>27.&nbsp;&nbsp;LEAD-BASED PAINT DISCLOSURE:</b> If it is indicated in Paragraph 1(j) that the Premises were built before 1978, then the Minnesota Residential Realty Addendum to Lease Agreement Disclosure of Information on Lead-Based Paint and Lead-Based Paint Hazards is attached to this Lease and is made a part of this Lease.
+</div>
+
+<div class="clause additional-terms">
+  <b>28.&nbsp;&nbsp;ADDITIONAL TERMS:</b>
+  {% for line in L.additional_terms_lines %}
+  <div class="additional-term-line">{% if line %}{{ line }}{% else %}&nbsp;{% endif %}</div>
+  {% endfor %}
+</div>
+
+<div class="clause">
+  <b>29.&nbsp;&nbsp;ADDENDA AND PAGE NUMBERING:</b> Attached addenda are a part of this Residential Lease Agreement. Enter total number of pages of this Residential Lease Agreement, including addenda, on line two (2) of page one (1).
+</div>
+
+<div class="clause">
+  <b>30.&nbsp;&nbsp;ELECTRONIC SIGNATURES:</b> The parties agree the electronic signature of any party on any document related to this transaction constitute valid, binding signatures.
+</div>
+
+<div class="clause">
+  <b>31.&nbsp;&nbsp;RECEIPT OF COPY:</b> Tenant acknowledges receiving a copy of this Lease.
+</div>
+
+{# ===== SIGNATURE BLOCK ===== #}
+{%- set _sig_name_pad = '&nbsp;' * 74 -%}
+{%- set _sig_date_pad = '&nbsp;' * 13 -%}
+<div class="sig-section">
+  <table class="sig-table">
+    <tr class="sig-sizer-row">
+      <td class="sig-name-col"><span>{{ _sig_name_pad }}</span></td>
+      <td class="sig-date-col sig-owner-date"><span>{{ _sig_date_pad }}</span></td>
+      <td class="sig-name-col sig-tenant-name"><span>{{ _sig_name_pad }}</span></td>
+      <td class="sig-date-col"><span>{{ _sig_date_pad }}</span></td>
+    </tr>
+    {% for i in range(4) %}
+    <tr>
+      <td class="sig-name-col">
+        {% if i < 2 %}
+        <div class="sig-line">{% if i == 0 %}{{ L.owner_name or '&nbsp;' }}{% else %}&nbsp;{% endif %}</div>
+        <div class="sig-caption">(Owner)</div>
+        {% endif %}
+      </td>
+      <td class="sig-date-col sig-owner-date">
+        {% if i < 2 %}
+        <div class="sig-line">{% if i == 0 %}{{ L.sign_date or '&nbsp;' }}{% else %}&nbsp;{% endif %}</div>
+        <div class="sig-caption">(Date)</div>
+        {% endif %}
+      </td>
+      <td class="sig-name-col sig-tenant-name">
+        <div class="sig-line">{% if L.tenants and L.tenants|length > i %}{{ L.tenants[i].name }}{% else %}&nbsp;{% endif %}</div>
+        <div class="sig-caption">(Tenant)</div>
+      </td>
+      <td class="sig-date-col">
+        <div class="sig-line">{% if L.tenants and L.tenants|length > i %}{{ L.sign_date or '&nbsp;' }}{% else %}&nbsp;{% endif %}</div>
+        <div class="sig-caption">(Date)</div>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{# ===== DISCLAIMER ===== #}
+<div class="disclaimer">
+  THIS RESIDENTIAL LEASE AGREEMENT IS NOT<br>
+  DESIGNED TO BE AND IS NOT WARRANTED TO BE INCLUSIVE OF ALL ISSUES OWNER AND<br>
+  TENANT MAY WISH TO ADDRESS, AND EITHER PARTY MAY WISH TO MODIFY THIS LEASE TO<br>
+  ADDRESS STATUTORY OR CONTRACTUAL MATTERS NOT CONTAINED IN THIS FORM.<br>
+  BOTH PARTIES ARE ADVISED TO SEEK THE ADVICE OF AN ATTORNEY TO ENSURE<br>
+  THIS CONTRACT ADEQUATELY ADDRESSES THAT PARTY&rsquo;S RIGHTS.
+</div>
+
+</body>
+</html>

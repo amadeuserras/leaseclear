@@ -1,0 +1,801 @@
+{#- ---------- macros ---------- -#}
+{%- from 'macros.j2' import fill as _fill -%}
+{%- macro fill(value, width='160px') -%}
+  {{- _fill(value, width, 4) -}}
+{%- endmacro -%}
+
+{%- macro box(checked) -%}
+  <span class="cb">{{ '&#9746;' if (checked is defined and checked) else '&#9744;' }}</span>
+{%- endmacro -%}
+
+{%- macro initials_footer_slots(label, slots) -%}
+  {{ label }}
+  {%- for slot in slots -%}
+    {%- if slot -%} ({{ slot }}){%- else -%} (_______){%- endif -%}
+  {%- endfor -%}
+{%- endmacro -%}
+
+{%- set L = lease | default({}) -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: Letter;
+    margin: 42px 46px 72px 46px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.6pt;
+    line-height: 1.28;
+    color: #000;
+  }
+
+  /* ---- page 1 header ---- */
+  .page1-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    margin-bottom: 3px;
+  }
+  .car-logo {
+    flex: 0 0 72px;
+    border: 1.5px solid #000;
+    padding: 3px 4px;
+    font-size: 6pt;
+    font-weight: bold;
+    letter-spacing: 0.8px;
+    line-height: 1.5;
+    text-align: center;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+  .car-logo .reg { font-size: 5pt; vertical-align: super; }
+  .page1-title {
+    flex: 1;
+    text-align: center;
+  }
+  .page1-title .main-title {
+    font-size: 11pt;
+    font-weight: bold;
+    line-height: 1.25;
+  }
+  .party-lines {
+    margin-top: 4px;
+    font-size: 7.4pt;
+  }
+  .party-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 1px;
+  }
+  .party-label { white-space: nowrap; font-size: 7.4pt; }
+  .party-line-field {
+    flex: 1;
+    border-bottom: 0.75px solid #000;
+    min-height: 10px;
+    font-style: italic;
+    font-weight: bold;
+    padding: 0 3px;
+    font-size: 7.4pt;
+  }
+
+  /* ---- continuation page header ---- */
+  .cont-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7.4pt;
+    border-bottom: 0.75px solid #000;
+    padding-bottom: 2px;
+    margin-bottom: 4px;
+  }
+  .cont-header-left { display: flex; gap: 4px; align-items: baseline; }
+  .cont-header-right { display: flex; gap: 4px; align-items: baseline; }
+  .cont-label { font-weight: bold; }
+  .cont-field {
+    border-bottom: 0.75px solid #000;
+    min-width: 180px;
+    display: inline-block;
+    font-style: italic;
+    font-weight: bold;
+    padding: 0 3px;
+    font-size: 7.4pt;
+  }
+  .cont-date-field {
+    border-bottom: 0.75px solid #000;
+    min-width: 80px;
+    display: inline-block;
+    padding: 0 3px;
+    font-size: 7.4pt;
+  }
+
+  /* ---- horizontal rule ---- */
+  hr.rule { border: none; border-top: 1px solid #000; margin: 3px 0 4px 0; }
+
+  /* ---- clauses ---- */
+  .clause { margin: 0 0 4px 0; text-align: justify; }
+  .clause-num { font-weight: bold; }
+  .clause-title { font-weight: bold; text-transform: uppercase; }
+  .sub { margin: 1px 0 1px 14px; text-align: justify; }
+  .subsub { margin: 1px 0 1px 26px; text-align: justify; }
+  .sublabel { font-weight: bold; }
+  .bold { font-weight: bold; }
+  .or-label { font-weight: bold; margin-left: 0; }
+
+  /* ---- fill fields ---- */
+  .field {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    line-height: 1.1;
+  }
+  .field.filled { font-style: italic; font-weight: bold; }
+  .cb { font-size: 8.5pt; vertical-align: -1px; padding-right: 1px; line-height: 1; }
+
+  /* ---- tables ---- */
+  table.grid { width: 100%; border-collapse: collapse; margin: 2px 0 4px 0; font-size: 7.4pt; }
+  table.grid th, table.grid td { border: 0.75px solid #000; padding: 2px 3px; text-align: left; }
+  table.grid th { font-weight: bold; text-align: center; }
+
+  /* ---- footer area (rendered in HTML, not @page margin) ---- */
+  .page-footer {
+    margin-top: 8px;
+    border-top: 0.75px solid #000;
+    padding-top: 3px;
+    font-size: 6.4pt;
+  }
+  .page-footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .footer-copyright { flex: 0 0 200px; font-size: 6pt; line-height: 1.3; color: #000; }
+  .footer-center { flex: 1; font-size: 7pt; text-align: center; }
+  .footer-right { flex: 0 0 130px; text-align: right; font-size: 6.8pt; }
+  .footer-initials { font-size: 7pt; margin-top: 1px; }
+  .footer-reviewed { font-size: 6.8pt; margin-top: 4px; border-top: 0.5px solid #000; padding-top: 2px; }
+  .eho-box {
+    display: inline-block;
+    border: 1px solid #000;
+    padding: 2px 3px;
+    font-size: 5pt;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.3;
+    vertical-align: middle;
+  }
+  .footer-form-id {
+    font-size: 6.8pt;
+    font-weight: bold;
+    margin-top: 3px;
+  }
+  .footer-title-center {
+    text-align: center;
+    font-weight: bold;
+    font-size: 7pt;
+    margin-top: 2px;
+  }
+
+  /* ---- notice box ---- */
+  .notice-box { border: 0.75px solid #000; padding: 4px 6px; margin: 4px 0; font-size: 7.4pt; }
+
+  /* ---- signature block ---- */
+  .sig-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 7.4pt; }
+  .sig-table td { padding: 2px 4px; vertical-align: bottom; }
+  .sig-underline { border-bottom: 0.75px solid #000; display: block; min-width: 100px; min-height: 14px; }
+  .sig-label { font-size: 6.5pt; }
+
+  .page-break { break-before: page; }
+  .small { font-size: 6.5pt; }
+</style>
+</head>
+<body>
+
+{#- ============================ PAGE 1 ============================ -#}
+
+{# ---- Page 1 Header ---- #}
+<div class="page1-header">
+  <div class="car-logo">
+    CALIFORNIA<br>
+    ASSOCIATION<br>
+    OF REALTORS<span class="reg">®</span>
+  </div>
+  <div class="page1-title">
+    <div class="main-title">RESIDENTIAL LEASE OR<br>MONTH-TO-MONTH RENTAL AGREEMENT</div>
+  </div>
+</div>
+
+<div class="party-lines">
+  <div class="party-row">
+    <div class="party-line-field">{{ L.landlord_name | default('') }}</div>
+    <div class="party-label">(&ldquo;Landlord&rdquo;) and</div>
+  </div>
+  <div class="party-row">
+    <div class="party-line-field">{{ L.tenant_name | default('') }}</div>
+    <div class="party-label">(&ldquo;Tenant&rdquo;) agree as follows:</div>
+  </div>
+</div>
+
+<hr class="rule">
+
+<div class="clause">
+  <span class="clause-num">1.</span>&ensp;<span class="clause-title">Property:</span>
+  <div class="sub">
+    <span class="sublabel">A.</span> Landlord rents to Tenant and Tenant rents from Landlord, the real property and improvements described as:
+    <br>{{ fill(L.property_address, '770px') }} (&ldquo;Premises&rdquo;).
+  </div>
+  <div class="sub">
+    <span class="sublabel">B.</span> The following personal property is included: {{ fill(L.included_property, '340px') }}.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">2.</span>&ensp;<span class="clause-title">Term:</span>
+  The term begins on (date) {{ fill(L.start_date, '120px') }} (&ldquo;Commencement Date&rdquo;),
+  <span class="sublabel">(Check A or B):</span>
+  <div class="sub">
+    {{ box(L.term_is_month_to_month) }} <span class="sublabel">A. Month-to-month:</span> and continues as a month-to-month tenancy. Either party may terminate the tenancy by giving written notice to the other at least 30 days prior to the intended termination date, subject to any applicable local laws. Such notice may be given on any date.
+  </div>
+  <div class="sub">
+    {{ box(L.term_is_fixed) }} <span class="sublabel">B. Lease:</span> and shall terminate on (date) {{ fill(L.end_date, '120px') }} at {{ fill('', '50px') }} {{ box(L.end_time_am) }} AM &nbsp;{{ box(L.end_time_pm) }} PM.
+    Any holding over after the term of this Agreement expires, with Landlord&rsquo;s consent, shall create a month-to-month tenancy which either party may terminate as specified in paragraph 2A. Rent shall be at a rate equal to the rent for the immediately preceding month, unless otherwise notified by Landlord, payable in advance. All other terms and conditions of this Agreement shall remain in full force and effect.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">3.</span>&ensp;<span class="clause-title">Rent:</span>
+  <div class="sub">
+    <span class="sublabel">A.</span> Tenant agrees to pay rent at the rate of $ {{ fill(L.rent_amount, '90px') }} per month for the term of the Agreement.
+  </div>
+  <div class="sub">
+    <span class="sublabel">B.</span> Rent is payable in advance on the <span class="bold">1st</span>
+    (or {{ fill(L.rent_due_day, '40px') }}) <span class="bold">day</span> of each calendar month, and is delinquent on the next day.
+  </div>
+  <div class="sub">
+    <span class="sublabel">C.</span> If Commencement Date falls on any day other than the first day of the month, rent shall be prorated based on a 30-day period. If Tenant has paid one full month&rsquo;s rent in advance of Commencement Date, rent for the second calendar month shall be prorated based on a 30-day period.
+  </div>
+  <div class="sub">
+    <span class="sublabel">D.</span> PAYMENT: The rent shall be paid by {{ box(L.pay_cash) }} cash, {{ box(L.pay_check) }} personal check, {{ box(L.pay_money_order) }} money order, {{ box(L.pay_cashier_check) }} cashier check, {{ box(L.pay_other) }} other {{ fill(L.pay_other_desc, '100px') }}, to
+    (name) {{ fill(L.payee_name, '140px') }} (phone) {{ fill(L.payee_phone, '110px') }} at
+    <br>(address) {{ fill(L.payee_address, '260px') }},
+    <br>(or at any other location specified by Landlord in writing to Tenant) between the hours of {{ fill(L.payment_hours_start, '70px') }} and {{ fill(L.payment_hours_end, '70px') }}
+    on the following days {{ fill(L.payment_days, '160px') }}.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">4.</span>&ensp;<span class="clause-title">Security Deposit:</span>
+  <div class="sub">
+    <span class="sublabel">A.</span> Tenant agrees to pay $ {{ fill(L.deposit_amount, '110px') }} as a security deposit. Security deposit will be {{ box(L.deposit_held_by_owner) }} transferred to and held by the Owner of the Premises; or {{ box(L.deposit_held_by_broker) }} held in Owner&rsquo;s Broker&rsquo;s trust account.
+  </div>
+  <div class="sub">
+    <span class="sublabel">B.</span> All or any portion of the security deposit may be used, as reasonably necessary, to: (1) cure Tenant&rsquo;s default in payment of rent, Late Charges, non-sufficient funds (&ldquo;NSF&rdquo;) fees, or other sums due; (2) repair damage, excluding ordinary wear and tear, caused by Tenant or by a guest or licensee of Tenant; (3) clean Premises, if necessary, upon termination of tenancy; and (4) replace or return personal property or appurtenances. <span class="bold">SECURITY DEPOSIT SHALL NOT BE USED BY TENANT IN LIEU OF PAYMENT OF LAST MONTH&rsquo;S RENT.</span> If all or any portion of the security deposit is used during tenancy, Tenant agrees to reinstate the total security deposit within five days after written notice is delivered to Tenant. Within three weeks after Tenant vacates the Premises, Landlord shall: (1) furnish Tenant an itemized statement indicating the amount of any security deposit received and the basis for its disposition; and (2) return any remaining portion of security deposit to Tenant.
+  </div>
+  <div class="sub">
+    <span class="sublabel">C.</span> No interest will be paid on security deposit unless required by local ordinance.
+  </div>
+  <div class="sub">
+    <span class="sublabel">D.</span> If security deposit is held by Owner, Tenant agrees not to hold Broker responsible for its return. If security deposit is held in Owner&rsquo;s Broker&rsquo;s trust account, and Broker&rsquo;s authority is terminated before expiration of this Agreement, and security deposits are released to someone other than Tenant, then Broker shall notify Tenant, in writing, where and to whom security deposit has been released. Once Tenant has been provided such notice, Tenant agrees not to hold Broker responsible for security deposit.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">5.</span>&ensp;<span class="clause-title">Move-In Costs Received/Due:</span>
+  <table class="grid">
+    <thead>
+      <tr>
+        <th style="width:34%; text-align:left;">Category</th>
+        <th style="width:16%;">Total Due</th>
+        <th style="width:18%;">Payment Received</th>
+        <th style="width:14%;">Balance Due</th>
+        <th style="width:18%;">Date Due</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in L.move_in_rows | default([]) %}
+      <tr>
+        <td>{{ row.category }}</td>
+        <td style="text-align:right;">{{ row.total_due }}</td>
+        <td style="text-align:right;">{{ row.payment_received }}</td>
+        <td style="text-align:right;">{{ row.balance_due }}</td>
+        <td>{{ row.date_due }}</td>
+      </tr>
+      {% else %}
+      <tr><td>Rent from &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; to &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (date)</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>*Security Deposit</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>Other &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td><strong>Total</strong></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="small">*The maximum amount that Landlord may receive as security deposit, however designated, cannot exceed two month&rsquo;s rent for an unfurnished Premises, or three month&rsquo;s rent for a furnished premises.</div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">6.</span>&ensp;<span class="clause-title">Parking: (Check A or B)</span>
+  <div class="sub">
+    {{ box(L.parking_permitted) }} <span class="sublabel">A.</span> Parking is permitted as follows: {{ fill(L.parking_description, '260px') }}
+    <br>The right to parking {{ box(L.parking_included_in_rent) }} is, {{ box(L.parking_not_included_in_rent) }} is not, included in the rent charged pursuant to paragraph 3. If not included in the rent, the parking rental fee shall be an additional $ {{ fill(L.parking_fee, '60px') }} per month. Parking space(s) are to be used for parking operable motor vehicles, except for trailers, boats, campers, buses or trucks (other than pick-up trucks). Tenant shall park in assigned space(s) only. Parking space(s) are to be kept clean. Vehicles leaking oil, gas or other motor vehicle fluids shall not be parked on the Premises. Mechanical work or storage of inoperable vehicles is not allowed in parking space(s) or elsewhere on the Premises.
+  </div>
+  <div class="sub">
+    <span class="or-label">OR</span> {{ box(L.parking_not_permitted) }} <span class="sublabel">B.</span> Parking is not permitted on the Premises.
+  </div>
+</div>
+
+{# ---- Page 1 Footer ---- #}
+<div class="page-footer">
+  <div class="page-footer-inner">
+    <div class="footer-copyright">
+      The copyright laws of the United States (Title 17 U.S. Code) forbid the
+      unauthorized reproduction of this form, or any portion thereof, by photocopy
+      machine or any other means, including facsimile or computerized formats.
+      Copyright &copy; 1994&ndash;2001, CALIFORNIA ASSOCIATION OF REALTORS&reg;,
+      INC. ALL RIGHTS RESERVED.
+    </div>
+    <div class="footer-center">
+      Landlord and Tenant acknowledge receipt of copy of this page.
+      <div class="footer-initials">
+        {{ initials_footer_slots("Landlord&rsquo;s Initials", L.landlord_initials_slots) }} &nbsp;&nbsp;&nbsp;
+        {{ initials_footer_slots("Tenant&rsquo;s Initials", L.tenant_initials_slots) }}
+      </div>
+    </div>
+    <div class="footer-right">
+      <div>Reviewed by</div>
+      <div>Broker or Designee {{ fill('', '60px') }} Date {{ fill('', '40px') }}</div>
+      <div style="margin-top:3px;"><span class="eho-box">EQUAL<br>HOUSING<br>OPPORTUNITY</span></div>
+    </div>
+  </div>
+  <div class="footer-form-id">LR-11 REVISED DATE 10/01 (PAGE 1 OF 4)</div>
+  <div class="footer-title-center">RESIDENTIAL LEASE OR MONTH-TO-MONTH RENTAL AGREEMENT (LR-11 PAGE 1 OF 4)</div>
+</div>
+
+{#- ============================ PAGE 2 ============================ -#}
+<div class="page-break"></div>
+
+<div class="cont-header">
+  <div class="cont-header-left">
+    <span class="cont-label">Premises:</span>
+    <span class="cont-field">{{ L.property_address | default('') }}</span>
+  </div>
+  <div class="cont-header-right">
+    <span class="cont-label">Date:</span>
+    <span class="cont-date-field">{{ L.agreement_date | default('') }}</span>
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">7.</span>&ensp;<span class="clause-title">Storage: (Check A or B)</span>
+  <div class="sub">
+    {{ box(L.storage_permitted) }} <span class="sublabel">A.</span> Storage is permitted as follows: {{ fill(L.storage_description, '260px') }}
+    <br>The right to storage space {{ box(L.storage_included_in_rent) }} is, {{ box(L.storage_not_included_in_rent) }} is not, included in the rent charged pursuant to paragraph 3. If not included in rent, storage space shall be an additional $ {{ fill(L.storage_fee, '60px') }} per month. Tenant shall store only personal property that Tenant owns, and shall not store property that is claimed by another or in which another has any right, title, or interest. Tenant shall not store any improperly packaged food or perishable goods, flammable materials, explosives, or other inherently dangerous material.
+  </div>
+  <div class="sub">
+    <span class="or-label">OR</span> {{ box(L.storage_not_permitted) }} <span class="sublabel">B.</span> Storage is not permitted on the Premises.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">8.</span>&ensp;<span class="clause-title">Late Charge/NSF Checks:</span>
+  Tenant acknowledges that either late payment of rent or issuance of a NSF check may cause Landlord to incur costs and expenses, the exact amount of which are extremely difficult and impractical to determine. These costs may include, but are not limited to, processing, enforcement and accounting expenses, and late charges imposed on Landlord. If any installment of rent due from Tenant is not received by Landlord within <span class="bold">5 (or {{ fill(L.late_grace_days, '30px') }}) calendar days</span> after date due, or if a check is returned NSF, Tenant shall pay to Landlord, respectively, an additional sum of $ {{ fill(L.late_charge_amount, '80px') }} as Late Charge and $25.00 as a NSF fee, either or both of which shall be deemed additional rent. Landlord and Tenant agree that these charges represent a fair and reasonable estimate of the costs Landlord may incur by reason of Tenant&rsquo;s late or NSF payment. Any Late Charge or NSF fee due shall be paid with the current installment of rent. Landlord&rsquo;s acceptance of any Late Charge or NSF fee shall not constitute a waiver as to any default of Tenant. Landlord&rsquo;s right to collect a Late Charge or NSF fee shall not be deemed an extension of the date rent is due under paragraph 3, or prevent Landlord from exercising any other rights and remedies under this Agreement, and as provided by law.
+</div>
+
+<div class="clause">
+  <span class="clause-num">9.</span>&ensp;<span class="clause-title">Condition of Premises:</span>
+  Tenant has examined Premises, all furniture, furnishings, appliances, landscaping, if any, and fixtures, including smoke detector(s).
+  <div class="sub"><span class="sublabel">(Check one:)</span></div>
+  <div class="sub">
+    {{ box(L.condition_option_a) }} <span class="sublabel">A.</span> Tenant acknowledges that these items are clean and in operative condition, with the following exceptions {{ fill(L.condition_exceptions, '260px') }}
+  </div>
+  <div class="sub">
+    <span class="or-label">OR</span> {{ box(L.condition_option_b) }} <span class="sublabel">B.</span> Tenant&rsquo;s acknowledgment of the condition of these items is contained in an attached statement of condition (such as C.A.R.&rsquo;s MIMO-11).
+  </div>
+  <div class="sub">
+    <span class="or-label">OR</span> {{ box(L.condition_option_c) }} <span class="sublabel">C.</span> Tenant will provide Landlord a list of items that are damaged or not in operable condition within <span class="bold">3 (or {{ fill(L.condition_inspection_days, '25px') }}) days</span> after Commencement Date, not as a contingency of this Agreement but rather as an acknowledgment of the condition of the Premises.
+  </div>
+  <div class="sub">
+    <span class="or-label">OR</span> {{ box(L.condition_option_d) }} <span class="sublabel">D.</span> Other: {{ fill(L.condition_other_desc, '260px') }}
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">10.</span>&ensp;<span class="clause-title">Neighborhood Conditions:</span>
+  Tenant is advised to satisfy him or herself as to neighborhood or area conditions, including schools, proximity and adequacy of law enforcement, crime statistics, registered felons or offenders, fire protection, other governmental services, proximity to commercial, industrial or agricultural activities, existing and proposed transportation, construction and development that may affect noise, view, or traffic, airport noise, noise or odor from any source, wild and domestic animals, other nuisances, hazards, or circumstances, facilities and condition of common areas, conditions and influences of significance to certain cultures and/or religions, and personal needs, requirements and preferences of Tenant.
+</div>
+
+<div class="clause">
+  <span class="clause-num">11.</span>&ensp;<span class="clause-title">Utilities:</span>
+  Tenant agrees to pay for all utilities and services, and the following charges: {{ fill(L.utilities_additional, '160px') }}
+  except {{ fill(L.landlord_pays_utilities, '160px') }}, which shall be paid for by Landlord. If any utilities are not separately metered, Tenant shall pay Tenant&rsquo;s proportional share, as reasonably determined by Landlord.
+</div>
+
+<div class="clause">
+  <span class="clause-num">12.</span>&ensp;<span class="clause-title">Occupants:</span>
+  The Premises are for the sole use as a personal residence by the following named persons <span class="bold">only:</span> {{ fill(L.occupants_list, '300px') }}
+</div>
+
+<div class="clause">
+  <span class="clause-num">13.</span>&ensp;<span class="clause-title">Pets:</span>
+  No animal or pet shall be kept on or about the Premises without Landlord&rsquo;s prior written consent, except {{ fill(L.pets_exception, '240px') }}
+</div>
+
+<div class="clause">
+  <span class="clause-num">14.</span>&ensp;<span class="clause-title">Rules/Regulations:</span>
+  Tenant agrees to comply with all rules and regulations of Landlord, which are at any time posted on the Premises or delivered to Tenant. Tenant shall not, and shall ensure that guests and licensees of Tenant shall not, disturb, annoy, endanger, or interfere with other tenants of the building or neighbors, or use the Premises for any unlawful purposes, including, but not limited to, using, manufacturing, selling, storing, or transporting illicit drugs or other contraband, or violate any law or ordinance, or commit a waste or nuisance on or about the Premises.
+</div>
+
+<div class="clause">
+  <span class="clause-num">15.</span>&ensp;<span class="clause-title">Condominium/Planned Unit Development:</span>
+  {{ box(L.is_hoa) }} (If checked) The Premises is a unit in a condominium, planned unit, or other development governed by a homeowners&rsquo; association (&ldquo;HOA&rdquo;). The name of the HOA is {{ fill(L.hoa_name, '180px') }}.
+  Tenant agrees to comply with all covenants, conditions and restrictions, bylaws, rules and regulations and decisions of HOA. Landlord shall provide Tenant copies of rules and regulations, if any. Tenant shall reimburse Landlord for any fines or charges imposed by HOA or other authorities, due to any violation by Tenant, or the guests or licensees of Tenant.
+</div>
+
+<div class="clause">
+  <span class="clause-num">16.</span>&ensp;<span class="clause-title">Maintenance:</span>
+  <div class="sub">
+    <span class="sublabel">A.</span> Tenant shall properly use, operate and safeguard Premises, including if applicable, any landscaping, furniture, furnishings, and appliances, and all mechanical, electrical, gas and plumbing fixtures, and keep them clean and sanitary. Tenant shall immediately notify Landlord, in writing, of any problem, malfunction or damage. Tenant shall pay for all repairs or replacements caused by Tenant, or guests of Tenant, excluding ordinary wear and tear. Tenant shall pay for all damage to Premises as a result of failure to report a problem in a timely manner. Tenant shall pay for repair of drain blockages or stoppages, unless caused by defective plumbing parts or tree roots invading sewer lines.
+  </div>
+  <div class="sub">
+    <span class="sublabel">B.</span> {{ box(L.water_landlord) }} Landlord &nbsp; {{ box(L.water_tenant) }} Tenant shall water the garden, landscaping, trees and shrubs, except {{ fill(L.watering_exceptions, '180px') }}
+  </div>
+  <div class="sub">
+    <span class="sublabel">C.</span> {{ box(L.maint_landlord) }} Landlord &nbsp; {{ box(L.maint_tenant) }} Tenant shall maintain the garden, landscaping, trees and shrubs, except {{ fill(L.maintenance_exceptions, '180px') }}
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">17.</span>&ensp;<span class="clause-title">Alterations:</span>
+  Tenant shall not make any alterations in or about the Premises without Landlord&rsquo;s prior written consent, including: painting, wallpapering, adding or changing locks, installing antenna or satellite dish(es), placing signs, displays or exhibits, or using screws, fastening devices, large nails or adhesive materials.
+</div>
+
+<div class="clause">
+  <span class="clause-num">18.</span>&ensp;<span class="clause-title">Keys/Locks:</span>
+  <div class="sub">
+    <span class="sublabel">A.</span> Tenant acknowledges receipt of (or Tenant will receive prior to the Commencement Date, or {{ fill('', '80px') }}):
+    <table class="grid" style="margin-top:2px; width:100%;">
+      <tr>
+        <td style="width:50%;">{{ box(true) }} {{ fill(L.premises_keys, '25px') }} key(s) to Premises,</td>
+        <td style="width:50%;">{{ box(true) }} {{ fill(L.garage_remotes, '25px') }} remote control device(s) for garage door/gate opener(s),</td>
+      </tr>
+      <tr>
+        <td>{{ box(true) }} {{ fill(L.mailbox_keys, '25px') }} key(s) to mailbox,</td>
+        <td>{{ box(false) }} {{ fill('', '25px') }} &nbsp;</td>
+      </tr>
+      <tr>
+        <td>{{ box(true) }} {{ fill(L.common_area_keys, '25px') }} key(s) to common area(s),</td>
+        <td>{{ box(false) }} {{ fill('', '25px') }} &nbsp;</td>
+      </tr>
+    </table>
+  </div>
+  <div class="sub">
+    <span class="sublabel">B.</span> Tenant acknowledges that locks to the Premises {{ box(L.locks_rekeyed) }} have, {{ box(L.locks_not_rekeyed) }} have not, been rekeyed.
+  </div>
+  <div class="sub">
+    <span class="sublabel">C.</span> If Tenant rekeys existing locks or opening devices, Tenant shall immediately deliver copies of all keys to Landlord. Tenant shall pay all costs and charges related to loss of any keys or opening devices. Tenant may not remove locks, even if installed by Tenant.
+  </div>
+</div>
+
+{# ---- Page 2 Footer ---- #}
+<div class="page-footer">
+  <div class="page-footer-inner">
+    <div class="footer-copyright">
+      The copyright laws of the United States (Title 17 U.S. Code) forbid the
+      unauthorized reproduction of this form, or any portion thereof, by photocopy
+      machine or any other means, including facsimile or computerized formats.
+      Copyright &copy; 1994&ndash;2001, CALIFORNIA ASSOCIATION OF REALTORS&reg;,
+      INC. ALL RIGHTS RESERVED.
+    </div>
+    <div class="footer-center">
+      Landlord and Tenant acknowledge receipt of copy of this page.
+      <div class="footer-initials">
+        {{ initials_footer_slots("Landlord&rsquo;s Initials", L.landlord_initials_slots) }} &nbsp;&nbsp;&nbsp;
+        {{ initials_footer_slots("Tenant&rsquo;s Initials", L.tenant_initials_slots) }}
+      </div>
+    </div>
+    <div class="footer-right">
+      <div>Reviewed by</div>
+      <div>Broker or Designee {{ fill('', '60px') }} Date {{ fill('', '40px') }}</div>
+      <div style="margin-top:3px;"><span class="eho-box">EQUAL<br>HOUSING<br>OPPORTUNITY</span></div>
+    </div>
+  </div>
+  <div class="footer-form-id">LR-11 REVISED DATE 10/01 (PAGE 2 of 4)</div>
+  <div class="footer-title-center">RESIDENTIAL LEASE OR MONTH-TO-MONTH RENTAL AGREEMENT (LR-11 PAGE 2 OF 4)</div>
+</div>
+
+{#- ============================ PAGE 3 ============================ -#}
+<div class="page-break"></div>
+
+<div class="cont-header">
+  <div class="cont-header-left">
+    <span class="cont-label">Premises:</span>
+    <span class="cont-field">{{ L.property_address | default('') }}</span>
+  </div>
+  <div class="cont-header-right">
+    <span class="cont-label">Date:</span>
+    <span class="cont-date-field">{{ L.agreement_date | default('') }}</span>
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">19.</span>&ensp;<span class="clause-title">Entry:</span>
+  Tenant shall make Premises available to Landlord or representative for the purpose of entering to make necessary or agreed repairs, decorations, alterations, or improvements, or to supply necessary or agreed services, or to show Premises to prospective or actual purchasers, tenants, mortgagees, lenders, appraisers, or contractors. Landlord and Tenant agree that twenty-four (24) hours notice (oral or written) shall be reasonable and sufficient notice. In an emergency, Landlord or representative may enter Premises at any time without prior notice.
+</div>
+
+<div class="clause">
+  <span class="clause-num">20.</span>&ensp;<span class="clause-title">Signs:</span>
+  Tenant authorizes Landlord to place For Sale/Lease signs on the Premises.
+</div>
+
+<div class="clause">
+  <span class="clause-num">21.</span>&ensp;<span class="clause-title">Assignment/Subletting:</span>
+  Tenant shall not sublet all or any part of Premises, or assign or transfer this Agreement or any interest in it, without prior written consent of Landlord. Unless such consent is obtained, any assignment, transfer or subletting of Premises or this Agreement or tenancy, by voluntary act of Tenant, operation of law, or otherwise, shall be null and void, and at the option of Landlord, terminate this Agreement. Any proposed assignee, transferee or sublessee shall submit to Landlord an application and credit information for Landlord&rsquo;s approval, and if approved, sign a separate written agreement with Landlord and Tenant. Landlord&rsquo;s consent to any one assignment, transfer or sublease, shall not be construed as consent to any subsequent assignment, transfer or sublease and does not release Tenant of Tenant&rsquo;s obligation under this Agreement.
+</div>
+
+<div class="clause">
+  <span class="clause-num">22.</span>&ensp;{{ box(L.lead_paint) }} <span class="clause-title">Lead Paint (Check if Applicable):</span>
+  Premises was constructed prior to 1978. In accordance with federal law, Landlord gives and Tenant acknowledges receipt of the disclosures on the attached form (such as C.A.R. Form FLD-11) and a federally approved lead pamphlet.
+</div>
+
+<div class="clause">
+  <span class="clause-num">23.</span>&ensp;<span class="clause-title">Possession:</span>
+  If Landlord is unable to deliver possession of Premises on Commencement Date, such Date shall be extended to date on which possession is made available to Tenant. If Landlord is unable to deliver possession within <span class="bold">5 (or {{ fill('', '30px') }}) calendar days</span> after agreed Commencement Date, Tenant may terminate this Agreement by giving written notice to Landlord, and shall be refunded all rent and security deposit paid.
+</div>
+
+<div class="clause">
+  <span class="clause-num">24.</span>&ensp;<span class="clause-title">Tenant&rsquo;s Obligations Upon Vacating Premises:</span>
+  Upon termination of Agreement, Tenant shall: (a) give Landlord all copies of all keys or opening devices to Premises, including any common areas; (b) vacate Premises and surrender it to Landlord empty of all persons; (c) vacate any/all parking and/or storage space; (d) deliver Premises to Landlord in the same condition as referenced in paragraph 9; (e) clean Premises, including professional cleaning of carpet and drapes; (f) give written notice to Landlord of Tenant&rsquo;s forwarding address; and (g) {{ fill('', '220px') }}.
+  <br>All improvements installed by Tenant, with or without Landlord&rsquo;s consent, become the property of Landlord upon termination.
+</div>
+
+<div class="clause">
+  <span class="clause-num">25.</span>&ensp;<span class="clause-title">Breach of Contract/Early Termination:</span>
+  In addition to any obligations established by paragraph 24, in event of termination by Tenant prior to completion of the original term of Agreement, Tenant shall also be responsible for lost rent, rental commissions, advertising expenses and painting costs necessary to ready Premises for rerental.
+</div>
+
+<div class="clause">
+  <span class="clause-num">26.</span>&ensp;<span class="clause-title">Temporary Relocation:</span>
+  Tenant agrees, upon demand of Landlord, to temporarily vacate Premises for a reasonable period, to allow for fumigation, or other methods, to control wood destroying pests or organisms, or other repairs to Premises. Tenant agrees to comply with all instructions and requirements necessary to prepare Premises to accommodate pest control, fumigation or other work, including bagging or storage of food and medicine, and removal of perishables and valuables. Tenant shall only be entitled to a credit of rent equal to the per diem rent for the period of time Tenant is required to vacate Premises.
+</div>
+
+<div class="clause">
+  <span class="clause-num">27.</span>&ensp;<span class="clause-title">Damage to Premises:</span>
+  If, by no fault of Tenant, Premises are totally or partially damaged or destroyed by fire, earthquake, accident or other casualty, which render Premises uninhabitable, either Landlord or Tenant may terminate Agreement by giving the other written notice. Rent shall be abated as of date of damage. The abated amount shall be the current monthly rent prorated on a 30-day basis. If Agreement is not terminated, Landlord shall promptly repair the damage, and rent shall be reduced based on the extent to which the damage interferes with Tenant&rsquo;s reasonable use of Premises. If damage occurs as a result of an act of Tenant or Tenant&rsquo;s guests, only Landlord shall have the right of termination, and no reduction in rent shall be made.
+</div>
+
+<div class="clause">
+  <span class="clause-num">28.</span>&ensp;<span class="clause-title">Insurance:</span>
+  Tenant&rsquo;s or guest&rsquo;s personal property and vehicles are not insured by Landlord or, if applicable, HOA, against loss or damage due to fire, theft, vandalism, rain, water, criminal or negligent acts of others, or any other cause. Tenant is to carry Tenant&rsquo;s own insurance (renter&rsquo;s insurance) to protect Tenant from any such loss.
+</div>
+
+<div class="clause">
+  <span class="clause-num">29.</span>&ensp;<span class="clause-title">Waterbeds:</span>
+  Tenant shall not use or have waterbeds on the Premises unless: (a) Tenant obtains a valid waterbed insurance policy; (b) Tenant increases the security deposit in an amount equal to one-half of one month&rsquo;s rent; and (c) the bed conforms to the floor load capacity of Premises.
+</div>
+
+<div class="clause">
+  <span class="clause-num">30.</span>&ensp;<span class="clause-title">Waiver:</span>
+  The waiver of any breach shall not be construed as a continuing waiver of the same or any subsequent breach.
+</div>
+
+<div class="clause">
+  <span class="clause-num">31.</span>&ensp;<span class="clause-title">Notice:</span>
+  Notices may be served at the following address, or at any other location subsequently designated:
+  <div class="sub">
+    Landlord: {{ fill(L.landlord_address, '220px') }} &nbsp;&nbsp;&nbsp;
+    Tenant: {{ fill(L.property_address, '200px') }}
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">32.</span>&ensp;<span class="clause-title">Tenant Estoppel Certificate:</span>
+  Tenant shall execute and return a tenant estoppel certificate delivered to Tenant by Landlord or Landlord&rsquo;s agent within 3 days after its receipt. The tenant estoppel certificate acknowledges that this Agreement is unmodified and in full force, or in full force as modified, and states the modifications. Failure to comply with this requirement shall be deemed Tenant&rsquo;s acknowledgment that the tenant estoppel certificate is true and correct, and may be relied upon by a lender or purchaser.
+</div>
+
+<div class="clause">
+  <span class="clause-num">33.</span>&ensp;<span class="clause-title">Joint and Individual Obligations:</span>
+  If there is more than one Tenant, each one shall be individually and completely responsible for the performance of all obligations of Tenant under this Agreement, jointly with every other Tenant, and individually, whether or not in possession.
+</div>
+
+<div class="clause">
+  <span class="clause-num">34.</span>&ensp;{{ box(L.military_ordinance) }} <span class="clause-title">Military Ordinance Disclosure:</span>
+  (If applicable and known to Landlord) Premises is located within one mile of an area once used for military training, and may contain potentially explosive munitions.
+</div>
+
+<div class="clause">
+  <span class="clause-num">35.</span>&ensp;<span class="clause-title">Tenant Representations; Credit:</span>
+  Tenant warrants that all statements in Tenant&rsquo;s rental application are accurate. Tenant authorizes Landlord and Broker(s) to obtain Tenant&rsquo;s credit report at time of application and periodically during tenancy in connection with approval, modification, or enforcement of this Agreement. Landlord may cancel this Agreement: (a) before occupancy begins; (b) upon disapproval of the credit report(s); or (c) at any time, upon discovering that information in Tenant&rsquo;s application is false. A negative credit report reflecting on Tenant&rsquo;s record may be submitted to a credit reporting agency if Tenant fails to fulfill the terms of payment and other obligations under this Agreement.
+</div>
+
+<div class="clause">
+  <span class="clause-num">36.</span>&ensp;If Landlord has entered into a contract for periodic pest control treatment of the Premises, Landlord shall give tenant a copy of the notice originally given to Landlord by the pest control company.
+</div>
+
+{# ---- Page 3 Footer ---- #}
+<div class="page-footer">
+  <div class="page-footer-inner">
+    <div class="footer-copyright">
+      The copyright laws of the United States (Title 17 U.S. Code) forbid the
+      unauthorized reproduction of this form, or any portion thereof, by photocopy
+      machine or any other means, including facsimile or computerized formats.
+      Copyright &copy; 1994&ndash;2001, CALIFORNIA ASSOCIATION OF REALTORS&reg;,
+      INC. ALL RIGHTS RESERVED.
+    </div>
+    <div class="footer-center">
+      Landlord and Tenant acknowledge receipt of copy of this page.
+      <div class="footer-initials">
+        {{ initials_footer_slots("Landlord&rsquo;s Initials", L.landlord_initials_slots) }} &nbsp;&nbsp;&nbsp;
+        {{ initials_footer_slots("Tenant&rsquo;s Initials", L.tenant_initials_slots) }}
+      </div>
+    </div>
+    <div class="footer-right">
+      <div>Reviewed by</div>
+      <div>Broker or Designee {{ fill('', '60px') }} Date {{ fill('', '40px') }}</div>
+      <div style="margin-top:3px;"><span class="eho-box">EQUAL<br>HOUSING<br>OPPORTUNITY</span></div>
+    </div>
+  </div>
+  <div class="footer-form-id">LR-11 REVISED DATE 10/01 (PAGE 3 OF 4)</div>
+  <div class="footer-title-center">RESIDENTIAL LEASE OR MONTH-TO-MONTH RENTAL AGREEMENT (LR-11 PAGE 3 OF 4)</div>
+</div>
+
+{#- ============================ PAGE 4 ============================ -#}
+<div class="page-break"></div>
+
+<div class="cont-header">
+  <div class="cont-header-left">
+    <span class="cont-label">Premises:</span>
+    <span class="cont-field">{{ L.property_address | default('') }}</span>
+  </div>
+  <div class="cont-header-right">
+    <span class="cont-label">Date:</span>
+    <span class="cont-date-field">{{ L.agreement_date | default('') }}</span>
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">37.</span>&ensp;<span class="clause-title">Data Base Disclosure:</span>
+  NOTICE: The California Department of Justice, sheriff&rsquo;s departments, police departments serving jurisdictions of 200,000 or more, and many other local law enforcement authorities maintain for public access a data base of the locations of persons required to register pursuant to paragraph (1) of subdivision (a) of Section 290.4 of the Penal Code. The data base is updated on a quarterly basis and a source of information about the presence of these individuals in any neighborhood. The Department of Justice also maintains a Sex Offender Identification Line through which inquiries about individuals may be made. This is a &ldquo;900&rdquo; telephone service. Callers must have specific information about individuals they are checking. Information regarding neighborhoods is not available through the &ldquo;900&rdquo; telephone service.
+</div>
+
+<div class="clause">
+  <span class="clause-num">38.</span>&ensp;<span class="clause-title">Other Terms and Conditions/Supplements:</span>
+  {{ fill(L.other_terms, '400px') }}
+  <div class="sub">
+    The following ATTACHED supplements are incorporated in this Agreement: {{ fill(L.attached_supplements, '260px') }}
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">39.</span>&ensp;<span class="clause-title">Attorney Fees:</span>
+  In any action or proceeding arising out of this Agreement, the prevailing party between Landlord and Tenant shall be entitled to reasonable attorney fees and costs.
+</div>
+
+<div class="clause">
+  <span class="clause-num">40.</span>&ensp;<span class="clause-title">Entire Contract:</span>
+  Time is of the essence. All prior agreements between Landlord and Tenant are incorporated in this Agreement, which constitutes the entire contract. It is intended as a final expression of the parties&rsquo; agreement, and may not be contradicted by evidence of any prior agreement or contemporaneous oral agreement. The parties further intend that this Agreement constitutes the complete and exclusive statement of its terms, and that no extrinsic evidence whatsoever may be introduced in any judicial or other proceeding, if any, involving this Agreement. Any provision of this Agreement that is held to be invalid shall not affect the validity or enforceability of any other provision in this Agreement.
+</div>
+
+<div class="clause">
+  <span class="clause-num">41.</span>&ensp;<span class="clause-title">Agency:</span>
+  <div class="sub">
+    <span class="sublabel">A. Confirmation:</span> The following agency relationship(s) are hereby confirmed for this transaction:
+    <br>Listing Agent: (Print firm name) {{ fill(L.listing_firm, '180px') }} is the agent of
+    (check one): {{ box(L.listing_represents_landlord_only) }} the Landlord exclusively; or {{ box(L.listing_represents_both) }} both the Landlord and Tenant.
+    <br>Leasing Agent: (Print firm name) {{ fill(L.leasing_firm, '180px') }} (if not same as Listing Agent) is the agent of
+    (check one): {{ box(L.leasing_represents_tenant_only) }} the Tenant exclusively; or {{ box(L.leasing_represents_landlord_only) }} the Landlord exclusively; or {{ box(L.leasing_represents_both) }} both the Tenant and Landlord.
+  </div>
+  <div class="sub">
+    <span class="sublabel">B. Disclosure:</span> {{ box(L.lease_exceeds_one_year) }} (If checked): The term of this lease exceeds one year. A disclosure regarding real estate agency relationships (such as C.A.R. form AD-11), has been provided to Landlord and Tenant, who each acknowledge its receipt.
+  </div>
+</div>
+
+<div class="clause">
+  <span class="clause-num">42.</span>&ensp;{{ box(false) }} <span class="clause-title">Interpreter/Translator:</span>
+  The terms of this Agreement have been interpreted/translated for Tenant into the following language:
+  {{ fill('', '160px') }}. Interpretation/translation service has been provided by (print name) {{ fill('', '160px') }},
+  who has the following Driver&rsquo;s License or other identification number: {{ fill('', '120px') }}.
+  Tenant has been advised to rely on, and has in fact solely relied on the interpretation/translation services of the above-named individual, and not on the Landlord or other person involved in negotiating the Agreement. If the Agreement has been negotiated primarily in Spanish, Tenant has been provided a Spanish language translation of this Agreement pursuant to the California Civil Code. (C.A.R. form LR-14-S fulfills this requirement.)
+  <br>Signature of interpreter/translator {{ fill('', '180px') }} &nbsp; Date {{ fill('', '80px') }}
+</div>
+
+<div class="notice-box" style="margin-top:5px; font-size:7.2pt;">
+  Landlord and Tenant acknowledge and agree that Brokers: (a) do not guarantee the condition of the Premises; (b) cannot verify representations made by others; (c) cannot provide legal or tax advice; (d) will not provide other advice or information that exceeds the knowledge, education or experience required to obtain a real estate license. Furthermore, if Brokers are not also acting as Landlord in this Agreement, Brokers; (e) do not decide what rental rate a Tenant should pay or Landlord should accept; and (f) do not decide upon the length or other terms of tenancy. Landlord and Tenant agree that they will seek legal, tax, insurance and other desired assistance from appropriate professionals.
+</div>
+
+{# Signature block #}
+<table class="sig-table" style="margin-top:6px;">
+  <tr>
+    <td style="width:65%;">
+      Tenant <span class="sig-underline">{{ L.tenant_name | default('') }}</span>
+    </td>
+    <td style="width:35%;">
+      Date <span class="sig-underline">{{ L.sign_date | default('') }}</span>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Tenant <span class="sig-underline">&nbsp;</span>
+    </td>
+    <td>
+      Date <span class="sig-underline">&nbsp;</span>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Landlord <span class="sig-underline">{{ L.landlord_name | default('') }}</span>
+      <br><span class="sig-label">(Owner or Agent with authority to enter into this lease)</span>
+    </td>
+    <td>
+      Date <span class="sig-underline">{{ L.sign_date | default('') }}</span>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Landlord <span class="sig-underline">&nbsp;</span>
+      <br><span class="sig-label">(Owner or Agent with authority to enter into this lease)</span>
+    </td>
+    <td>
+      Date <span class="sig-underline">&nbsp;</span>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      Landlord Address <span class="sig-underline" style="min-width:200px;">{{ L.landlord_address | default('') }}</span>
+      &nbsp; Telephone <span class="sig-underline" style="min-width:100px;">{{ L.landlord_phone | default('') }}</span>
+    </td>
+  </tr>
+</table>
+
+<hr class="rule" style="margin-top:6px;">
+
+<div class="small" style="margin-bottom:3px;">
+  Agency relationships are confirmed as above. Real estate brokers who are not also Landlord in this Agreement are not a party to the Agreement between Landlord and Tenant.
+</div>
+
+<table class="grid" style="font-size:7pt; margin-top:3px;">
+  <tr>
+    <td style="width:28%;">Real Estate Broker<br><span class="small">(Leasing Firm Name)</span><br>{{ fill(L.broker_leasing_firm, '140px') }}</td>
+    <td style="width:28%;">By {{ fill(L.broker_leasing_agent, '110px') }}</td>
+    <td style="width:16%;">Date {{ fill(L.sign_date, '70px') }}</td>
+    <td style="width:28%;">Sign _______________</td>
+  </tr>
+  <tr>
+    <td>Address {{ fill(L.broker_leasing_address, '130px') }}</td>
+    <td>Telephone {{ fill(L.broker_leasing_phone, '100px') }}</td>
+    <td colspan="2">Fax {{ fill(L.broker_leasing_fax, '100px') }}</td>
+  </tr>
+  <tr>
+    <td>Real Estate Broker<br><span class="small">(Listing Firm Name)</span><br>{{ fill(L.broker_listing_firm, '140px') }}</td>
+    <td>By {{ fill(L.broker_listing_agent, '110px') }}</td>
+    <td>Date {{ fill(L.sign_date, '70px') }}</td>
+    <td>Sign _______________</td>
+  </tr>
+  <tr>
+    <td>Address {{ fill(L.broker_listing_address, '130px') }}</td>
+    <td>Telephone {{ fill(L.broker_listing_phone, '100px') }}</td>
+    <td colspan="2">Fax {{ fill(L.broker_listing_fax, '100px') }}</td>
+  </tr>
+</table>
+
+{# ---- Page 4 Footer ---- #}
+<div class="page-footer">
+  <div class="page-footer-inner">
+    <div class="footer-copyright">
+      THIS FORM HAS BEEN APPROVED BY THE CALIFORNIA ASSOCIATION OF REALTORS&reg; (C.A.R.). NO REPRESENTATION IS MADE AS TO THE LEGAL VALIDITY OR ADEQUACY OF ANY PROVISION IN ANY SPECIFIC TRANSACTION. A REAL ESTATE BROKER IS THE PERSON QUALIFIED TO ADVISE ON REAL ESTATE TRANSACTIONS. IF YOU DESIRE LEGAL OR TAX ADVICE, CONSULT AN APPROPRIATE PROFESSIONAL.
+      <br><br>
+      Published and Distributed by: REAL ESTATE BUSINESS SERVICES, INC., a subsidiary of the CALIFORNIA ASSOCIATION OF REALTORS&reg;, 525 South Virgil Avenue, Los Angeles, California 90020.
+    </div>
+    <div class="footer-center">&nbsp;</div>
+    <div class="footer-right">
+      <div>Reviewed by</div>
+      <div>Broker or Designee {{ fill('', '60px') }} Date {{ fill('', '40px') }}</div>
+      <div style="margin-top:3px;"><span class="eho-box">EQUAL<br>HOUSING<br>OPPORTUNITY</span></div>
+    </div>
+  </div>
+  <div class="footer-form-id">LR-11 REVISED DATE 10/01 (PAGE 4 OF 4)</div>
+  <div class="footer-title-center">RESIDENTIAL LEASE OR MONTH-TO-MONTH RENTAL AGREEMENT (LR-11 PAGE 4 OF 4)</div>
+</div>
+
+</body>
+</html>

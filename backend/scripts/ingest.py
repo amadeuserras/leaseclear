@@ -7,7 +7,12 @@ from leaseclear.ingestion.embed import embed_chunks
 from leaseclear.ingestion.parse import parse_pdf
 from leaseclear.ingestion.store import store_chunks, store_document
 
-DEFAULT_PDF = Path(__file__).resolve().parents[2] / "corpus" / "generated" / "lease.pdf"
+DEFAULT_PDF = (
+    Path(__file__).resolve().parents[2]
+    / "corpus"
+    / "generated"
+    / "meridian-nadkarni_osei.pdf"
+)
 DEFAULT_DOCUMENT_ID = "00000000-0000-0000-0000-000000000001"
 
 

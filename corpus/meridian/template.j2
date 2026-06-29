@@ -1,38 +1,7 @@
-{#-
-  ============================================================================
-  SYNTHETIC RESIDENTIAL LEASE — Jinja2 / HTML template (render to PDF via WeasyPrint)
-  ----------------------------------------------------------------------------
-  Purpose: a small (~4 page) but structurally REALISTIC lease for developing and
-  testing a document-Q&A / RAG ingestion pipeline. It deliberately reproduces the
-  *behaviours* that make real leases hard to chunk — NOT the text of any real form.
-
-  Structural features intentionally included (each is a chunker test case):
-    - Header logo + horizontal rule; repeating per-page footer boilerplate (noise)
-    - Numbered clauses 1..N in the main lease
-    - SHORT clauses (one sentence) next to LONG clauses (~400-800 tokens)
-    - Nested sub-clauses: A./B./C. and (i)/(ii)/(iii) and (a)/(b)
-    - Checkbox UI: ☒ / ☐ glyphs, plus a "Check A or B" conditional pattern
-    - A checkbox-GATED clause whose applicability depends on a box (refusal test)
-    - Fill-in-the-blank underline fields driven by Jinja vars (empty => ruled line)
-    - Cross-references to other clauses ("as described in Section 4") and to an
-      attached addendum, plus a statute-style reference
-    - A nested ADDENDUM with its OWN clause numbering reset (1..M) => multi-doc /
-      renumbering behaviour in miniature
-
-  Render contract: pass a dict `lease`. Every field is optional; missing scalar
-  fields fall back to an empty ruled line via the fill() macro, mimicking a blank
-  form. Checkbox booleans default to False (unchecked).
-  ============================================================================
--#}
-
 {#- ---------- macros ---------- -#}
+{%- from 'macros.j2' import fill as _fill -%}
 {%- macro fill(value, width='180px') -%}
-  {%- set width_class = 'field-w-' ~ (width | replace('px', '')) -%}
-  {%- if value is not none and value|string|trim != '' -%}
-    <span class="field filled {{ width_class }}">{{ value }}</span>
-  {%- else -%}
-    <span class="field blank {{ width_class }}">&nbsp;</span>
-  {%- endif -%}
+  {{- _fill(value, width, 5) -}}
 {%- endmacro -%}
 
 {%- macro box(checked) -%}
@@ -49,9 +18,6 @@
   @page {
     size: Letter;
     margin: 54px 56px 64px 56px;
-    @bottom-left  { content: "MERIDIAN RESIDENTIAL LEASE  (Form MRL-204, Rev. 03/24)"; font-size: 7pt; color:#555; }
-    @bottom-center{ content: "Property: {{ L.property_address | default('________________') }}"; font-size: 7pt; color:#555; }
-    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 7pt; color:#555; }
   }
   * { box-sizing: border-box; }
   body {
@@ -90,30 +56,16 @@
 
   /* ---------- fill-in fields & checkboxes ---------- */
   .field {
-    display: inline-block;
-    border-bottom: 1px solid #222;
-    padding: 0 4px;
-    text-align: center;
+    text-decoration: underline;
+    text-underline-offset: 4px;
     line-height: 1.05;
   }
-  .field.filled { font-style: italic; font-weight: bold; color:#13335c; }
-  .field-w-40  { min-width: 40px; }
-  .field-w-50  { min-width: 50px; }
-  .field-w-70  { min-width: 70px; }
-  .field-w-90  { min-width: 90px; }
-  .field-w-100 { min-width: 100px; }
-  .field-w-110 { min-width: 110px; }
-  .field-w-120 { min-width: 120px; }
-  .field-w-140 { min-width: 140px; }
-  .field-w-150 { min-width: 150px; }
-  .field-w-160 { min-width: 160px; }
-  .field-w-180 { min-width: 180px; }
-  .field-w-210 { min-width: 210px; }
-  .field-w-230 { min-width: 230px; }
-  .field-w-280 { min-width: 280px; }
-  .field-w-300 { min-width: 300px; }
-  .field-w-320 { min-width: 320px; }
-  .field-w-330 { min-width: 330px; }
+  .field.filled {
+    font-style: italic;
+    font-weight: bold;
+    color: #13335c;
+    text-decoration-color: #000;
+  }
   .cb { font-size: 11pt; vertical-align: -1px; padding-right: 2px; }
 
   /* ---------- initials line ---------- */
@@ -123,7 +75,7 @@
   }
 
   /* ---------- table (move-in style) ---------- */
-  table.grid { width:100%; border-collapse: collapse; margin: 4px 0 6px 0; font-size: 8.4pt; }
+  table.grid { width:100%; border-collapse: separate; border-spacing: 0; margin: 4px 0 6px 0; font-size: 8.4pt; }
   table.grid th, table.grid td { border: 1px solid #444; padding: 3px 5px; text-align:left; }
   table.grid th { background:#eef2f6; font-weight:bold; }
 

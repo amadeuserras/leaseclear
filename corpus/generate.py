@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import importlib.util
 import sys
 import tempfile
 from pathlib import Path
 
 import fitz
 from jinja2 import (  # pyright: ignore[reportMissingImports]
+    ChoiceLoader,
     Environment,
     FileSystemLoader,
 )
@@ -14,16 +16,28 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from meridian.data import LEASE  # noqa: E402
-
 OUTPUT_DIR = ROOT / "generated"
-TEMPLATE_DIR = ROOT / "meridian"
-MARGIN = 54
+MARGIN = 20
 
 
-def render_html(context: dict) -> str:
+def load_case(case_path: Path):
+    """Import a case file and return its LEASE object."""
+    spec = importlib.util.spec_from_file_location(case_path.stem, case_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load case module from {case_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.LEASE
+
+
+def render_html(template_dir: Path, context: dict) -> str:
     env = Environment(
-        loader=FileSystemLoader(TEMPLATE_DIR),
+        loader=ChoiceLoader(
+            [
+                FileSystemLoader(str(template_dir)),
+                FileSystemLoader(str(ROOT)),
+            ]
+        ),
         autoescape=False,
         trim_blocks=True,
         lstrip_blocks=True,
@@ -36,12 +50,7 @@ def render_pdf(html: str, output_path: Path) -> None:
 
     story = fitz.Story(html=html)
     mediabox = fitz.paper_rect("letter")
-    where = fitz.Rect(
-        MARGIN,
-        MARGIN,
-        mediabox.width - MARGIN,
-        mediabox.height - MARGIN,
-    )
+    where = fitz.Rect(MARGIN, MARGIN, mediabox.width - MARGIN, mediabox.height - MARGIN)
 
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         tmp_path = Path(tmp.name)
@@ -61,11 +70,32 @@ def render_pdf(html: str, output_path: Path) -> None:
     tmp_path.unlink()
 
 
+def discover() -> list[tuple[Path, Path]]:
+    """Return (template_dir, case_file) pairs for every corpus/cases/*.py."""
+    pairs = []
+    for cases_dir in sorted(ROOT.glob("*/cases")):
+        template_dir = cases_dir.parent
+        for case_file in sorted(cases_dir.glob("*.py")):
+            if case_file.name == "__init__.py":
+                continue
+            pairs.append((template_dir, case_file))
+    return pairs
+
+
 def main() -> None:
-    html = render_html(LEASE.to_context())
-    output_path = OUTPUT_DIR / f"{LEASE.filename}.pdf"
-    render_pdf(html, output_path)
-    print(f"generated {output_path}")
+    pairs = discover()
+    if not pairs:
+        print("no cases found")
+        return
+
+    for template_dir, case_file in pairs:
+        corpus = template_dir.name
+        case = case_file.stem
+        lease = load_case(case_file)
+        html = render_html(template_dir, lease.to_context())
+        output_path = OUTPUT_DIR / f"{corpus}-{case}.pdf"
+        render_pdf(html, output_path)
+        print(f"generated {output_path}")
 
 
 if __name__ == "__main__":

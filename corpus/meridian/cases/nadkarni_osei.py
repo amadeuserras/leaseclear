@@ -17,7 +17,7 @@ from meridian.model import (
 )
 
 LEASE = Lease(
-    filename="lease",
+    filename="meridian-nadkarni_osei",
     agreement_date="June 14, 2025",
     landlord=Landlord(
         name="Cedar Grove Rentals LLC",
