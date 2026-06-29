@@ -218,8 +218,7 @@
   <span class="clause-num">1.</span>&ensp;<span class="clause-title">Property:</span>
   <div class="sub">
     <span class="sublabel">A.</span> Landlord rents to Tenant and Tenant rents from Landlord, the real property and improvements described as:
-    {{ fill(L.property_address, '320px') }}
-    <br>{{ fill('', '420px') }} (&ldquo;Premises&rdquo;).
+    <br>{{ fill(L.property_address, '770px') }} (&ldquo;Premises&rdquo;).
   </div>
   <div class="sub">
     <span class="sublabel">B.</span> The following personal property is included: {{ fill(L.included_property, '340px') }}.
@@ -332,8 +331,8 @@
     <div class="footer-center">
       Landlord and Tenant acknowledge receipt of copy of this page.
       <div class="footer-initials">
-        Landlord&rsquo;s Initials (_______) (_______) &nbsp;&nbsp;&nbsp;
-        Tenant&rsquo;s Initials (_______) (_______)
+        {{ initials_footer_slots("Landlord&rsquo;s Initials", L.landlord_initials_slots) }} &nbsp;&nbsp;&nbsp;
+        {{ initials_footer_slots("Tenant&rsquo;s Initials", L.tenant_initials_slots) }}
       </div>
     </div>
     <div class="footer-right">
@@ -484,8 +483,8 @@
     <div class="footer-center">
       Landlord and Tenant acknowledge receipt of copy of this page.
       <div class="footer-initials">
-        Landlord&rsquo;s Initials (_______) (_______) &nbsp;&nbsp;&nbsp;
-        Tenant&rsquo;s Initials (_______) (_______)
+        {{ initials_footer_slots("Landlord&rsquo;s Initials", L.landlord_initials_slots) }} &nbsp;&nbsp;&nbsp;
+        {{ initials_footer_slots("Tenant&rsquo;s Initials", L.tenant_initials_slots) }}
       </div>
     </div>
     <div class="footer-right">
@@ -619,8 +618,8 @@
     <div class="footer-center">
       Landlord and Tenant acknowledge receipt of copy of this page.
       <div class="footer-initials">
-        Landlord&rsquo;s Initials (_______) (_______) &nbsp;&nbsp;&nbsp;
-        Tenant&rsquo;s Initials (_______) (_______)
+        {{ initials_footer_slots("Landlord&rsquo;s Initials", L.landlord_initials_slots) }} &nbsp;&nbsp;&nbsp;
+        {{ initials_footer_slots("Tenant&rsquo;s Initials", L.tenant_initials_slots) }}
       </div>
     </div>
     <div class="footer-right">

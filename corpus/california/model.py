@@ -38,6 +38,10 @@ def _initials(name: str) -> str:
     return (parts[0][0] + parts[-1][0]).upper()
 
 
+def _initials_slots(values: list[str], count: int = 2) -> list[str]:
+    return (values + [""] * count)[:count]
+
+
 @dataclass
 class Landlord:
     name: str
@@ -224,7 +228,6 @@ class Lease:
 
     def to_context(self) -> dict:
         methods = {m.lower() for m in self.rent.methods}
-        first_tenant = self.tenants[0] if self.tenants else None
         rent_start = self.term.start
 
         # Move-in costs table rows
@@ -244,20 +247,20 @@ class Lease:
                 }
             )
 
+        landlord_init = self.landlord.initials or _initials(self.landlord.name)
+        tenant_inits = [t.initials or _initials(t.name) for t in self.tenants[:2]]
+
         return {
             "agreement_date": self.agreement_date,
             "sign_date": self.sign_date or self.agreement_date,
             "landlord_name": self.landlord.name,
             "landlord_address": self.landlord.address,
             "landlord_phone": self.landlord.phone,
-            "landlord_initials": self.landlord.initials
-            or _initials(self.landlord.name),
+            "landlord_initials": landlord_init,
+            "landlord_initials_slots": _initials_slots([landlord_init]),
             "tenant_name": _join_names([t.name for t in self.tenants]),
-            "tenant_initials": (
-                first_tenant.initials or _initials(first_tenant.name)
-                if first_tenant
-                else ""
-            ),
+            "tenant_initials": tenant_inits[0] if tenant_inits else "",
+            "tenant_initials_slots": _initials_slots(tenant_inits),
             "occupants": ", ".join(self.occupants),
             "property_address": self.property.address,
             "included_property": ", ".join(self.property.included_personal_property),
