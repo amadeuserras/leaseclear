@@ -4,13 +4,21 @@ import json
 from pathlib import Path
 from uuid import UUID
 
-from leaseclear.types import EmbeddedChunk
+from leaseclear.ingestion.slug import make_document_slug
+from leaseclear.types import AssignedDocument, EmbeddedChunk
 
 _DATA_DIR = Path(__file__).resolve().parent
 
 CORPUS_LEASE_PDF = _DATA_DIR / "test_lease.pdf"
 CORPUS_LEASE_DOCUMENT_ID = UUID("00000000-0000-4000-8000-000000000001")
 TEST_LEASE_CHUNKS_PATH = _DATA_DIR / "test_lease_chunks.json"
+
+SEED_DOCUMENT = AssignedDocument(
+    id=CORPUS_LEASE_DOCUMENT_ID,
+    slug=make_document_slug(CORPUS_LEASE_PDF.name),
+    filename=CORPUS_LEASE_PDF.name,
+    pages=[],
+)
 
 _fixture_data = json.loads(TEST_LEASE_CHUNKS_PATH.read_text())
 SEED_CHUNKS = [

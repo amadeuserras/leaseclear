@@ -7,14 +7,8 @@ import pytest
 
 from leaseclear.core.config import settings
 from leaseclear.db.connection import apply_schema
-from leaseclear.ingestion.slug import make_document_slug
 from leaseclear.ingestion.store import store_chunks, store_documents
-from leaseclear.types import AssignedDocument
-from tests.data.corpus import (
-    CORPUS_LEASE_DOCUMENT_ID,
-    CORPUS_LEASE_PDF,
-    SEED_CHUNKS,
-)
+from tests.data.corpus import SEED_CHUNKS, SEED_DOCUMENT
 
 
 @pytest.fixture(scope="session")
@@ -47,17 +41,7 @@ async def seed_db(
     try:
         await apply_schema(conn)
         await conn.execute("TRUNCATE chunks, logs, users, documents")
-        await store_documents(
-            conn,
-            [
-                AssignedDocument(
-                    id=CORPUS_LEASE_DOCUMENT_ID,
-                    slug=make_document_slug(CORPUS_LEASE_PDF.name),
-                    filename=CORPUS_LEASE_PDF.name,
-                    pages=[],
-                )
-            ],
-        )
+        await store_documents(conn, [SEED_DOCUMENT])
         await store_chunks(conn, SEED_CHUNKS)
         yield conn
     finally:

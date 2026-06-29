@@ -3,18 +3,13 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
+from dataclasses import asdict, replace
 
 from leaseclear.ingestion.chunk import chunk_documents
 from leaseclear.ingestion.embed import embed_chunks
 from leaseclear.ingestion.parse import parse_document
-from leaseclear.ingestion.slug import make_document_slug
-from leaseclear.types import AssignedDocument, UploadDocument
-from tests.data.corpus import (
-    CORPUS_LEASE_DOCUMENT_ID,
-    CORPUS_LEASE_PDF,
-    TEST_LEASE_CHUNKS_PATH,
-)
+from leaseclear.types import UploadDocument
+from tests.data.corpus import CORPUS_LEASE_PDF, SEED_DOCUMENT, TEST_LEASE_CHUNKS_PATH
 
 
 def main() -> None:
@@ -23,12 +18,7 @@ def main() -> None:
         filename=CORPUS_LEASE_PDF.name,
     )
     parsed = parse_document(upload)
-    assigned = AssignedDocument(
-        id=CORPUS_LEASE_DOCUMENT_ID,
-        slug=make_document_slug(CORPUS_LEASE_PDF.name),
-        filename=CORPUS_LEASE_PDF.name,
-        pages=parsed.pages,
-    )
+    assigned = replace(SEED_DOCUMENT, pages=parsed.pages)
     chunks = chunk_documents([assigned])
     all_embedded = embed_chunks(chunks)
 
