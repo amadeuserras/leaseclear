@@ -48,6 +48,15 @@ uv run ruff format .
 uv run pyright
 ```
 
+Workflow before commit
+
+```bash
+uv run pytest
+uv run ruff check .
+uv run ruff format .
+uv run pyright
+```
+
 ### Frontend
 
 First time:
