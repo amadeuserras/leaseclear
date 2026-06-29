@@ -68,7 +68,7 @@ def reset_rate_limits() -> None:
 async def api_client(
     monkeypatch: pytest.MonkeyPatch,
     database_url: str,
-    seeded_db: asyncpg.Connection,
+    seed_db: asyncpg.Connection,
 ) -> AsyncIterator[TestClient]:
     monkeypatch.setattr(settings, "database_url", database_url)
     monkeypatch.setattr(

@@ -7,7 +7,7 @@ from leaseclear.db.logs import insert_query_log
 from leaseclear.types import QueryLogEntry
 
 
-async def test_insert_query_log(seeded_db: DbConnection) -> None:
+async def test_insert_query_log(seed_db: DbConnection) -> None:
     entry = QueryLogEntry(
         id=uuid4(),
         question="How much is the security deposit?",
@@ -19,9 +19,9 @@ async def test_insert_query_log(seeded_db: DbConnection) -> None:
         output_tokens=128,
         refused=False,
     )
-    await insert_query_log(seeded_db, entry)
+    await insert_query_log(seed_db, entry)
 
-    row = await seeded_db.fetchrow(
+    row = await seed_db.fetchrow(
         "SELECT question, refused, chunk_ids_retrieved FROM logs WHERE id = $1",
         entry.id,
     )

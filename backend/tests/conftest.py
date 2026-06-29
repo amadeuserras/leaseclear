@@ -14,7 +14,6 @@ from leaseclear.types import EmbeddedChunk
 
 CORPUS_LEASE_PDF = Path(__file__).resolve().parent / "data" / "test_lease.pdf"
 CORPUS_LEASE_DOCUMENT_ID = "test_lease"
-
 TEST_LEASE_CHUNKS_PATH = (
     Path(__file__).resolve().parent / "data" / "test_lease_chunks.json"
 )
@@ -44,7 +43,7 @@ async def ensure_test_database(database_url: str) -> None:
 
 
 @pytest.fixture
-async def seeded_db(
+async def seed_db(
     database_url: str,
     ensure_test_database: None,
 ) -> AsyncIterator[asyncpg.Connection]:

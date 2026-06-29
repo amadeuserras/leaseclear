@@ -57,7 +57,7 @@ def test_query_endpoint_streams_sse(
 
 async def test_query_writes_log_row(
     api_client: TestClient,
-    seeded_db: asyncpg.Connection,
+    seed_db: asyncpg.Connection,
     mock_generate_stream: None,
 ) -> None:
     question = "How much is the security deposit?"
@@ -70,7 +70,7 @@ async def test_query_writes_log_row(
         assert response.status_code == 200
         response.read()
 
-    row = await seeded_db.fetchrow(
+    row = await seed_db.fetchrow(
         "SELECT * FROM logs WHERE question = $1",
         question,
     )

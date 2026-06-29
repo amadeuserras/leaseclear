@@ -21,15 +21,15 @@ from tests.retrieval.metrics import mean_reciprocal_rank, reciprocal_rank
 
 
 @pytest.mark.real_api
-async def test_search_mrr_comparison(seeded_db: asyncpg.Connection) -> None:
+async def test_search_mrr_comparison(seed_db: asyncpg.Connection) -> None:
     hybrid_rrs: list[float] = []
     lexical_rrs: list[float] = []
     vector_rrs: list[float] = []
 
     for case in CASES:
-        hybrid_results = await hybrid.search(seeded_db, case.query)
-        lexical_results = await lexical.search(seeded_db, case.query)
-        vector_results = await vector.search(seeded_db, case.query)
+        hybrid_results = await hybrid.search(seed_db, case.query)
+        lexical_results = await lexical.search(seed_db, case.query)
+        vector_results = await vector.search(seed_db, case.query)
 
         hybrid_rrs.append(reciprocal_rank(hybrid_results, case.expected_clause))
         lexical_rrs.append(reciprocal_rank(lexical_results, case.expected_clause))
