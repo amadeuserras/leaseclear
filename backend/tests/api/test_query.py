@@ -77,7 +77,7 @@ async def test_query_writes_log_row(
     assert row is not None
     assert row["document_ids"] is None
     assert row["chunk_ids_retrieved"]
-    assert all(chunk_id.startswith("lease_") for chunk_id in row["chunk_ids_retrieved"])
+    assert all(chunk_id.startswith("test_lease_") for chunk_id in row["chunk_ids_retrieved"])
     assert row["input_tokens"] == MOCK_INPUT_TOKENS
     assert row["output_tokens"] == MOCK_OUTPUT_TOKENS
     assert row["refused"] is False

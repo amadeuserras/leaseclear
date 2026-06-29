@@ -18,12 +18,12 @@ def make_chunk(chunk_id: str, document_id: str, clause_label: str | None) -> Chu
 
 
 def test_label_with_clause():
-    chunks = [make_chunk("lease_chunk-004", "lease", "3. Rent")]
+    chunks = [make_chunk("test_lease_chunk-004", "test_lease", "3. Rent")]
     result = label_chunks(chunks)
-    assert result[0].citation_id == "[lease §3. Rent]"
+    assert result[0].citation_id == "[test_lease §3. Rent]"
 
 
 def test_label_fallback_when_no_clause():
-    chunks = [make_chunk("lease_chunk-001", "lease", None)]
+    chunks = [make_chunk("test_lease_chunk-001", "test_lease", None)]
     result = label_chunks(chunks)
-    assert result[0].citation_id == "[lease p.1]"
+    assert result[0].citation_id == "[test_lease p.1]"

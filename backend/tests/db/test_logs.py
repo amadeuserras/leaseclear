@@ -11,8 +11,8 @@ async def test_insert_query_log(seeded_db: DbConnection) -> None:
     entry = QueryLogEntry(
         id=uuid4(),
         question="How much is the security deposit?",
-        document_ids=["lease"],
-        chunk_ids_retrieved=["lease_chunk-005"],
+        document_ids=["test_lease"],
+        chunk_ids_retrieved=["test_lease_chunk-005"],
         ttft_s=0.42,
         total_s=1.8,
         input_tokens=512,
@@ -28,4 +28,4 @@ async def test_insert_query_log(seeded_db: DbConnection) -> None:
     assert row is not None
     assert row["question"] == entry.question
     assert row["refused"] is False
-    assert row["chunk_ids_retrieved"] == ["lease_chunk-005"]
+    assert row["chunk_ids_retrieved"] == ["test_lease_chunk-005"]

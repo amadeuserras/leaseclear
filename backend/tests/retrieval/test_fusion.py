@@ -7,7 +7,7 @@ from leaseclear.types import ChunkBase
 def _chunk(chunk_id: str) -> ChunkBase:
     return ChunkBase(
         chunk_id=chunk_id,
-        document_id="lease",
+        document_id="test_lease",
         text=f"text for {chunk_id}",
         clause_label=None,
         page_number=1,
