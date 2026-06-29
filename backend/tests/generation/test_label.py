@@ -10,7 +10,7 @@ TEST_DOCUMENT_ID = UUID("00000000-0000-4000-8000-000000000002")
 
 def make_chunk(document_id: UUID, clause_label: str | None) -> ChunkBase:
     return ChunkBase(
-        chunk_id=uuid4(),
+        id=uuid4(),
         document_id=document_id,
         document_slug="test-lease",
         text="some text",

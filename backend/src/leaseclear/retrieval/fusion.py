@@ -16,8 +16,8 @@ def reciprocal_rank_fusion(
 
     for ranked_list in ranked_lists:
         for rank, chunk in enumerate(ranked_list, start=1):
-            scores[chunk.chunk_id] = scores.get(chunk.chunk_id, 0.0) + 1.0 / (k + rank)
-            chunks[chunk.chunk_id] = chunk
+            scores[chunk.id] = scores.get(chunk.id, 0.0) + 1.0 / (k + rank)
+            chunks[chunk.id] = chunk
 
     ranked_chunk_ids: list[UUID] = sorted(
         scores, key=lambda cid: scores[cid], reverse=True

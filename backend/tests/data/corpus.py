@@ -15,7 +15,7 @@ TEST_LEASE_CHUNKS_PATH = _DATA_DIR / "test_lease_chunks.json"
 _fixture_data = json.loads(TEST_LEASE_CHUNKS_PATH.read_text())
 SEED_CHUNKS = [
     EmbeddedChunk(
-        chunk_id=UUID(chunk["chunk_id"]),
+        id=UUID(chunk["id"]),
         document_id=UUID(chunk["document_id"]),
         document_slug=chunk["document_slug"],
         text=chunk["text"],

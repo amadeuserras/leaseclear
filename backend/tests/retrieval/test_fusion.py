@@ -14,7 +14,7 @@ CHUNK_D = UUID("00000000-0000-4000-8000-000000000013")
 
 def _chunk(chunk_id: UUID) -> ChunkBase:
     return ChunkBase(
-        chunk_id=chunk_id,
+        id=chunk_id,
         document_id=TEST_DOCUMENT_ID,
         document_slug="test-lease",
         text=f"text for {chunk_id}",
@@ -32,4 +32,4 @@ def test_rrf_ranks_shared_chunks_ahead_of_single_list_hits() -> None:
 
     fused = reciprocal_rank_fusion(vector_results, lexical_results)
 
-    assert [chunk.chunk_id for chunk in fused] == [CHUNK_B, CHUNK_A, CHUNK_D, CHUNK_C]
+    assert [chunk.id for chunk in fused] == [CHUNK_B, CHUNK_A, CHUNK_D, CHUNK_C]

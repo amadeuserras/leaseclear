@@ -22,7 +22,7 @@ CREATE TABLE documents (
 );
 
 CREATE TABLE chunks (
-    chunk_id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY,
     document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
     document_slug TEXT NOT NULL,
     text TEXT NOT NULL,

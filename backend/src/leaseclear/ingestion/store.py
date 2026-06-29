@@ -24,15 +24,15 @@ async def store_chunks(
     await conn.executemany(
         """--sql
         INSERT INTO chunks (
-            chunk_id, document_id, document_slug, text, embedding,
+            id, document_id, document_slug, text, embedding,
             clause_label, page_number, char_start, char_end, token_count
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        ON CONFLICT (chunk_id) DO UPDATE SET embedding = EXCLUDED.embedding
+        ON CONFLICT (id) DO UPDATE SET embedding = EXCLUDED.embedding
         """,
         [
             (
-                chunk.chunk_id,
+                chunk.id,
                 chunk.document_id,
                 chunk.document_slug,
                 chunk.text,

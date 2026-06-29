@@ -63,7 +63,7 @@ def _to_response(
     }
     citations = [
         Citation(
-            chunk_id=chunk.chunk_id,
+            chunk_id=chunk.id,
             clause_label=chunk.clause_label or "",
             page_number=chunk.page_number,
             passage=c.quote,
@@ -160,7 +160,7 @@ async def query_events(
         id=uuid4(),
         question=question,
         document_ids=document_ids,
-        chunk_ids_retrieved=[c.chunk_id for c in retrieved],
+        chunk_ids_retrieved=[c.id for c in retrieved],
         ttft_s=ttft_s,
         total_s=total_s,
         input_tokens=stream_meta.input_tokens,

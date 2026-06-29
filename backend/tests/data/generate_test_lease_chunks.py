@@ -36,7 +36,7 @@ def main() -> None:
         "chunks": [
             {
                 **asdict(chunk),
-                "chunk_id": str(chunk.chunk_id),
+                "id": str(chunk.id),
                 "document_id": str(chunk.document_id),
             }
             for chunk in all_embedded

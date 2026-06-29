@@ -32,7 +32,7 @@ class AssignedDocument:
 
 @dataclass
 class ChunkBase:
-    chunk_id: UUID
+    id: UUID
     document_id: UUID
     document_slug: str
     text: str
@@ -51,7 +51,7 @@ class EmbeddedChunk(ChunkBase):
 @dataclass
 class LabelledChunk:
     citation_id: str
-    chunk_id: UUID
+    id: UUID
     text: str
 
 

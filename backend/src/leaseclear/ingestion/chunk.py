@@ -55,7 +55,7 @@ def _chunk_document(document: AssignedDocument) -> list[ChunkBase]:
         search_from = char_end
         chunks.append(
             ChunkBase(
-                chunk_id=uuid.uuid4(),
+                id=uuid.uuid4(),
                 document_id=document.id,
                 document_slug=document.slug,
                 text=raw.text,

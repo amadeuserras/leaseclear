@@ -13,7 +13,7 @@ def label_chunks(chunks: list[ChunkBase]) -> list[LabelledChunk]:
     return [
         LabelledChunk(
             citation_id=_make_citation_id(c),
-            chunk_id=c.chunk_id,
+            id=c.id,
             text=c.text,
         )
         for c in chunks
