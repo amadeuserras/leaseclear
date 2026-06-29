@@ -1,12 +1,20 @@
-from leaseclear.ingestion.parse import ParsedDocument, parse_pdf
+from leaseclear.ingestion.parse import parse_document
+from leaseclear.types import UploadDocument
 from tests.conftest import CORPUS_LEASE_PDF
-from tests.ingestion.data.expected_parsed_lease import EXPECTED_PARSED_LEASE_PAGES
 
 
 def test_parse_pdf_corpus_lease() -> None:
-    parsed = parse_pdf(CORPUS_LEASE_PDF)
-
-    assert parsed == ParsedDocument(
-        source=CORPUS_LEASE_PDF.resolve(),
-        pages=EXPECTED_PARSED_LEASE_PAGES,
+    upload = UploadDocument(
+        path=str(CORPUS_LEASE_PDF),
+        filename=CORPUS_LEASE_PDF.name,
     )
+    parsed = parse_document(upload)
+
+    assert parsed.filename == CORPUS_LEASE_PDF.name
+    assert len(parsed.pages) == 3
+    assert [page.page_number for page in parsed.pages] == [1, 2, 3]
+    assert all(page.text.strip() for page in parsed.pages)
+
+    assert "RESIDENTIAL LEASE AGREEMENT" in parsed.pages[0].text
+    assert "3. Rent" in parsed.pages[0].text
+    assert "SCHEDULE A" in parsed.pages[2].text

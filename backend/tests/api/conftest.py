@@ -8,7 +8,6 @@ from fastapi.testclient import TestClient
 
 from leaseclear.api.limiter import limiter
 from leaseclear.api.main import app
-from leaseclear.api.schemas import DocumentResponse
 from leaseclear.core.config import settings
 from leaseclear.db.connection import close_pool
 from leaseclear.generation.prompts import DELIMITER
@@ -49,14 +48,10 @@ def mock_generate_stream(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture
 def mock_upload_document(monkeypatch: pytest.MonkeyPatch) -> None:
-    async def fake_upload_document(_file: object) -> DocumentResponse:
-        return DocumentResponse(
-            document_id="00000000-0000-0000-0000-000000000099",
-            filename="lease.pdf",
-            chunks_created=0,
-        )
+    async def fake_upload_documents(_files: object) -> None:
+        return None
 
-    monkeypatch.setattr("leaseclear.api.main.upload_document", fake_upload_document)
+    monkeypatch.setattr("leaseclear.api.main.upload_documents", fake_upload_documents)
 
 
 @pytest.fixture(autouse=True)

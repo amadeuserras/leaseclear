@@ -5,9 +5,11 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 
-from leaseclear.ingestion.chunk import chunk_document
+from leaseclear.ingestion.chunk import chunk_documents
 from leaseclear.ingestion.embed import embed_chunks
-from leaseclear.ingestion.parse import parse_pdf
+from leaseclear.ingestion.parse import parse_document
+from leaseclear.ingestion.slug import make_document_slug
+from leaseclear.types import AssignedDocument, UploadDocument
 from tests.conftest import (
     CORPUS_LEASE_DOCUMENT_ID,
     CORPUS_LEASE_PDF,
@@ -16,8 +18,18 @@ from tests.conftest import (
 
 
 def main() -> None:
-    document = parse_pdf(CORPUS_LEASE_PDF)
-    chunks = chunk_document(document, CORPUS_LEASE_DOCUMENT_ID)
+    upload = UploadDocument(
+        path=str(CORPUS_LEASE_PDF),
+        filename=CORPUS_LEASE_PDF.name,
+    )
+    parsed = parse_document(upload)
+    assigned = AssignedDocument(
+        id=CORPUS_LEASE_DOCUMENT_ID,
+        slug=make_document_slug(CORPUS_LEASE_PDF.name),
+        filename=CORPUS_LEASE_PDF.name,
+        pages=parsed.pages,
+    )
+    chunks = chunk_documents([assigned])
     all_embedded = embed_chunks(chunks)
 
     payload = {"chunks": [asdict(chunk) for chunk in all_embedded]}

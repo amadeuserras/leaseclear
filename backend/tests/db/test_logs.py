@@ -8,11 +8,12 @@ from leaseclear.types import QueryLogEntry
 
 
 async def test_insert_query_log(seed_db: DbConnection) -> None:
+    chunk_id = str(uuid4())
     entry = QueryLogEntry(
         id=uuid4(),
         question="How much is the security deposit?",
         document_ids=["test_lease"],
-        chunk_ids_retrieved=["test_lease_chunk-005"],
+        chunk_ids_retrieved=[chunk_id],
         ttft_s=0.42,
         total_s=1.8,
         input_tokens=512,
@@ -28,4 +29,4 @@ async def test_insert_query_log(seed_db: DbConnection) -> None:
     assert row is not None
     assert row["question"] == entry.question
     assert row["refused"] is False
-    assert row["chunk_ids_retrieved"] == ["test_lease_chunk-005"]
+    assert row["chunk_ids_retrieved"] == [chunk_id]

@@ -89,9 +89,9 @@ def test_documents_accepts_valid_token(
     response = api_client.post(
         "/documents",
         headers={"Authorization": f"Bearer {valid_token}"},
-        files={"file": ("lease.pdf", b"fake-pdf", "application/pdf")},
+        files={"files": ("lease.pdf", b"fake-pdf", "application/pdf")},
     )
-    assert response.status_code == 200
+    assert response.status_code == 204
 
 
 def test_query_does_not_require_auth(

@@ -8,6 +8,7 @@ def _chunk(chunk_id: str) -> ChunkBase:
     return ChunkBase(
         chunk_id=chunk_id,
         document_id="test_lease",
+        document_slug="test-lease",
         text=f"text for {chunk_id}",
         clause_label=None,
         page_number=1,

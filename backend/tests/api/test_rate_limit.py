@@ -27,11 +27,11 @@ def test_documents_returns_429_after_limit(
     )
     token = register.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
-    files = {"file": ("lease.pdf", b"fake-pdf", "application/pdf")}
+    files = {"files": ("lease.pdf", b"fake-pdf", "application/pdf")}
 
     for _ in range(5):
         response = api_client.post("/documents", headers=headers, files=files)
-        assert response.status_code == 200
+        assert response.status_code == 204
 
     response = api_client.post("/documents", headers=headers, files=files)
     assert response.status_code == 429
