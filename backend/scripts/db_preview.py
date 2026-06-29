@@ -140,9 +140,7 @@ async def main() -> None:
 
             for table in tables:
                 columns = await list_columns(conn, table)
-                total_rows = await conn.fetchval(
-                    f'SELECT COUNT(*) FROM "{table}"'
-                )
+                total_rows = await conn.fetchval(f'SELECT COUNT(*) FROM "{table}"')
                 rows = await conn.fetch(f'SELECT * FROM "{table}" LIMIT {MAX_ROWS}')
                 print_table(table, columns, rows, total_rows)
     finally:
