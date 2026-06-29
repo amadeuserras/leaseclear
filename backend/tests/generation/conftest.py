@@ -13,12 +13,12 @@ def chunks() -> list[LabelledChunk]:
     return [
         LabelledChunk(
             citation_id="[lease §3. Rent]",
-            chunk_id=str(uuid4()),
+            chunk_id=uuid4(),
             text="Tenant shall pay Rent of $2,875.00 per month.",
         ),
         LabelledChunk(
             citation_id="[lease §4. Security Deposit]",
-            chunk_id=str(uuid4()),
+            chunk_id=uuid4(),
             text="Tenant shall deposit $5,750.00 as a security deposit.",
         ),
     ]

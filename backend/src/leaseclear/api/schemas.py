@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -17,11 +19,11 @@ class TokenResponse(BaseModel):
 
 class QueryRequest(BaseModel):
     question: str
-    document_ids: list[str] | None = None
+    document_ids: list[UUID] | None = None
 
 
 class Citation(BaseModel):
-    chunk_id: str
+    chunk_id: UUID
     clause_label: str
     page_number: int
     passage: str

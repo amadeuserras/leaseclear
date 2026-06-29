@@ -15,7 +15,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE documents (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY,
     filename TEXT NOT NULL,
     slug TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -23,7 +23,7 @@ CREATE TABLE documents (
 
 CREATE TABLE chunks (
     chunk_id UUID PRIMARY KEY,
-    document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
     document_slug TEXT NOT NULL,
     text TEXT NOT NULL,
     embedding vector(1536) NOT NULL,
@@ -44,8 +44,8 @@ CREATE INDEX chunks_text_tsv_gin_idx
 CREATE TABLE logs (
     id UUID PRIMARY KEY,
     question TEXT NOT NULL,
-    document_ids TEXT[],
-    chunk_ids_retrieved TEXT[] NOT NULL,
+    document_ids UUID[],
+    chunk_ids_retrieved UUID[] NOT NULL,
     ttft_s REAL,
     total_s REAL,
     input_tokens INT,

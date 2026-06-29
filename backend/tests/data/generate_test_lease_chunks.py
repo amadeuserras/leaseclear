@@ -10,7 +10,7 @@ from leaseclear.ingestion.embed import embed_chunks
 from leaseclear.ingestion.parse import parse_document
 from leaseclear.ingestion.slug import make_document_slug
 from leaseclear.types import AssignedDocument, UploadDocument
-from tests.conftest import (
+from tests.data.corpus import (
     CORPUS_LEASE_DOCUMENT_ID,
     CORPUS_LEASE_PDF,
     TEST_LEASE_CHUNKS_PATH,
@@ -32,7 +32,16 @@ def main() -> None:
     chunks = chunk_documents([assigned])
     all_embedded = embed_chunks(chunks)
 
-    payload = {"chunks": [asdict(chunk) for chunk in all_embedded]}
+    payload = {
+        "chunks": [
+            {
+                **asdict(chunk),
+                "chunk_id": str(chunk.chunk_id),
+                "document_id": str(chunk.document_id),
+            }
+            for chunk in all_embedded
+        ]
+    }
     TEST_LEASE_CHUNKS_PATH.parent.mkdir(parents=True, exist_ok=True)
     TEST_LEASE_CHUNKS_PATH.write_text(json.dumps(payload))
     print(f"Wrote {len(all_embedded)} chunks to {TEST_LEASE_CHUNKS_PATH}")

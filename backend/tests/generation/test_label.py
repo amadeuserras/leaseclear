@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from leaseclear.generation.label import label_chunks
 from leaseclear.types import ChunkBase
 
+TEST_DOCUMENT_ID = UUID("00000000-0000-4000-8000-000000000002")
 
-def make_chunk(document_id: str, clause_label: str | None) -> ChunkBase:
+
+def make_chunk(document_id: UUID, clause_label: str | None) -> ChunkBase:
     return ChunkBase(
-        chunk_id=str(uuid4()),
+        chunk_id=uuid4(),
         document_id=document_id,
         document_slug="test-lease",
         text="some text",
@@ -21,12 +23,12 @@ def make_chunk(document_id: str, clause_label: str | None) -> ChunkBase:
 
 
 def test_label_with_clause():
-    chunks = [make_chunk("test_lease", "3. Rent")]
+    chunks = [make_chunk(TEST_DOCUMENT_ID, "3. Rent")]
     result = label_chunks(chunks)
-    assert result[0].citation_id == "[test_lease §3. Rent]"
+    assert result[0].citation_id == f"[{TEST_DOCUMENT_ID} §3. Rent]"
 
 
 def test_label_fallback_when_no_clause():
-    chunks = [make_chunk("test_lease", None)]
+    chunks = [make_chunk(TEST_DOCUMENT_ID, None)]
     result = label_chunks(chunks)
-    assert result[0].citation_id == "[test_lease p.1]"
+    assert result[0].citation_id == f"[{TEST_DOCUMENT_ID} p.1]"

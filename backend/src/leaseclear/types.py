@@ -24,7 +24,7 @@ class ParsedDocument:
 
 @dataclass
 class AssignedDocument:
-    id: str
+    id: UUID
     slug: str
     filename: str
     pages: list[PageText]
@@ -32,8 +32,8 @@ class AssignedDocument:
 
 @dataclass
 class ChunkBase:
-    chunk_id: str
-    document_id: str
+    chunk_id: UUID
+    document_id: UUID
     document_slug: str
     text: str
     clause_label: str | None
@@ -51,7 +51,7 @@ class EmbeddedChunk(ChunkBase):
 @dataclass
 class LabelledChunk:
     citation_id: str
-    chunk_id: str
+    chunk_id: UUID
     text: str
 
 
@@ -85,8 +85,8 @@ class GenerationStreamMeta:
 class QueryLogEntry:
     id: UUID
     question: str
-    document_ids: list[str] | None
-    chunk_ids_retrieved: list[str]
+    document_ids: list[UUID] | None
+    chunk_ids_retrieved: list[UUID]
     ttft_s: float | None
     total_s: float | None
     input_tokens: int | None

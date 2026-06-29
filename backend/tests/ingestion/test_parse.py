@@ -1,6 +1,6 @@
 from leaseclear.ingestion.parse import parse_document
 from leaseclear.types import UploadDocument
-from tests.conftest import CORPUS_LEASE_PDF
+from tests.data.corpus import CORPUS_LEASE_PDF
 
 
 def test_parse_pdf_corpus_lease() -> None:

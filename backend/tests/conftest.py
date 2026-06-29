@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 from collections.abc import AsyncIterator
-from pathlib import Path
 
 import asyncpg
 import pytest
@@ -11,15 +9,12 @@ from leaseclear.core.config import settings
 from leaseclear.db.connection import apply_schema
 from leaseclear.ingestion.slug import make_document_slug
 from leaseclear.ingestion.store import store_chunks, store_documents
-from leaseclear.types import AssignedDocument, EmbeddedChunk
-
-CORPUS_LEASE_PDF = Path(__file__).resolve().parent / "data" / "test_lease.pdf"
-CORPUS_LEASE_DOCUMENT_ID = "test_lease"
-TEST_LEASE_CHUNKS_PATH = (
-    Path(__file__).resolve().parent / "data" / "test_lease_chunks.json"
+from leaseclear.types import AssignedDocument
+from tests.data.corpus import (
+    CORPUS_LEASE_DOCUMENT_ID,
+    CORPUS_LEASE_PDF,
+    SEED_CHUNKS,
 )
-_fixture_data = json.loads(TEST_LEASE_CHUNKS_PATH.read_text())
-SEED_CHUNKS = [EmbeddedChunk(**c) for c in _fixture_data["chunks"]]
 
 
 @pytest.fixture(scope="session")

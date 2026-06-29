@@ -4,7 +4,7 @@ import json
 import logging
 import time
 from collections.abc import AsyncIterator
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from leaseclear.api.schemas import Citation, QueryResponse
 from leaseclear.db.connection import get_pool
@@ -123,7 +123,7 @@ async def _stream_prose(
 
 async def query_events(
     question: str,
-    document_ids: list[str] | None = None,
+    document_ids: list[UUID] | None = None,
 ) -> AsyncIterator[dict[str, str]]:
     start = time.perf_counter()
     ttft_s: float | None = None
@@ -176,7 +176,7 @@ async def query_events(
 
 async def run_query(
     question: str,
-    document_ids: list[str] | None = None,
+    document_ids: list[UUID] | None = None,
 ) -> QueryResponse:
     async for event in query_events(question, document_ids):
         if event["event"] == "done":

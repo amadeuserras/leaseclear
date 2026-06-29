@@ -5,14 +5,15 @@ from uuid import uuid4
 from leaseclear.db.connection import DbConnection
 from leaseclear.db.logs import insert_query_log
 from leaseclear.types import QueryLogEntry
+from tests.data.corpus import CORPUS_LEASE_DOCUMENT_ID
 
 
 async def test_insert_query_log(seed_db: DbConnection) -> None:
-    chunk_id = str(uuid4())
+    chunk_id = uuid4()
     entry = QueryLogEntry(
         id=uuid4(),
         question="How much is the security deposit?",
-        document_ids=["test_lease"],
+        document_ids=[CORPUS_LEASE_DOCUMENT_ID],
         chunk_ids_retrieved=[chunk_id],
         ttft_s=0.42,
         total_s=1.8,
