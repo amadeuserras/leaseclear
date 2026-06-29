@@ -12,13 +12,14 @@ from leaseclear.db.connection import apply_schema
 from leaseclear.ingestion.store import store_chunks, store_document
 from leaseclear.types import EmbeddedChunk
 
-CORPUS_LEASE_PDF = Path(__file__).resolve().parent / "fixtures" / "test_lease.pdf"
+CORPUS_LEASE_PDF = Path(__file__).resolve().parent / "data" / "test_lease.pdf"
 CORPUS_LEASE_DOCUMENT_ID = "test_lease"
 
-FIXTURE_PATH = Path(__file__).resolve().parent / "fixtures" / "seed_corpus.json"
-_fixture_data = json.loads(FIXTURE_PATH.read_text())
+TEST_LEASE_CHUNKS_PATH = (
+    Path(__file__).resolve().parent / "data" / "test_lease_chunks.json"
+)
+_fixture_data = json.loads(TEST_LEASE_CHUNKS_PATH.read_text())
 SEED_CHUNKS = [EmbeddedChunk(**c) for c in _fixture_data["chunks"]]
-QUERY_EMBEDDINGS = _fixture_data["query_embeddings"]
 
 
 @pytest.fixture(scope="session")
@@ -40,19 +41,6 @@ async def ensure_test_database(database_url: str) -> None:
             await conn.execute(f'CREATE DATABASE "{db_name}"')
     finally:
         await conn.close()
-
-
-@pytest.fixture(autouse=True)
-def mock_embed_texts(
-    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    if request.node.get_closest_marker("real_api") is not None:
-        return
-
-    def fake_embed_texts(texts: list[str]) -> list[list[float]]:
-        return [QUERY_EMBEDDINGS[text] for text in texts]
-
-    monkeypatch.setattr("leaseclear.retrieval.vector.embed_texts", fake_embed_texts)
 
 
 @pytest.fixture

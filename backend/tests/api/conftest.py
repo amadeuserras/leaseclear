@@ -16,6 +16,15 @@ from leaseclear.types import GenerationStreamMeta, LabelledChunk
 
 MOCK_INPUT_TOKENS = 10
 MOCK_OUTPUT_TOKENS = 20
+_FAKE_QUERY_EMBEDDING = [0.01] * 1536
+
+
+@pytest.fixture(autouse=True)
+def mock_embed_texts(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_embed_texts(texts: list[str]) -> list[list[float]]:
+        return [_FAKE_QUERY_EMBEDDING for _ in texts]
+
+    monkeypatch.setattr("leaseclear.retrieval.vector.embed_texts", fake_embed_texts)
 
 
 @pytest.fixture
