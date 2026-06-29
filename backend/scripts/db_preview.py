@@ -70,8 +70,15 @@ def format_cell(value: object, *, max_width: int = MAX_CELL_WIDTH) -> str:
     return text
 
 
+def table_header(table: str, total_rows: int) -> str:
+    return f"\n=== {table} ({total_rows} rows) ==="
+
+
 def print_table(
-    table: str, columns: list[tuple[str, str]], rows: list[asyncpg.Record]
+    table: str,
+    columns: list[tuple[str, str]],
+    rows: list[asyncpg.Record],
+    total_rows: int,
 ) -> None:
     compact = [is_compact_column(name, dtype) for name, dtype in columns]
     headers = [
@@ -85,7 +92,7 @@ def print_table(
     ]
 
     if not rows:
-        print(f"\n=== {table} (0 rows) ===")
+        print(table_header(table, total_rows))
         for header in headers:
             print(f"  {header}")
         print("  (no rows)")
@@ -106,7 +113,7 @@ def print_table(
         for index, header in enumerate(headers)
     ]
 
-    print(f"\n=== {table} (showing {len(rows)} row(s)) ===")
+    print(table_header(table, total_rows))
 
     header_line = " | ".join(
         header.ljust(widths[index]) for index, header in enumerate(headers)
@@ -133,8 +140,11 @@ async def main() -> None:
 
             for table in tables:
                 columns = await list_columns(conn, table)
+                total_rows = await conn.fetchval(
+                    f'SELECT COUNT(*) FROM "{table}"'
+                )
                 rows = await conn.fetch(f'SELECT * FROM "{table}" LIMIT {MAX_ROWS}')
-                print_table(table, columns, rows)
+                print_table(table, columns, rows, total_rows)
     finally:
         await close_pool()
 
