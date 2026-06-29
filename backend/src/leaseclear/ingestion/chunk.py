@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import re
+import uuid
 from dataclasses import dataclass
 
 import tiktoken
 
-from leaseclear.ingestion.parse import PageText, ParsedDocument
-from leaseclear.types import ChunkBase
+from leaseclear.types import AssignedDocument, ChunkBase, PageText
 
 SUB_CLAUSE_LINE = re.compile(r"^(\d+\.\d+)\s+(.*)$")
 TOP_CLAUSE_LINE = re.compile(r"^(\d+)\.\s+(.*)$")
@@ -31,16 +31,23 @@ class _RawChunk:
     page_number: int
 
 
-def chunk_document(document: ParsedDocument, document_id: str) -> list[ChunkBase]:
+def chunk_documents(documents: list[AssignedDocument]) -> list[ChunkBase]:
+    chunks: list[ChunkBase] = []
+    for document in documents:
+        chunks.extend(_chunk_document(document))
+    return chunks
+
+
+def _chunk_document(document: AssignedDocument) -> list[ChunkBase]:
     sections = _split_into_sections(document.pages)
     raw_chunks: list[_RawChunk] = []
     for section in sections:
         raw_chunks.extend(_section_to_chunks(section))
 
-    full_text = document.full_text
+    full_text = "\n\n".join(page.text for page in document.pages if page.text)
     search_from = 0
     chunks: list[ChunkBase] = []
-    for index, raw in enumerate(raw_chunks, start=1):
+    for raw in raw_chunks:
         char_start = full_text.find(raw.text, search_from)
         if char_start == -1:
             char_start = search_from
@@ -48,8 +55,9 @@ def chunk_document(document: ParsedDocument, document_id: str) -> list[ChunkBase
         search_from = char_end
         chunks.append(
             ChunkBase(
-                chunk_id=f"{document_id}_chunk-{index:03d}",
-                document_id=document_id,
+                chunk_id=str(uuid.uuid4()),
+                document_id=document.id,
+                document_slug=document.slug,
                 text=raw.text,
                 clause_label=raw.clause_label,
                 page_number=raw.page_number,

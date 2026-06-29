@@ -10,12 +10,12 @@ from leaseclear.types import LabelledChunk
 chunks = [
     LabelledChunk(
         citation_id="[lease §3. Rent]",
-        chunk_id="test_lease_chunk-004",
+        chunk_id="d0000000-0000-4000-8000-000000000004",
         text="3. Rent. Tenant shall pay Rent of $2,875.00 per month, due on the 1st of each month.",
     ),
     LabelledChunk(
         citation_id="[lease §4. Security Deposit]",
-        chunk_id="test_lease_chunk-005",
+        chunk_id="d0000000-0000-4000-8000-000000000005",
         text="4. Security Deposit. Tenant shall deposit $5,750.00 as a security deposit prior to move-in.",
     ),
 ]

@@ -1,21 +1,19 @@
 from __future__ import annotations
 
 from leaseclear.db.connection import DbConnection
-from leaseclear.types import EmbeddedChunk
+from leaseclear.types import AssignedDocument, EmbeddedChunk
 
 
-async def store_document(
+async def store_documents(
     conn: DbConnection,
-    document_id: str,
-    filename: str,
+    documents: list[AssignedDocument],
 ) -> None:
-    await conn.execute(
+    await conn.executemany(
         """--sql
-        INSERT INTO documents (id, filename)
-        VALUES ($1, $2)
+        INSERT INTO documents (id, filename, slug)
+        VALUES ($1, $2, $3)
         """,
-        document_id,
-        filename,
+        [(doc.id, doc.filename, doc.slug) for doc in documents],
     )
 
 
@@ -26,16 +24,17 @@ async def store_chunks(
     await conn.executemany(
         """--sql
         INSERT INTO chunks (
-            chunk_id, document_id, text, embedding,
+            chunk_id, document_id, document_slug, text, embedding,
             clause_label, page_number, char_start, char_end, token_count
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         ON CONFLICT (chunk_id) DO UPDATE SET embedding = EXCLUDED.embedding
         """,
         [
             (
                 chunk.chunk_id,
                 chunk.document_id,
+                chunk.document_slug,
                 chunk.text,
                 str(chunk.embedding),
                 chunk.clause_label,

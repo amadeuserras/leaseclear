@@ -7,14 +7,14 @@ from fastapi import Depends, FastAPI, File, Request, UploadFile
 from sse_starlette.sse import EventSourceResponse
 
 from leaseclear.api.auth import router as auth_router
-from leaseclear.api.documents import upload_document
+from leaseclear.api.documents import upload_documents
 from leaseclear.api.limiter import (
     RateLimitExceeded,
     limiter,
     rate_limit_exceeded_handler,
 )
 from leaseclear.api.query import query_events
-from leaseclear.api.schemas import DocumentResponse, HealthResponse, QueryRequest
+from leaseclear.api.schemas import HealthResponse, QueryRequest
 from leaseclear.auth.deps import current_user
 from leaseclear.db.connection import close_pool, get_pool
 
@@ -37,14 +37,14 @@ def health() -> HealthResponse:
     return HealthResponse(status="ok")
 
 
-@app.post("/documents", response_model=DocumentResponse)
+@app.post("/documents", status_code=204)
 @limiter.limit("5/minute")
 async def documents_upload(
     request: Request,
-    file: Annotated[UploadFile, File()],
+    files: Annotated[list[UploadFile], File()],
     _user_id: Annotated[str, Depends(current_user)],
-) -> DocumentResponse:
-    return await upload_document(file)
+) -> None:
+    await upload_documents(files)
 
 
 @app.post("/query")

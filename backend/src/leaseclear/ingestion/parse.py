@@ -1,34 +1,15 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
 import fitz
 
-
-@dataclass
-class PageText:
-    page_number: int
-    text: str
+from leaseclear.types import PageText, ParsedDocument, UploadDocument
 
 
-@dataclass
-class ParsedDocument:
-    source: Path
-    pages: list[PageText]
-
-    @property
-    def page_count(self) -> int:
-        return len(self.pages)
-
-    @property
-    def full_text(self) -> str:
-        return "\n\n".join(page.text for page in self.pages if page.text)
-
-
-def parse_pdf(path: Path | str) -> ParsedDocument:
-    source = Path(path)
+def parse_document(upload: UploadDocument) -> ParsedDocument:
+    source = Path(upload.path)
     pages: list[PageText] = []
 
     with fitz.open(source) as doc:
@@ -37,4 +18,4 @@ def parse_pdf(path: Path | str) -> ParsedDocument:
             text = cast(str, page.get_text("text")).strip()
             pages.append(PageText(page_number=index + 1, text=text))
 
-    return ParsedDocument(source=source.resolve(), pages=pages)
+    return ParsedDocument(filename=upload.filename, pages=pages)

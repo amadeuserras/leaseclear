@@ -17,17 +17,17 @@ from leaseclear.utils.pretty_print import pretty_print
 
 vector_results = [
     {
-        "chunk_id": "test_lease_chunk-005",
+        "chunk_id": "d0000000-0000-4000-8000-000000000005",
         "clause_label": "5. Security Deposit",
         "text": "5. Security Deposit. Tenant shall deposit $5,750.00 as a security deposit prior to move-in.",
     },
     {
-        "chunk_id": "test_lease_chunk-004",
+        "chunk_id": "d0000000-0000-4000-8000-000000000004",
         "clause_label": "4. Rent",
         "text": "4. Rent. Tenant shall pay Rent of $2,875.00 per month, due on the 1st of each month.",
     },
     {
-        "chunk_id": "test_lease_chunk-011",
+        "chunk_id": "d0000000-0000-4000-8000-000000000011",
         "clause_label": "11. Statutory Disclosures",
         "text": "11. Statutory and Condition Disclosures. The following disclosures form part of this Agreement...",
     },
@@ -35,12 +35,12 @@ vector_results = [
 
 lexical_results = [
     {
-        "chunk_id": "test_lease_chunk-005",
+        "chunk_id": "d0000000-0000-4000-8000-000000000005",
         "clause_label": "5. Security Deposit",
         "text": "5. Security Deposit. Tenant shall deposit $5,750.00 as a security deposit prior to move-in.",
     },
     {
-        "chunk_id": "test_lease_chunk-008",
+        "chunk_id": "d0000000-0000-4000-8000-000000000008",
         "clause_label": "8. Maintenance",
         "text": "8. Maintenance, Use, and Reporting. Tenant shall properly use, operate, and safeguard the Premises...",
     },
@@ -48,28 +48,28 @@ lexical_results = [
 
 # Fused output — re-ranked by RRF score.
 #
-#   lease_chunk-005  vector rank 1 + lexical rank 1  →  1/61 + 1/61 ≈ 0.0328
-#   lease_chunk-004  vector rank 2 only               →  1/62       ≈ 0.0161
-#   lease_chunk-008  lexical rank 2 only              →  1/62       ≈ 0.0161
-#   lease_chunk-011  vector rank 3 only               →  1/63       ≈ 0.0159
+#   d0000000-0000-4000-8000-000000000005  vector rank 1 + lexical rank 1  →  1/61 + 1/61 ≈ 0.0328
+#   d0000000-0000-4000-8000-000000000004  vector rank 2 only               →  1/62       ≈ 0.0161
+#   d0000000-0000-4000-8000-000000000008  lexical rank 2 only              →  1/62       ≈ 0.0161
+#   d0000000-0000-4000-8000-000000000011  vector rank 3 only               →  1/63       ≈ 0.0159
 example_output = [
     {
-        "chunk_id": "test_lease_chunk-005",
+        "chunk_id": "d0000000-0000-4000-8000-000000000005",
         "clause_label": "5. Security Deposit",
         "rrf_note": "rank 1 in vector + rank 1 in lexical",
     },
     {
-        "chunk_id": "test_lease_chunk-004",
+        "chunk_id": "d0000000-0000-4000-8000-000000000004",
         "clause_label": "4. Rent",
         "rrf_note": "rank 2 in vector only",
     },
     {
-        "chunk_id": "test_lease_chunk-008",
+        "chunk_id": "d0000000-0000-4000-8000-000000000008",
         "clause_label": "8. Maintenance",
         "rrf_note": "rank 2 in lexical only",
     },
     {
-        "chunk_id": "test_lease_chunk-011",
+        "chunk_id": "d0000000-0000-4000-8000-000000000011",
         "clause_label": "11. Statutory Disclosures",
         "rrf_note": "rank 3 in vector only",
     },

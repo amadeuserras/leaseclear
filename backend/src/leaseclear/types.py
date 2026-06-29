@@ -5,9 +5,36 @@ from uuid import UUID
 
 
 @dataclass
+class UploadDocument:
+    path: str
+    filename: str
+
+
+@dataclass
+class PageText:
+    page_number: int
+    text: str
+
+
+@dataclass
+class ParsedDocument:
+    filename: str
+    pages: list[PageText]
+
+
+@dataclass
+class AssignedDocument:
+    id: str
+    slug: str
+    filename: str
+    pages: list[PageText]
+
+
+@dataclass
 class ChunkBase:
     chunk_id: str
     document_id: str
+    document_slug: str
     text: str
     clause_label: str | None
     page_number: int

@@ -17,12 +17,14 @@ CREATE TABLE users (
 CREATE TABLE documents (
     id TEXT PRIMARY KEY,
     filename TEXT NOT NULL,
+    slug TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE chunks (
-    chunk_id TEXT PRIMARY KEY,
+    chunk_id UUID PRIMARY KEY,
     document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    document_slug TEXT NOT NULL,
     text TEXT NOT NULL,
     embedding vector(1536) NOT NULL,
     clause_label TEXT,
