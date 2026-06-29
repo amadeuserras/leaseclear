@@ -8,6 +8,13 @@
   <span class="cb">{{ '&#9746;' if (checked is defined and checked) else '&#9744;' }}</span>
 {%- endmacro -%}
 
+{%- macro initials_footer_slots(label, slots) -%}
+  {{ label }}
+  {%- for slot in slots -%}
+    {%- if slot -%} ({{ slot }}){%- else -%} (_______){%- endif -%}
+  {%- endfor -%}
+{%- endmacro -%}
+
 {%- set L = lease | default({}) -%}
 <!DOCTYPE html>
 <html lang="en">
