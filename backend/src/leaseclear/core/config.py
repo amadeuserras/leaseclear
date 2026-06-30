@@ -13,7 +13,8 @@ class Settings(BaseSettings):
     test_database_url: str = (
         "postgresql://leaseclear:leaseclear@localhost:5433/leaseclear_test"
     )
-    openai_api_key: str
+    openai_embeddings_api_key: str
+    openai_judge_api_key: str
     anthropic_api_key: str
     jwt_secret: str
 
