@@ -10,72 +10,31 @@ from leaseclear.api.schemas import Citation, QueryResponse
 from leaseclear.db.connection import get_pool
 from leaseclear.db.logs import insert_query_log
 from leaseclear.generation.generate import generate_stream
+from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import DELIMITER, REFUSAL_MESSAGE
 from leaseclear.generation.validate import validate
 from leaseclear.retrieval import hybrid
 from leaseclear.types import ChunkBase, GenerationResult, QueryLogEntry
-from leaseclear.types import (
-    Citation as GenCitation,
-)
+from leaseclear.types import Citation as GenCitation
 
 logger = logging.getLogger(__name__)
 
 
-def _strip_markdown_fence(raw: str) -> str:
-    cleaned = raw.strip()
-    if not cleaned.startswith("```"):
-        return cleaned
-    cleaned = cleaned.split("\n", 1)[1]
-    cleaned = cleaned.rsplit("```", 1)[0]
-    return cleaned.strip()
-
-
-def _parse_metadata(raw: str) -> tuple[list[GenCitation], float]:
-    parts = raw.split(DELIMITER, 1)
-    if len(parts) != 2:
-        raise ValueError(
-            f"Expected prose and metadata separated by {DELIMITER!r}\n\nRaw:\n{raw}"
-        )
-    try:
-        data = json.loads(_strip_markdown_fence(parts[1]))
-    except json.JSONDecodeError as e:
-        raise ValueError(
-            f"Claude returned invalid metadata JSON: {e}\n\nRaw:\n{raw}"
-        ) from e
-    citations = [GenCitation(**c) for c in data.get("citations", [])]
-    return citations, float(data["confidence"])
-
-
-def _to_response(
-    result: GenerationResult,
-    retrieved: list[ChunkBase],
-) -> QueryResponse:
-    chunk_by_citation = {chunk.citation_id: chunk for chunk in retrieved}
-    citations = [
-        Citation(
-            chunk_id=chunk.id,
-            clause_label=chunk.clause_label or "",
-            page_number=chunk.page_number,
-            passage=c.quote,
-        )
-        for c in result.citations
-        if (chunk := chunk_by_citation.get(c.id)) is not None
-    ]
+def _to_response(result: GenerationResult, retrieved: list[ChunkBase]) -> QueryResponse:
+    cited = resolve_citations([c.id for c in result.citations], retrieved)
     return QueryResponse(
         answer=result.answer,
-        citations=citations,
+        citations=[
+            Citation(
+                chunk_id=chunk.id,
+                clause_label=chunk.clause_label or "",
+                page_number=chunk.page_number,
+                passage=chunk.text,
+            )
+            for chunk in cited
+        ],
         confidence=result.confidence,
     )
-
-
-def _finalize(
-    raw: str,
-    chunks: list[ChunkBase],
-) -> GenerationResult:
-    citations, confidence = _parse_metadata(raw)
-    result = GenerationResult(answer="", citations=citations, confidence=confidence)
-    validate(result, chunks, REFUSAL_MESSAGE)
-    return result
 
 
 async def _stream_prose(
@@ -99,7 +58,6 @@ async def _stream_prose(
             past_delimiter = True
             continue
 
-        # hold back the last few chars: they might be a half-arrived delimiter
         safe = len(buffer) - (len(DELIMITER) - 1)
         if safe > emitted:
             yield buffer[emitted:safe]
@@ -134,12 +92,13 @@ async def query_events(
         prose_parts.append(prose)
         yield {"event": "token", "data": prose}
 
-    result = _finalize("".join(raw_parts), retrieved)
+    prose, citation_ids, confidence = parse_response("".join(raw_parts))
     result = GenerationResult(
         answer="".join(prose_parts).strip(),
-        citations=result.citations,
-        confidence=result.confidence,
+        citations=[GenCitation(id=cid) for cid in citation_ids],
+        confidence=confidence,
     )
+    validate(result, retrieved, REFUSAL_MESSAGE)
     payload = _to_response(result, retrieved)
     yield {"event": "done", "data": json.dumps(payload.model_dump())}
 
