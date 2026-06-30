@@ -15,7 +15,7 @@ def test_valid_citation_passes(cited_result, chunks):
 def test_phantom_id_fails(chunks):
     bad_result = GenerationResult(
         answer="The fee is $500. [lease §99. Made Up]",
-        citations=[Citation(id="[lease §99. Made Up]", quote="$500")],
+        citations=[Citation(id="[lease §99. Made Up]")],
         confidence=0.9,
     )
     result = validate(bad_result, chunks, REFUSAL_MESSAGE)

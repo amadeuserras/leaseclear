@@ -14,11 +14,9 @@ PART 1 — the answer as plain prose:
 - Never infer, assume, or use outside knowledge
 
 PART 2 — a single line {DELIMITER}, then JSON only:
-{{"citations": [{{"id": "[lease §3. Rent]", "quote": "short verbatim snippet"}}],
-"confidence": 0.0-1.0}}
+{{"citations": ["[lease §3. Rent]"], "confidence": 0.0-1.0}}
 
 Rules for Part 2:
-- One citation per distinct id used in Part 1
-- "quote" must be copied verbatim from the clause text
+- List every distinct citation id used in Part 1
 - confidence: 1.0 = explicit in text, lower = less certain
 """.strip()

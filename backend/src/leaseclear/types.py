@@ -57,7 +57,6 @@ class EmbeddedChunk(ChunkBase):
 @dataclass
 class Citation:
     id: str
-    quote: str
 
 
 @dataclass

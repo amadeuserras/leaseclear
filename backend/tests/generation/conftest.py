@@ -41,7 +41,7 @@ def chunks() -> list[ChunkBase]:
 def cited_result() -> GenerationResult:
     return GenerationResult(
         answer="The security deposit is $5,750.00. [lease §4. Security Deposit]",
-        citations=[Citation(id="[lease §4. Security Deposit]", quote="$5,750.00")],
+        citations=[Citation(id="[lease §4. Security Deposit]")],
         confidence=1.0,
     )
 
