@@ -42,17 +42,16 @@ class ChunkBase:
     char_end: int
     token_count: int
 
+    @property
+    def citation_id(self) -> str:
+        if self.clause_label:
+            return f"[{self.document_slug} §{self.clause_label}]"
+        return f"[{self.document_slug} p.{self.page_number}]"
+
 
 @dataclass
 class EmbeddedChunk(ChunkBase):
     embedding: list[float]
-
-
-@dataclass
-class LabelledChunk:
-    citation_id: str
-    id: UUID
-    text: str
 
 
 @dataclass

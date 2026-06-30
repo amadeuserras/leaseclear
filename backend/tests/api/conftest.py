@@ -11,7 +11,7 @@ from leaseclear.api.main import app
 from leaseclear.core.config import settings
 from leaseclear.db.connection import close_pool
 from leaseclear.generation.prompts import DELIMITER
-from leaseclear.types import GenerationStreamMeta, LabelledChunk
+from leaseclear.types import ChunkBase, GenerationStreamMeta
 
 MOCK_INPUT_TOKENS = 10
 MOCK_OUTPUT_TOKENS = 20
@@ -29,7 +29,7 @@ def mock_embed_texts(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.fixture
 def mock_generate_stream(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_generate_stream(
-        question: str, chunks: list[LabelledChunk]
+        question: str, chunks: list[ChunkBase]
     ) -> tuple[AsyncIterator[str], GenerationStreamMeta]:
         async def tokens() -> AsyncIterator[str]:
             cid = chunks[0].citation_id if chunks else "[lease §unknown]"

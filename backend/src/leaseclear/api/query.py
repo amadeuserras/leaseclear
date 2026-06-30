@@ -10,16 +10,10 @@ from leaseclear.api.schemas import Citation, QueryResponse
 from leaseclear.db.connection import get_pool
 from leaseclear.db.logs import insert_query_log
 from leaseclear.generation.generate import generate_stream
-from leaseclear.generation.label import label_chunks
 from leaseclear.generation.prompts import DELIMITER, REFUSAL_MESSAGE
 from leaseclear.generation.validate import validate
 from leaseclear.retrieval import hybrid
-from leaseclear.types import (
-    ChunkBase,
-    GenerationResult,
-    LabelledChunk,
-    QueryLogEntry,
-)
+from leaseclear.types import ChunkBase, GenerationResult, QueryLogEntry
 from leaseclear.types import (
     Citation as GenCitation,
 )
@@ -55,12 +49,8 @@ def _parse_metadata(raw: str) -> tuple[list[GenCitation], float]:
 def _to_response(
     result: GenerationResult,
     retrieved: list[ChunkBase],
-    labelled: list[LabelledChunk],
 ) -> QueryResponse:
-    chunk_by_citation = {
-        label.citation_id: chunk
-        for label, chunk in zip(labelled, retrieved, strict=True)
-    }
+    chunk_by_citation = {chunk.citation_id: chunk for chunk in retrieved}
     citations = [
         Citation(
             chunk_id=chunk.id,
@@ -80,11 +70,11 @@ def _to_response(
 
 def _finalize(
     raw: str,
-    labelled: list[LabelledChunk],
+    chunks: list[ChunkBase],
 ) -> GenerationResult:
     citations, confidence = _parse_metadata(raw)
     result = GenerationResult(answer="", citations=citations, confidence=confidence)
-    validate(result, labelled, REFUSAL_MESSAGE)
+    validate(result, chunks, REFUSAL_MESSAGE)
     return result
 
 
@@ -135,24 +125,22 @@ async def query_events(
     if document_ids is not None:
         retrieved = [c for c in retrieved if c.document_id in document_ids]
 
-    labelled = label_chunks(retrieved)
-
     raw_parts: list[str] = []
     prose_parts: list[str] = []
-    tokens, stream_meta = generate_stream(question, labelled)
+    tokens, stream_meta = generate_stream(question, retrieved)
     async for prose in _stream_prose(tokens, raw_parts):
         if ttft_s is None:
             ttft_s = time.perf_counter() - start
         prose_parts.append(prose)
         yield {"event": "token", "data": prose}
 
-    result = _finalize("".join(raw_parts), labelled)
+    result = _finalize("".join(raw_parts), retrieved)
     result = GenerationResult(
         answer="".join(prose_parts).strip(),
         citations=result.citations,
         confidence=result.confidence,
     )
-    payload = _to_response(result, retrieved, labelled)
+    payload = _to_response(result, retrieved)
     yield {"event": "done", "data": json.dumps(payload.model_dump())}
 
     total_s = time.perf_counter() - start

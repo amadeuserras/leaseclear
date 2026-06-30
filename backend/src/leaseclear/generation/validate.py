@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from leaseclear.types import GenerationResult, LabelledChunk, ValidationResult
+from leaseclear.types import ChunkBase, GenerationResult, ValidationResult
 
 
 def validate(
     result: GenerationResult,
-    chunks: list[LabelledChunk],
+    chunks: list[ChunkBase],
     refusal_message: str,
 ) -> ValidationResult:
     if result.answer.strip() == refusal_message:
