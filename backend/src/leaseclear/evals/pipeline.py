@@ -5,7 +5,7 @@ import asyncio
 import logging
 from pathlib import Path
 
-from leaseclear.db.connection import close_pool, get_pool
+from leaseclear.db.connection import close_pool, db_session
 from leaseclear.evals.dataset import load_all_golden
 from leaseclear.evals.judge import judge
 from leaseclear.evals.metrics import aggregate, score
@@ -26,11 +26,10 @@ async def run_eval(
     golden = items if items is not None else load_all_golden()
     results: list[EvalResult] = []
 
-    pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with db_session():
         for item in golden:
             logger.info("eval: %s", item.id)
-            result = await run_item(conn, item)
+            result = await run_item(item)
             score(result)
 
             if use_judge:

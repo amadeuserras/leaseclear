@@ -21,7 +21,7 @@ async def test_insert_query_log(seed_db: DbConnection) -> None:
         output_tokens=128,
         refused=False,
     )
-    await insert_query_log(seed_db, entry)
+    await insert_query_log(entry)
 
     row = await seed_db.fetchrow(
         "SELECT question, refused, chunk_ids_retrieved FROM logs WHERE id = $1",

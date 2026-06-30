@@ -16,7 +16,7 @@ async def test_vector_search_returns_relevant_clause(
     question: str,
     expected_clause: str,
 ) -> None:
-    results: list[ChunkBase] = await search(seed_db, question, top_k=5)
+    results: list[ChunkBase] = await search(question, top_k=5)
 
     assert results
     assert all(result.document_id == CORPUS_LEASE_DOCUMENT_ID for result in results)

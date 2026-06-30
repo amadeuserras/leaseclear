@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from leaseclear.db.connection import DbConnection
+from leaseclear.db.connection import get_conn
 from leaseclear.types import ChunkBase
 
 
 async def search(
-    conn: DbConnection,
     question: str,
     top_k: int = 20,
 ) -> list[ChunkBase]:
-    rows = await conn.fetch(
+    rows = await get_conn().fetch(
         """--sql
         SELECT id, document_id, document_slug, text, clause_label,
                page_number, char_start, char_end, token_count

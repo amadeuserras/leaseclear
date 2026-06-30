@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from leaseclear.db.connection import get_pool
+from leaseclear.db.connection import db_session
 from leaseclear.ingestion.assign import assign_document
 from leaseclear.ingestion.chunk import chunk_documents
 from leaseclear.ingestion.embed import embed_chunks
@@ -16,9 +16,8 @@ async def ingest_documents(uploads: list[UploadDocument]) -> list[ChunkBase]:
     chunks = chunk_documents(assigned)
     embedded = embed_chunks(chunks)
 
-    pool = await get_pool()
-    async with pool.acquire() as conn, conn.transaction():
-        await store_documents(conn, assigned)
-        await store_chunks(conn, embedded)
+    async with db_session() as conn, conn.transaction():
+        await store_documents(assigned)
+        await store_chunks(embedded)
 
     return chunks

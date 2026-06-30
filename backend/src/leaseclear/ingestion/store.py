@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from leaseclear.db.connection import DbConnection
+from leaseclear.db.connection import get_conn
 from leaseclear.types import AssignedDocument, EmbeddedChunk
 
 
-async def store_documents(
-    conn: DbConnection,
-    documents: list[AssignedDocument],
-) -> None:
-    await conn.executemany(
+async def store_documents(documents: list[AssignedDocument]) -> None:
+    await get_conn().executemany(
         """--sql
         INSERT INTO documents (id, filename, slug)
         VALUES ($1, $2, $3)
@@ -17,11 +14,8 @@ async def store_documents(
     )
 
 
-async def store_chunks(
-    conn: DbConnection,
-    chunks: list[EmbeddedChunk],
-) -> None:
-    await conn.executemany(
+async def store_chunks(chunks: list[EmbeddedChunk]) -> None:
+    await get_conn().executemany(
         """--sql
         INSERT INTO chunks (
             id, document_id, document_slug, text, embedding,

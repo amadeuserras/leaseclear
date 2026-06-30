@@ -6,7 +6,7 @@ import asyncpg
 import pytest
 
 from leaseclear.core.config import settings
-from leaseclear.db.connection import apply_schema
+from leaseclear.db.connection import _session_ctx, apply_schema
 from leaseclear.ingestion.store import store_chunks, store_documents
 from tests.data.corpus import SEED_CHUNKS, SEED_DOCUMENT
 
@@ -38,12 +38,14 @@ async def seed_db(
     ensure_test_database: None,
 ) -> AsyncIterator[asyncpg.Connection]:
     conn = await asyncpg.connect(database_url)
+    token = _session_ctx.set(conn)
     try:
-        await apply_schema(conn)
+        await apply_schema()
         await conn.execute("TRUNCATE chunks, logs, users, documents")
-        await store_documents(conn, [SEED_DOCUMENT])
-        await store_chunks(conn, SEED_CHUNKS)
+        await store_documents([SEED_DOCUMENT])
+        await store_chunks(SEED_CHUNKS)
         yield conn
     finally:
+        _session_ctx.reset(token)
         await conn.execute("TRUNCATE chunks, logs, users, documents")
         await conn.close()

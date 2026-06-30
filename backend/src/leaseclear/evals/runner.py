@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from leaseclear.db.connection import DbConnection
 from leaseclear.evals.types import EvalResult, GoldenItem
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
@@ -10,8 +9,8 @@ from leaseclear.retrieval import hybrid
 from leaseclear.types import Citation, GenerationResult
 
 
-async def run_item(conn: DbConnection, item: GoldenItem) -> EvalResult:
-    retrieved = await hybrid.search(conn, item.question)
+async def run_item(item: GoldenItem) -> EvalResult:
+    retrieved = await hybrid.search(item.question)
 
     raw_parts: list[str] = []
     tokens, _ = generate_stream(item.question, retrieved)

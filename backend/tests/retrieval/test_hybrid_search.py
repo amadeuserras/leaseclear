@@ -27,9 +27,9 @@ async def test_search_mrr_comparison(seed_db: asyncpg.Connection) -> None:
     vector_rrs: list[float] = []
 
     for case in CASES:
-        hybrid_results = await hybrid.search(seed_db, case.query)
-        lexical_results = await lexical.search(seed_db, case.query)
-        vector_results = await vector.search(seed_db, case.query)
+        hybrid_results = await hybrid.search(case.query)
+        lexical_results = await lexical.search(case.query)
+        vector_results = await vector.search(case.query)
 
         hybrid_rrs.append(reciprocal_rank(hybrid_results, case.expected_clause))
         lexical_rrs.append(reciprocal_rank(lexical_results, case.expected_clause))

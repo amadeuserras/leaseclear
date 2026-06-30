@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from leaseclear.db.connection import DbConnection
+from leaseclear.db.connection import get_conn
 from leaseclear.types import QueryLogEntry
 
 
-async def insert_query_log(conn: DbConnection, entry: QueryLogEntry) -> None:
-    await conn.execute(
+async def insert_query_log(entry: QueryLogEntry) -> None:
+    await get_conn().execute(
         """--sql
         INSERT INTO logs (
             id, question, document_ids, chunk_ids_retrieved,

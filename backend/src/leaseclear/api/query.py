@@ -7,7 +7,7 @@ from collections.abc import AsyncIterator
 from uuid import UUID, uuid4
 
 from leaseclear.api.schemas import Citation, QueryResponse
-from leaseclear.db.connection import get_pool
+from leaseclear.db.connection import db_session
 from leaseclear.db.logs import insert_query_log
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
@@ -76,9 +76,8 @@ async def query_events(
     start = time.perf_counter()
     ttft_s: float | None = None
 
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        retrieved = await hybrid.search(conn, question)
+    async with db_session():
+        retrieved = await hybrid.search(question)
 
     if document_ids is not None:
         retrieved = [c for c in retrieved if c.document_id in document_ids]
@@ -115,8 +114,8 @@ async def query_events(
         refused=result.answer.strip() == REFUSAL_MESSAGE,
     )
     try:
-        async with pool.acquire() as conn:
-            await insert_query_log(conn, entry)
+        async with db_session():
+            await insert_query_log(entry)
     except Exception:
         logger.exception("failed to write query log")
 

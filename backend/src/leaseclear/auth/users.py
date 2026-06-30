@@ -6,13 +6,12 @@ from asyncpg.exceptions import UniqueViolationError
 from fastapi import HTTPException
 
 from leaseclear.auth.password import hash_password, verify_password
-from leaseclear.db.connection import get_pool
+from leaseclear.db.connection import db_session
 
 
 async def register_user(email: str, password: str) -> str:
     user_id = str(uuid.uuid4())
-    pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with db_session() as conn:
         try:
             await conn.execute(
                 "INSERT INTO users (id, email, password_hash) VALUES ($1, $2, $3)",
@@ -28,8 +27,7 @@ async def register_user(email: str, password: str) -> str:
 
 
 async def authenticate_user(email: str, password: str) -> str:
-    pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with db_session() as conn:
         row = await conn.fetchrow(
             "SELECT id, password_hash FROM users WHERE email = $1",
             email,
