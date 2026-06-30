@@ -30,3 +30,12 @@
 - Keep endpoint functions thin and orchestration-focused.
 - Move business logic into service layer functions/classes.
 
+### Verification
+After any backend change, run from `backend/`:
+
+```bash
+uv run pytest
+uv run ruff check .
+uv run ruff format .
+uv run pyright
+```
