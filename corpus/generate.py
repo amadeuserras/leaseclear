@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -83,6 +84,10 @@ def discover() -> list[tuple[Path, Path]]:
 
 
 def main() -> None:
+    if OUTPUT_DIR.exists():
+        shutil.rmtree(OUTPUT_DIR)
+    OUTPUT_DIR.mkdir()
+
     pairs = discover()
     if not pairs:
         print("no cases found")
