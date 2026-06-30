@@ -1,0 +1,31 @@
+---
+description: "Backend, corpus, and Python conventions for LeaseClear"
+globs: ["backend/**/*.py", "backend/**/*.sql", "corpus/**/*.py"]
+alwaysApply: false
+---
+
+# Backend Python Standards
+
+## Design Philosophy
+
+- Prefer idiomatic, declarative and simple code. 
+- Favor small, single-purpose functions over monolithic blocks.
+- Avoid adding complexity to handle edge cases that are not known to exist.
+- Single-letter loop variables are preferred for list comprehensions: `x`, `i`, `j`, `k`, `s`, `ch`, `f`, `_`.
+- Comments should be rare and intentional: non-obvious business rules, external constraints, API quirks, or non-intuitive edge cases.
+
+## Types and Validation
+
+- Internal code should rely on type hints and Pyright dataclasses.
+- Use Pydantic only at API boundaries: FastAPI request and response models.
+
+## Verification
+
+After backend or corpus changes, run from `backend/` when relevant:
+
+```bash
+uv run pytest
+uv run ruff check .
+uv run ruff format .
+uv run pyright
+```
