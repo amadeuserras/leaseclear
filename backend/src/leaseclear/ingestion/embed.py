@@ -7,14 +7,18 @@ from openai import OpenAI
 from leaseclear.core.config import settings
 from leaseclear.types import ChunkBase, EmbeddedChunk
 
-_client = OpenAI(api_key=settings.openai_api_key)
+MODEL = "text-embedding-3-small"
+
+
+def _get_client() -> OpenAI:
+    return OpenAI(api_key=settings.openai_embeddings_api_key)
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
     if not texts:
         return []
 
-    response = _client.embeddings.create(input=texts, model="text-embedding-3-small")
+    response = _get_client().embeddings.create(input=texts, model=MODEL)
     ordered = sorted(response.data, key=lambda item: item.index)
     return [item.embedding for item in ordered]
 
