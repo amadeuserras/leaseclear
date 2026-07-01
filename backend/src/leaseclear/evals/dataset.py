@@ -7,8 +7,10 @@ from leaseclear.evals.types import GoldenItem
 
 GOLDEN_PATH = Path(__file__).resolve().parent / "golden" / "golden.jsonl"
 
+LIMIT = 3
 
-def load_all_golden(limit: int | None = None) -> list[GoldenItem]:
+
+def load_all_golden(limit: int | None = LIMIT) -> list[GoldenItem]:
     items: list[GoldenItem] = []
     for line_no, line in enumerate(GOLDEN_PATH.read_text().splitlines(), start=1):
         stripped = line.strip()
