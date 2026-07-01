@@ -20,7 +20,7 @@ def _fmt(value: float | None) -> str:
     return "—" if value is None else f"{value:.2%}"
 
 
-def _format_metrics(metrics: AggregateMetrics) -> str:
+def format_metrics(metrics: AggregateMetrics) -> str:
     return "\n".join(
         [
             "| Metric | Score |",
@@ -87,7 +87,7 @@ def format_report(
         "",
         "## Metrics",
         "",
-        _format_metrics(metrics),
+        format_metrics(metrics),
         "",
     ]
     if include_cases:

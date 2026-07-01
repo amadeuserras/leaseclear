@@ -8,7 +8,7 @@ from leaseclear.db.connection import close_pool, db_session
 from leaseclear.evals.dataset import load_all_golden
 from leaseclear.evals.judge import judge
 from leaseclear.evals.metrics import aggregate, score
-from leaseclear.evals.report import format_report, result_path, write_report
+from leaseclear.evals.report import format_metrics, result_path, write_report
 from leaseclear.evals.runner import run_item
 from leaseclear.evals.types import EvalResult, GoldenItem
 
@@ -53,8 +53,8 @@ async def main(argv: list[str] | None = None) -> None:
         await close_pool()
 
     metrics = aggregate(results)
-    print(format_report(metrics, results, include_cases=include_cases))
-    print(f"\nWrote {path}")
+    print("Done! Wrote report to evals/results")
+    print(format_metrics(metrics))
 
 
 if __name__ == "__main__":
