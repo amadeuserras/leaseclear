@@ -111,6 +111,28 @@ uv run ruff format --check .
 uv run pyright
 ```
 
+## Evals
+
+`backend/src/leaseclear/evals/` is the eval harness: a golden dataset
+(`evals/golden/golden.jsonl`) of answerable, unanswerable, and hard questions,
+each run through the real retrieval → generation pipeline and scored on
+retrieval recall@8, faithfulness, citation precision, refusal accuracy,
+hallucination rate, and TTFT/latency. Faithfulness, citation precision, and
+hallucination rate are graded by an LLM judge (OpenAI `gpt-4o-mini`) — a
+different model family than the generator (Anthropic Claude), so the judge
+isn't grading its own homework.
+
+Numbers are published honestly in **[METRICS.md](METRICS.md)**, including
+when a metric doesn't have enough cases to mean anything yet.
+
+- Fast tests (`uv run pytest`) cover the harness itself — golden dataset
+  shape, recall matching, judge JSON parsing, metrics math, report
+  rendering — with no external API calls, so they run on every push.
+- The real run (`uv run pytest -m eval`, or `uv run python
+  scripts/run_evals.py` to also regenerate `METRICS.md`) calls real OpenAI
+  and Anthropic APIs against a fully-ingested corpus, so it's on-demand /
+  nightly only (`.github/workflows/evals.yml`), not on every push.
+
 ## Stack
 
 - **Backend:** FastAPI, PostgreSQL + pgvector, hybrid retrieval (vector + FTS + RRF), Claude generation

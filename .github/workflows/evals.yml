@@ -1,0 +1,72 @@
+name: Evals
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # 07:00 UTC nightly. Costs real OpenAI + Anthropic API calls, so this
+    # intentionally does not run on every push (see ci.yml for that).
+    - cron: "0 7 * * *"
+
+jobs:
+  evals:
+    name: Golden dataset eval suite
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: leaseclear
+          POSTGRES_PASSWORD: leaseclear
+          POSTGRES_DB: leaseclear
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgresql://leaseclear:leaseclear@localhost:5433/leaseclear
+      TEST_DATABASE_URL: postgresql://leaseclear:leaseclear@localhost:5433/leaseclear_test
+      OPENAI_EMBEDDINGS_API_KEY: ${{ secrets.OPENAI_EMBEDDINGS_API_KEY }}
+      OPENAI_JUDGE_API_KEY: ${{ secrets.OPENAI_JUDGE_API_KEY }}
+      ANTHROPIC_GENERATE_API_KEY: ${{ secrets.ANTHROPIC_GENERATE_API_KEY }}
+      ANTHROPIC_METADATA_API_KEY: ${{ secrets.ANTHROPIC_METADATA_API_KEY }}
+      ANTHROPIC_FILTER_API_KEY: ${{ secrets.ANTHROPIC_FILTER_API_KEY }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Generate corpus
+        working-directory: corpus
+        run: |
+          uv sync --frozen
+          uv run python generate.py
+
+      - name: Apply schema and ingest corpus
+        run: uv run python scripts/ingest.py
+
+      - name: Run eval suite (pytest thresholds)
+        run: uv run pytest -m eval -v
+
+      - name: Regenerate METRICS.md
+        run: uv run python scripts/run_evals.py
+
+      - name: Publish METRICS.md to job summary
+        run: cat ../METRICS.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload METRICS.md
+        uses: actions/upload-artifact@v4
+        with:
+          name: METRICS.md
+          path: METRICS.md
