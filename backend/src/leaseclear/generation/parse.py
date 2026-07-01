@@ -4,15 +4,7 @@ import json
 
 from leaseclear.generation.prompts import DELIMITER
 from leaseclear.types import ChunkBase
-
-
-def strip_markdown_fence(raw: str) -> str:
-    cleaned = raw.strip()
-    if not cleaned.startswith("```"):
-        return cleaned
-    cleaned = cleaned.split("\n", 1)[1]
-    cleaned = cleaned.rsplit("```", 1)[0]
-    return cleaned.strip()
+from leaseclear.utils.text import strip_markdown_fence
 
 
 def parse_response(raw: str) -> tuple[str, list[str], float]:

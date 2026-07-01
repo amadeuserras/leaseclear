@@ -15,7 +15,8 @@ class Settings(BaseSettings):
     )
     openai_embeddings_api_key: str
     openai_judge_api_key: str
-    anthropic_api_key: str
+    anthropic_generate_api_key: str
+    anthropic_metadata_api_key: str
     jwt_secret: str
 
 

@@ -18,6 +18,9 @@ CREATE TABLE documents (
     id UUID PRIMARY KEY,
     filename TEXT NOT NULL,
     slug TEXT NOT NULL,
+    landlord_name TEXT,
+    tenant_names TEXT[],
+    property_address TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

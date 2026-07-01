@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import tiktoken
@@ -33,7 +34,7 @@ class _RawChunk:
     page_number: int
 
 
-def chunk_documents(documents: list[AssignedDocument]) -> list[ChunkBase]:
+def chunk_documents(documents: Sequence[AssignedDocument]) -> list[ChunkBase]:
     chunks: list[ChunkBase] = []
     for document in documents:
         chunks.extend(_chunk_document(document))

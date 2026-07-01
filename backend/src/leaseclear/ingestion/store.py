@@ -1,16 +1,28 @@
 from __future__ import annotations
 
 from leaseclear.db.connection import get_conn
-from leaseclear.types import AssignedDocument, EmbeddedChunk
+from leaseclear.types import EmbeddedChunk, EnrichedDocument
 
 
-async def store_documents(documents: list[AssignedDocument]) -> None:
+async def store_documents(documents: list[EnrichedDocument]) -> None:
     await get_conn().executemany(
         """--sql
-        INSERT INTO documents (id, filename, slug)
-        VALUES ($1, $2, $3)
+        INSERT INTO documents (
+            id, filename, slug, landlord_name, tenant_names, property_address
+        )
+        VALUES ($1, $2, $3, $4, $5, $6)
         """,
-        [(doc.id, doc.filename, doc.slug) for doc in documents],
+        [
+            (
+                doc.id,
+                doc.filename,
+                doc.slug,
+                doc.landlord_name,
+                doc.tenant_names,
+                doc.property_address,
+            )
+            for doc in documents
+        ],
     )
 
 
