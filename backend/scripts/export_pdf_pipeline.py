@@ -13,7 +13,7 @@ from leaseclear.types import ChunkBase, UploadDocument
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PDF = REPO_ROOT / "corpus" / "generated" / "texas-washington_price.pdf"
-OUTPUT_DIR = Path(__file__).resolve().parents[1] / "tests" / "data"
+OUTPUT_DIR = Path(__file__).resolve().parents[1] / "scripts"
 
 
 def _source_pdf_ref(pdf: Path) -> str:
