@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from leaseclear.evals.types import EvalResult, GoldenItem
+from leaseclear.filtering.filter import filter_documents
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import REFUSAL_MESSAGE
@@ -10,7 +11,8 @@ from leaseclear.types import Citation, GenerationResult
 
 
 async def run_item(item: GoldenItem) -> EvalResult:
-    retrieved = await hybrid.search(item.question)
+    document_ids = await filter_documents(item.question)
+    retrieved = await hybrid.search(item.question, document_ids=document_ids)
 
     raw_parts: list[str] = []
     tokens, _ = generate_stream(item.question, retrieved)
