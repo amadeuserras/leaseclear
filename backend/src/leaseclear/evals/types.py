@@ -16,7 +16,7 @@ class GoldenItem:
     document_slug: str
     expected_answer: str | None = None
     expected_refusal: bool = False
-    clause_label: str | None = None
+    clause_number: str | None = None
     page_number: int | None = None
 
 

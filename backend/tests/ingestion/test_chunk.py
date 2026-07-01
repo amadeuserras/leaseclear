@@ -17,11 +17,15 @@ def test_chunk_documents_corpus_lease() -> None:
     assert len(chunks) >= 10
 
     labels = {chunk.clause_label for chunk in chunks}
+    numbers = {chunk.clause_number for chunk in chunks}
     assert "" in labels
+    assert None in numbers
     assert "3. Rent" in labels
     assert "5. Security Deposit" in labels
+    assert "3" in numbers
+    assert "5" in numbers
 
-    rent = next(chunk for chunk in chunks if chunk.clause_label == "3. Rent")
+    rent = next(chunk for chunk in chunks if chunk.clause_number == "3")
     assert "$2,875.00" in rent.text
 
     for chunk in chunks:

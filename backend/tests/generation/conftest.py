@@ -17,6 +17,7 @@ def chunks() -> list[ChunkBase]:
             document_id=document_id,
             document_slug="lease",
             text="Tenant shall pay Rent of $2,875.00 per month.",
+            clause_number="3",
             clause_label="3. Rent",
             page_number=1,
             char_start=0,
@@ -28,6 +29,7 @@ def chunks() -> list[ChunkBase]:
             document_id=document_id,
             document_slug="lease",
             text="Tenant shall deposit $5,750.00 as a security deposit.",
+            clause_number="4",
             clause_label="4. Security Deposit",
             page_number=1,
             char_start=51,
@@ -40,8 +42,8 @@ def chunks() -> list[ChunkBase]:
 @pytest.fixture
 def cited_result() -> GenerationResult:
     return GenerationResult(
-        answer="The security deposit is $5,750.00. [lease §4. Security Deposit]",
-        citations=[Citation(id="[lease §4. Security Deposit]")],
+        answer="The security deposit is $5,750.00. [lease §4]",
+        citations=[Citation(id="[lease §4]")],
         confidence=1.0,
     )
 

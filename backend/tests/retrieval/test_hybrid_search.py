@@ -31,9 +31,11 @@ async def test_search_mrr_comparison(seed_db: asyncpg.Connection) -> None:
         lexical_results = await lexical.search(case.query)
         vector_results = await vector.search(case.query)
 
-        hybrid_rrs.append(reciprocal_rank(hybrid_results, case.expected_clause))
-        lexical_rrs.append(reciprocal_rank(lexical_results, case.expected_clause))
-        vector_rrs.append(reciprocal_rank(vector_results, case.expected_clause))
+        hybrid_rrs.append(reciprocal_rank(hybrid_results, case.expected_clause_number))
+        lexical_rrs.append(
+            reciprocal_rank(lexical_results, case.expected_clause_number)
+        )
+        vector_rrs.append(reciprocal_rank(vector_results, case.expected_clause_number))
 
     scores = {
         "hybrid": mean_reciprocal_rank(hybrid_rrs),

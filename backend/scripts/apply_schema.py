@@ -1,12 +1,11 @@
 import asyncio
 
-from leaseclear.db.connection import apply_schema, close_pool, get_pool
+from leaseclear.db.connection import apply_schema, close_pool, db_session
 
 
 async def main() -> None:
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        await apply_schema(conn)
+    async with db_session():
+        await apply_schema()
     await close_pool()
     print("Schema applied.")
 

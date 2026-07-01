@@ -3,9 +3,9 @@ from __future__ import annotations
 from leaseclear.types import ChunkBase
 
 
-def reciprocal_rank(results: list[ChunkBase], clause_label: str) -> float:
+def reciprocal_rank(results: list[ChunkBase], clause_number: str | None) -> float:
     for position, chunk in enumerate(results, start=1):
-        if chunk.clause_label == clause_label:
+        if chunk.clause_number == clause_number:
             return 1.0 / position
     return 0.0
 

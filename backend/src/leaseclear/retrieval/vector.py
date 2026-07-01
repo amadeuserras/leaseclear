@@ -15,7 +15,7 @@ async def search(
     [query_vector] = embed_texts([question])
     rows = await get_conn().fetch(
         """--sql
-        SELECT id, document_id, document_slug, text, clause_label,
+        SELECT id, document_id, document_slug, text, clause_number, clause_label,
                page_number, char_start, char_end, token_count
         FROM chunks
         WHERE ($3::float IS NULL OR 1 - (embedding <=> $1) >= $3)

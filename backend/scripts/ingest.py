@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 
-from leaseclear.db.connection import apply_schema, close_pool, get_pool
+from leaseclear.db.connection import apply_schema, close_pool, db_session
 from leaseclear.ingestion.ingest import ingest_documents
 from leaseclear.types import UploadDocument
 
@@ -22,10 +22,9 @@ async def main() -> None:
 
     uploads = [UploadDocument(path=str(pdf), filename=pdf.name) for pdf in pdfs]
 
-    pool = await get_pool()
     try:
-        async with pool.acquire() as conn:
-            await apply_schema(conn)
+        async with db_session() as conn:
+            await apply_schema()
             await conn.execute("TRUNCATE logs, chunks, documents")
             chunks = await ingest_documents(uploads)
             print(

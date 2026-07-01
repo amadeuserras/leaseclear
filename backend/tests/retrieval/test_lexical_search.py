@@ -11,7 +11,7 @@ async def test_lexical_search_matches_exact_clause_heading(
     results = await search("Security Deposit", top_k=5)
 
     assert results
-    assert results[0].clause_label == "5. Security Deposit"
+    assert results[0].clause_number == "5"
 
 
 async def test_lexical_search_returns_empty_for_unknown_section_reference(

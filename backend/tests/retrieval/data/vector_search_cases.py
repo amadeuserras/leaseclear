@@ -8,21 +8,21 @@ import pytest
 @dataclass(frozen=True)
 class VectorSearchCase:
     question: str
-    expected_clause: str
+    expected_clause_number: str
 
 
 CASES = [
-    VectorSearchCase("What is the monthly rent?", "3. Rent"),
-    VectorSearchCase("How much is the security deposit?", "5. Security Deposit"),
-    VectorSearchCase("When does the lease end?", "2. Term"),
-    VectorSearchCase("Can the tenant have pets?", "7. Pets"),
+    VectorSearchCase("What is the monthly rent?", "3"),
+    VectorSearchCase("How much is the security deposit?", "5"),
+    VectorSearchCase("When does the lease end?", "2"),
+    VectorSearchCase("Can the tenant have pets?", "7"),
     VectorSearchCase(
         "How much notice must the landlord give before entering?",
-        "9. Entry",
+        "9",
     ),
-    VectorSearchCase("What is the pet deposit?", "2. Pet Deposit and Rent"),
+    VectorSearchCase("What is the pet deposit?", "2"),
 ]
 
 
 def as_pytest_params() -> list:
-    return [pytest.param(case.question, case.expected_clause) for case in CASES]
+    return [pytest.param(case.question, case.expected_clause_number) for case in CASES]

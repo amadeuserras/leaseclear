@@ -35,6 +35,5 @@ def parse_response(raw: str) -> tuple[str, list[str], float]:
 def resolve_citations(
     citation_ids: list[str], chunks: list[ChunkBase]
 ) -> list[ChunkBase]:
-    """Map citation IDs (e.g. '[doc §3. Rent]') to the chunks they reference."""
     by_citation = {chunk.citation_id: chunk for chunk in chunks}
     return [by_citation[cid] for cid in citation_ids if cid in by_citation]

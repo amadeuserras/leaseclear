@@ -27,6 +27,7 @@ SEED_CHUNKS = [
         document_id=UUID(chunk["document_id"]),
         document_slug=chunk["document_slug"],
         text=chunk["text"],
+        clause_number=chunk["clause_number"],
         clause_label=chunk["clause_label"],
         page_number=chunk["page_number"],
         char_start=chunk["char_start"],

@@ -7,11 +7,11 @@ def score(result: EvalResult) -> None:
     """Compute automated scores and write them onto the result in place."""
     item = result.item
 
-    if item.clause_label is None:
+    if item.clause_number is None:
         result.retrieval_recall = 1.0
     else:
-        labels = [c.clause_label for c in result.retrieved_chunks if c.clause_label]
-        result.retrieval_recall = 1.0 if item.clause_label in labels else 0.0
+        numbers = [c.clause_number for c in result.retrieved_chunks if c.clause_number]
+        result.retrieval_recall = 1.0 if item.clause_number in numbers else 0.0
 
     result.refusal_accuracy = 1.0 if result.refused == item.expected_refusal else 0.0
 

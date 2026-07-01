@@ -19,6 +19,7 @@ _TOKEN_ENCODER = tiktoken.get_encoding("cl100k_base")
 
 @dataclass
 class _Section:
+    clause_number: str | None
     clause_label: str
     page_number: int
     lines: list[tuple[int, str]]
@@ -27,6 +28,7 @@ class _Section:
 @dataclass
 class _RawChunk:
     text: str
+    clause_number: str | None
     clause_label: str
     page_number: int
 
@@ -59,6 +61,7 @@ def _chunk_document(document: AssignedDocument) -> list[ChunkBase]:
                 document_id=document.id,
                 document_slug=document.slug,
                 text=raw.text,
+                clause_number=raw.clause_number,
                 clause_label=raw.clause_label,
                 page_number=raw.page_number,
                 char_start=char_start,
@@ -83,6 +86,7 @@ def _split_into_sections(pages: list[PageText]) -> list[_Section]:
                     sections.append(current)
                 num, rest = clause
                 current = _Section(
+                    clause_number=num,
                     clause_label=_clause_label(num, rest),
                     page_number=page.page_number,
                     lines=[(page.page_number, line)],
@@ -91,6 +95,7 @@ def _split_into_sections(pages: list[PageText]) -> list[_Section]:
 
             if current is None:
                 current = _Section(
+                    clause_number=None,
                     clause_label="",
                     page_number=page.page_number,
                     lines=[(page.page_number, line)],
@@ -117,6 +122,7 @@ def _section_to_chunks(section: _Section) -> list[_RawChunk]:
         chunks.append(
             _RawChunk(
                 text=body,
+                clause_number=section.clause_number,
                 clause_label=section.clause_label,
                 page_number=page_number,
             )

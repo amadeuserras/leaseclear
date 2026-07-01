@@ -19,9 +19,9 @@ async def store_chunks(chunks: list[EmbeddedChunk]) -> None:
         """--sql
         INSERT INTO chunks (
             id, document_id, document_slug, text, embedding,
-            clause_label, page_number, char_start, char_end, token_count
+            clause_number, clause_label, page_number, char_start, char_end, token_count
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         ON CONFLICT (id) DO UPDATE SET embedding = EXCLUDED.embedding
         """,
         [
@@ -31,6 +31,7 @@ async def store_chunks(chunks: list[EmbeddedChunk]) -> None:
                 chunk.document_slug,
                 chunk.text,
                 str(chunk.embedding),
+                chunk.clause_number,
                 chunk.clause_label,
                 chunk.page_number,
                 chunk.char_start,

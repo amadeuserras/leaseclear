@@ -36,6 +36,7 @@ class ChunkBase:
     document_id: UUID
     document_slug: str
     text: str
+    clause_number: str | None
     clause_label: str | None
     page_number: int
     char_start: int
@@ -44,8 +45,8 @@ class ChunkBase:
 
     @property
     def citation_id(self) -> str:
-        if self.clause_label:
-            return f"[{self.document_slug} §{self.clause_label}]"
+        if self.clause_number:
+            return f"[{self.document_slug} §{self.clause_number}]"
         return f"[{self.document_slug} p.{self.page_number}]"
 
 

@@ -14,13 +14,13 @@ def test_valid_citation_passes(cited_result, chunks):
 
 def test_phantom_id_fails(chunks):
     bad_result = GenerationResult(
-        answer="The fee is $500. [lease §99. Made Up]",
-        citations=[Citation(id="[lease §99. Made Up]")],
+        answer="The fee is $500. [lease §99]",
+        citations=[Citation(id="[lease §99]")],
         confidence=0.9,
     )
     result = validate(bad_result, chunks, REFUSAL_MESSAGE)
     assert not result.passed
-    assert "[lease §99. Made Up]" in result.phantom_ids
+    assert "[lease §99]" in result.phantom_ids
 
 
 def test_refusal_always_passes(refusal_result, chunks):

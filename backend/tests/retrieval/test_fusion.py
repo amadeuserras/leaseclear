@@ -18,6 +18,7 @@ def _chunk(chunk_id: UUID) -> ChunkBase:
         document_id=TEST_DOCUMENT_ID,
         document_slug="test-lease",
         text=f"text for {chunk_id}",
+        clause_number=None,
         clause_label=None,
         page_number=1,
         char_start=0,

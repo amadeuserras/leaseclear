@@ -27,6 +27,7 @@ CREATE TABLE chunks (
     document_slug TEXT NOT NULL,
     text TEXT NOT NULL,
     embedding vector(1536) NOT NULL,
+    clause_number TEXT,
     clause_label TEXT,
     page_number INT,
     char_start INT,
