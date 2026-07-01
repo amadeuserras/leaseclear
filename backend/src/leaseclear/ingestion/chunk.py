@@ -12,6 +12,7 @@ from leaseclear.types import AssignedDocument, ChunkBase, PageText
 SUB_CLAUSE_LINE = re.compile(r"^(\d+\.\d+)\s+(.*)$")
 TOP_CLAUSE_LINE = re.compile(r"^(\d+)\.\s+(.*)$")
 TITLE = re.compile(r"^(.+?)\.(?:\s|$)")
+BARE_MARKER_LINE = re.compile(r"^(?:\d+\.|[A-Z]\.)$")
 
 MAX_CHUNK_CHARS = 2400
 SPLITTERS = ("\n\n", "\n", ". ", " ")
@@ -42,12 +43,13 @@ def chunk_documents(documents: Sequence[AssignedDocument]) -> list[ChunkBase]:
 
 
 def _chunk_document(document: AssignedDocument) -> list[ChunkBase]:
-    sections = _split_into_sections(document.pages)
+    flat_lines = _flatten_pages(document.pages)
+    sections = _split_into_sections(flat_lines)
     raw_chunks: list[_RawChunk] = []
     for section in sections:
         raw_chunks.extend(_section_to_chunks(section))
 
-    full_text = "\n\n".join(page.text for page in document.pages if page.text)
+    full_text = _section_text(flat_lines)
     search_from = 0
     chunks: list[ChunkBase] = []
     for raw in raw_chunks:
@@ -73,36 +75,61 @@ def _chunk_document(document: AssignedDocument) -> list[ChunkBase]:
     return chunks
 
 
-def _split_into_sections(pages: list[PageText]) -> list[_Section]:
+def _flatten_pages(pages: list[PageText]) -> list[tuple[int, str]]:
+    lines = [
+        (page.page_number, line)
+        for page in pages
+        if page.text
+        for line in page.text.splitlines()
+    ]
+    return _merge_bare_markers(lines)
+
+
+def _merge_bare_markers(lines: list[tuple[int, str]]) -> list[tuple[int, str]]:
+    """Join a clause/sub-clause marker that PDF text extraction split onto its
+    own line (e.g. "3." followed by "Rent. Tenant shall pay...") with the
+    line that follows, so it still matches the clause-start regexes."""
+    merged: list[tuple[int, str]] = []
+    i = 0
+    while i < len(lines):
+        page_number, line = lines[i]
+        if BARE_MARKER_LINE.match(line.strip()) and i + 1 < len(lines):
+            _, next_line = lines[i + 1]
+            merged.append((page_number, f"{line.strip()} {next_line.strip()}"))
+            i += 2
+            continue
+        merged.append((page_number, line))
+        i += 1
+    return merged
+
+
+def _split_into_sections(lines: list[tuple[int, str]]) -> list[_Section]:
     sections: list[_Section] = []
     current: _Section | None = None
 
-    for page in pages:
-        if not page.text:
+    for page_number, line in lines:
+        clause = _parse_clause_start(line)
+        if clause is not None:
+            if current is not None:
+                sections.append(current)
+            num, rest = clause
+            current = _Section(
+                clause_number=num,
+                clause_label=_clause_label(num, rest),
+                page_number=page_number,
+                lines=[(page_number, line)],
+            )
             continue
-        for line in page.text.splitlines():
-            clause = _parse_clause_start(line)
-            if clause is not None:
-                if current is not None:
-                    sections.append(current)
-                num, rest = clause
-                current = _Section(
-                    clause_number=num,
-                    clause_label=_clause_label(num, rest),
-                    page_number=page.page_number,
-                    lines=[(page.page_number, line)],
-                )
-                continue
 
-            if current is None:
-                current = _Section(
-                    clause_number=None,
-                    clause_label="",
-                    page_number=page.page_number,
-                    lines=[(page.page_number, line)],
-                )
-            else:
-                current.lines.append((page.page_number, line))
+        if current is None:
+            current = _Section(
+                clause_number=None,
+                clause_label="",
+                page_number=page_number,
+                lines=[(page_number, line)],
+            )
+        else:
+            current.lines.append((page_number, line))
 
     if current is not None:
         sections.append(current)
