@@ -1,4 +1,6 @@
+import argparse
 import asyncio
+import datetime as dt
 from pathlib import Path
 
 from leaseclear.db.connection import close_pool, db_session, get_conn
@@ -7,7 +9,7 @@ from leaseclear.evals.metrics import aggregate_metrics
 from leaseclear.evals.pipeline import run_all
 from leaseclear.evals.report import render_metrics_md
 
-METRICS_PATH = Path(__file__).resolve().parents[2] / "METRICS.md"
+METRICS_DIR = Path(__file__).resolve().parents[2] / "metrics"
 
 
 async def _ensure_corpus_ingested() -> None:
@@ -20,8 +22,23 @@ async def _ensure_corpus_ingested() -> None:
         )
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="only run the first N golden items (for quick, cheap dev runs)",
+    )
+    return parser.parse_args()
+
+
 async def main() -> None:
+    args = _parse_args()
     items = load_golden_items()
+    if args.limit is not None:
+        items = items[: args.limit]
+
     try:
         await _ensure_corpus_ingested()
         results = await run_all(items)
@@ -29,8 +46,12 @@ async def main() -> None:
         await close_pool()
 
     metrics = aggregate_metrics(results)
-    METRICS_PATH.write_text(render_metrics_md(metrics, results))
-    print(f"wrote {METRICS_PATH}")
+
+    METRICS_DIR.mkdir(exist_ok=True)
+    timestamp = dt.datetime.now(dt.UTC).strftime("%Y%m%d-%H%M%S")
+    out_path = METRICS_DIR / f"{timestamp}.md"
+    out_path.write_text(render_metrics_md(metrics, results))
+    print(f"wrote {out_path}")
 
     for score in (
         metrics.retrieval_recall_at_8,

@@ -122,16 +122,17 @@ hallucination rate are graded by an LLM judge (OpenAI `gpt-4o-mini`) — a
 different model family than the generator (Anthropic Claude), so the judge
 isn't grading its own homework.
 
-Numbers are published honestly in **[METRICS.md](METRICS.md)**, including
-when a metric doesn't have enough cases to mean anything yet.
+Every run writes a new timestamped report to **[`metrics/`](metrics/)**
+(`metrics/<YYYYMMDD-HHMMSS>.md`) instead of overwriting a single file, so the
+numbers over time are the history — sort the directory and the most recent
+file is the current state.
 
-- Fast tests (`uv run pytest`) cover the harness itself — golden dataset
-  shape, recall matching, judge JSON parsing, metrics math, report
-  rendering — with no external API calls, so they run on every push.
+- Fast tests (`uv run pytest`) cover the harness itself with no external API
+  calls, so they run on every push.
 - The real run (`uv run pytest -m eval`, or `uv run python
-  scripts/run_evals.py` to also regenerate `METRICS.md`) calls real OpenAI
-  and Anthropic APIs against a fully-ingested corpus, so it's on-demand /
-  nightly only (`.github/workflows/evals.yml`), not on every push.
+  scripts/run_evals.py [--limit N]` to also write a report) calls real
+  OpenAI and Anthropic APIs against a fully-ingested corpus, so it's on-demand
+  / nightly only (`.github/workflows/evals.yml`), not on every push.
 
 ## Stack
 
