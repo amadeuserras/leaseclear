@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from leaseclear.db.connection import get_conn
 from leaseclear.ingestion.embed import embed_texts
 from leaseclear.types import ChunkBase
@@ -11,6 +13,7 @@ async def search(
     question: str,
     top_k: int = 20,
     similarity_floor: float | None = DEFAULT_SIMILARITY_FLOOR,
+    document_ids: list[UUID] | None = None,
 ) -> list[ChunkBase]:
     [query_vector] = embed_texts([question])
     rows = await get_conn().fetch(
@@ -19,11 +22,13 @@ async def search(
                page_number, char_start, char_end, token_count
         FROM chunks
         WHERE ($3::float IS NULL OR 1 - (embedding <=> $1) >= $3)
+          AND ($4::uuid[] IS NULL OR document_id = ANY($4))
         ORDER BY embedding <=> $1
         LIMIT $2
         """,
         str(query_vector),
         top_k,
         similarity_floor,
+        document_ids,
     )
     return [ChunkBase(**dict(row)) for row in rows]

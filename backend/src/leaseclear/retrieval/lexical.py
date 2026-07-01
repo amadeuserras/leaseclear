@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from leaseclear.db.connection import get_conn
 from leaseclear.types import ChunkBase
 
@@ -7,6 +9,7 @@ from leaseclear.types import ChunkBase
 async def search(
     question: str,
     top_k: int = 20,
+    document_ids: list[UUID] | None = None,
 ) -> list[ChunkBase]:
     rows = await get_conn().fetch(
         """--sql
@@ -14,10 +17,12 @@ async def search(
                page_number, char_start, char_end, token_count
         FROM chunks
         WHERE text_tsv @@ plainto_tsquery('english', $1)
+          AND ($3::uuid[] IS NULL OR document_id = ANY($3))
         ORDER BY ts_rank(text_tsv, plainto_tsquery('english', $1)) DESC
         LIMIT $2
         """,
         question,
         top_k,
+        document_ids,
     )
     return [ChunkBase(**dict(row)) for row in rows]

@@ -77,10 +77,7 @@ async def query_events(
     ttft_s: float | None = None
 
     async with db_session():
-        retrieved = await hybrid.search(question)
-
-    if document_ids is not None:
-        retrieved = [c for c in retrieved if c.document_id in document_ids]
+        retrieved = await hybrid.search(question, document_ids=document_ids)
 
     raw_parts: list[str] = []
     prose_parts: list[str] = []
