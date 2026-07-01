@@ -59,6 +59,7 @@ jobs:
           OPENAI_JUDGE_API_KEY: ci-placeholder
           ANTHROPIC_GENERATE_API_KEY: ci-placeholder
           ANTHROPIC_METADATA_API_KEY: ci-placeholder
+          ANTHROPIC_FILTER_API_KEY: ci-placeholder
           JWT_SECRET: ci-placeholder
 
   corpus:

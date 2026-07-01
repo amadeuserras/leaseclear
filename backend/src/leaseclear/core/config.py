@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     openai_judge_api_key: str
     anthropic_generate_api_key: str
     anthropic_metadata_api_key: str
+    anthropic_filter_api_key: str
     jwt_secret: str
 
 

@@ -38,6 +38,14 @@ class EnrichedDocument(AssignedDocument):
 
 
 @dataclass
+class DocumentMetadata:
+    id: UUID
+    landlord_name: str | None
+    tenant_names: list[str]
+    property_address: str | None
+
+
+@dataclass
 class ChunkBase:
     id: UUID
     document_id: UUID
