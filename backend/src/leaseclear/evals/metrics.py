@@ -2,6 +2,57 @@ from __future__ import annotations
 
 from leaseclear.evals.types import AggregateMetrics, EvalResult
 
+_STOPWORDS = {
+    "a",
+    "an",
+    "the",
+    "of",
+    "to",
+    "in",
+    "on",
+    "at",
+    "for",
+    "and",
+    "or",
+    "is",
+    "are",
+    "per",
+    "with",
+    "by",
+    "as",
+    "least",
+    "up",
+    "may",
+    "must",
+    "be",
+    "than",
+    "that",
+    "this",
+}
+_STRIP_CHARS = ".,;:!?'\"()*_`"
+
+
+def _normalize_token(token: str) -> str:
+    return token.strip(_STRIP_CHARS).casefold()
+
+
+def _significant_tokens(text: str) -> set[str]:
+    tokens = {_normalize_token(t) for t in text.split()}
+    return {t for t in tokens if t and t not in _STOPWORDS}
+
+
+def _answer_matches(expected: str, answer: str) -> bool:
+    """Loose match: exact substring, or every significant word/number in the
+    expected answer shows up somewhere in the generated answer. This avoids
+    penalizing correct answers for cosmetic differences (extra detail,
+    "twenty-four (24)" vs "24", markdown formatting, etc.)."""
+    if expected.casefold() in answer.casefold():
+        return True
+    expected_tokens = _significant_tokens(expected)
+    if not expected_tokens:
+        return False
+    return expected_tokens.issubset(_significant_tokens(answer))
+
 
 def score(result: EvalResult) -> None:
     """Compute automated scores and write them onto the result in place."""
@@ -23,7 +74,7 @@ def score(result: EvalResult) -> None:
         result.answer_match = 0.0
     else:
         result.answer_match = (
-            1.0 if item.expected_answer.casefold() in result.answer.casefold() else 0.0
+            1.0 if _answer_matches(item.expected_answer, result.answer) else 0.0
         )
 
 

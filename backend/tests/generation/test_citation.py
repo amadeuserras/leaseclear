@@ -27,4 +27,11 @@ def test_citation_with_clause():
 
 def test_citation_fallback_when_no_clause():
     chunk = make_chunk(None)
-    assert chunk.citation_id == "[test-lease p.1]"
+    assert chunk.citation_id == "[test-lease p.1@0]"
+
+
+def test_citation_fallback_is_unique_per_chunk():
+    first = make_chunk(None)
+    second = make_chunk(None)
+    second.char_start = 100
+    assert first.citation_id != second.citation_id

@@ -62,7 +62,7 @@ class ChunkBase:
     def citation_id(self) -> str:
         if self.clause_number:
             return f"[{self.document_slug} §{self.clause_number}]"
-        return f"[{self.document_slug} p.{self.page_number}]"
+        return f"[{self.document_slug} p.{self.page_number}@{self.char_start}]"
 
 
 @dataclass
