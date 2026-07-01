@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 
 from leaseclear.evals.types import AggregateMetrics, EvalResult
 from leaseclear.generation.generate import build_user_message
 from leaseclear.generation.prompts import REFUSAL_MESSAGE
 
-DEFAULT_EVAL_PATH = Path(__file__).resolve().parents[3] / "EVAL.md"
+RESULTS_DIR = Path(__file__).resolve().parent / "results"
+
+
+def result_path(*, at: datetime | None = None) -> Path:
+    stamp = (at or datetime.now()).strftime("%Y-%m-%d_%H%M%S")
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    return RESULTS_DIR / f"evals-{stamp}.md"
 
 
 def _fmt(value: float | None) -> str:
@@ -40,7 +47,7 @@ def _format_case(index: int, result: EvalResult) -> str:
         [
             f"### {index}. {item.id} ({item.type})",
             "",
-            f"**Document:** `{item.document_slug}`",
+            f"**Golden document:** `{item.document_slug}`",
             "",
             "#### Prompt sent to Claude",
             "",
@@ -73,7 +80,7 @@ def format_report(
     metrics: AggregateMetrics,
     results: list[EvalResult],
     *,
-    include_cases: bool = False,
+    include_cases: bool = True,
 ) -> str:
     sections = [
         "# LeaseClear Eval",
@@ -93,8 +100,8 @@ def format_report(
 def write_report(
     metrics: AggregateMetrics,
     results: list[EvalResult],
-    path: Path = DEFAULT_EVAL_PATH,
+    path: Path,
     *,
-    include_cases: bool = False,
+    include_cases: bool = True,
 ) -> None:
     path.write_text(format_report(metrics, results, include_cases=include_cases))
