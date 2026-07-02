@@ -3,12 +3,11 @@ from __future__ import annotations
 import json
 
 from leaseclear.generation.prompts import DELIMITER
-from leaseclear.types import ChunkBase
+from leaseclear.types import ChunkBase, ParsedResponse
 from leaseclear.utils.text import strip_markdown_fence
 
 
-def parse_response(raw: str) -> tuple[str, list[str], float]:
-    """Split raw Claude output into (prose, citation_ids, confidence)."""
+def parse_response(raw: str) -> ParsedResponse:
     parts = raw.split(DELIMITER, 1)
     if len(parts) != 2:
         raise ValueError(
@@ -21,7 +20,11 @@ def parse_response(raw: str) -> tuple[str, list[str], float]:
         raise ValueError(
             f"Claude returned invalid metadata JSON: {e}\n\nRaw:\n{raw}"
         ) from e
-    return prose, data.get("citations", []), float(data["confidence"])
+    return ParsedResponse(
+        prose=prose,
+        citation_ids=data.get("citations", []),
+        confidence=float(data["confidence"]),
+    )
 
 
 def resolve_citations(

@@ -13,10 +13,14 @@ from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import REFUSAL_MESSAGE
 from leaseclear.generation.validate import validate
 from leaseclear.retrieval import hybrid
-from leaseclear.types import ChunkBase, Citation, GenerationResult, GenerationStreamMeta
+from leaseclear.types import (
+    ChunkBase,
+    Citation,
+    GenerationResult,
+    GenerationStreamMeta,
+    ParsedResponse,
+)
 
-# Small cap on in-flight cases so a growing golden set doesn't fan out into an
-# API rate-limit storm, while still being faster than fully sequential.
 MAX_CONCURRENT_CASES = 4
 
 
@@ -33,11 +37,11 @@ async def _generate(
             ttft_s = time.perf_counter() - start
         raw_parts.append(token)
 
-    prose, citation_ids, confidence = parse_response("".join(raw_parts))
+    parsed: ParsedResponse = parse_response("".join(raw_parts))
     result = GenerationResult(
-        answer=prose,
-        citations=[Citation(id=cid) for cid in citation_ids],
-        confidence=confidence,
+        answer=parsed.prose,
+        citations=[Citation(id=cid) for cid in parsed.citation_ids],
+        confidence=parsed.confidence,
     )
     return result, meta, ttft_s, time.perf_counter() - start
 
