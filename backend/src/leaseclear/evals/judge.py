@@ -9,8 +9,6 @@ from leaseclear.evals.types import ClaimJudgment, JudgeVerdict
 from leaseclear.types import ChunkBase
 from leaseclear.utils.text import strip_markdown_fence
 
-# A different model family from the generator (Anthropic Claude) so the judge
-# isn't grading its own homework - see METRICS.md for the rationale.
 JUDGE_MODEL = "gpt-4o-mini"
 
 SYSTEM_PROMPT = """

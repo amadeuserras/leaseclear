@@ -25,6 +25,12 @@ def _row(label: str, score: MetricScore) -> str:
 
 def _case_dump(result: CaseResult) -> str:
     data = dataclasses.asdict(result)
+    for chunk, raw in zip(result.retrieved, data["retrieved"], strict=True):
+        raw["citation_id"] = chunk.citation_id
+    if result.judge is not None:
+        data["judge"]["faithfulness"] = result.judge.faithfulness
+        data["judge"]["citation_precision"] = result.judge.citation_precision
+        data["judge"]["hallucination_rate"] = result.judge.hallucination_rate
     return json.dumps(data, indent=2, default=str, ensure_ascii=False)
 
 
@@ -38,15 +44,29 @@ def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> s
         "",
         "| Metric | Score | Target | n | Status |",
         "|---|---|---|---|---|",
-        _row("Retrieval recall@8", metrics.retrieval_recall_at_8),
-        _row("Faithfulness (LLM-as-judge)", metrics.faithfulness),
-        _row("Citation precision", metrics.citation_precision),
+        _row(
+            "Retrieval recall@8 – golden chunk was retrieved in the top 8 chunks",
+            metrics.retrieval_recall_at_8,
+        ),
+        _row(
+            "Faithfulness (LLM) – claims supported by retrieved chunks",
+            metrics.faithfulness,
+        ),
+        _row(
+            "Citation precision (LLM) – claims supported by cited chunks",
+            metrics.citation_precision,
+        ),
         _row("Refusal accuracy", metrics.refusal_accuracy),
-        _row("Hallucination rate", metrics.hallucination_rate),
+        _row(
+            "Hallucination rate (LLM) – claims not supported by retrieved chunks",
+            metrics.hallucination_rate,
+        ),
         "",
-        f"p95 time-to-first-token: {_fmt_s(metrics.p95_ttft_s)} (target < 1.5s)",
+        f"p95 time-to-first-token – time until the first streamed token appears: "
+        f"{_fmt_s(metrics.p95_ttft_s)} (target < 1.5s)",
         "",
-        f"p95 total query latency: {_fmt_s(metrics.p95_total_s)}",
+        f"p95 total query latency – time until the full answer is generated: "
+        f"{_fmt_s(metrics.p95_total_s)}",
         "",
         "## Per-case results",
         "",

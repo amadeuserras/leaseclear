@@ -10,7 +10,7 @@ TARGETS = {
     "faithfulness": 0.90,
     "citation_precision": 0.90,
     "refusal_accuracy": 0.93,
-    "hallucination_rate": 0.05,  # ceiling - lower is better
+    "hallucination_rate": 0.05,
 }
 
 

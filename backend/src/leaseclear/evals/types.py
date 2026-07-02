@@ -29,6 +29,12 @@ class JudgeVerdict:
             return None
         return sum(c.supported_by_citation for c in self.claims) / len(self.claims)
 
+    @property
+    def hallucination_rate(self) -> float | None:
+        if not self.claims:
+            return None
+        return sum(not c.supported_by_context for c in self.claims) / len(self.claims)
+
 
 @dataclass
 class CaseResult:

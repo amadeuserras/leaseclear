@@ -25,19 +25,15 @@ class GoldenItem:
 
     @property
     def canonical_document_slug(self) -> str | None:
-        """The slug as it will appear on stored chunks.
-
-        golden.jsonl slugs are written by hand from case filenames (which use
-        underscores, e.g. "texas-washington_price"); ingestion runs every
-        filename through `slugify`, which turns underscores into hyphens. Both
-        sides must be normalized the same way before comparing.
-        """
+        """The slug as it will appear on stored chunks."""
         if self.document_slug is None:
             return None
         return slugify(self.document_slug)
 
 
-def load_golden_items(path: Path = DEFAULT_GOLDEN_PATH) -> list[GoldenItem]:
+def load_golden_items(
+    path: Path = DEFAULT_GOLDEN_PATH, *, limit: int | None = None
+) -> list[GoldenItem]:
     items: list[GoldenItem] = []
     for line in path.read_text().splitlines():
         line = line.strip()
@@ -56,4 +52,6 @@ def load_golden_items(path: Path = DEFAULT_GOLDEN_PATH) -> list[GoldenItem]:
                 page_number=data.get("page_number"),
             )
         )
+        if limit is not None and len(items) >= limit:
+            break
     return items

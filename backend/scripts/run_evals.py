@@ -9,7 +9,8 @@ from leaseclear.evals.metrics import aggregate_metrics
 from leaseclear.evals.pipeline import run_all
 from leaseclear.evals.report import render_metrics_md
 
-METRICS_DIR = Path(__file__).resolve().parents[2] / "metrics"
+REPORTS_DIR = Path(__file__).resolve().parents[1] / "src/leaseclear/evals/reports"
+LIMIT = 3
 
 
 async def _ensure_corpus_ingested() -> None:
@@ -35,7 +36,7 @@ def _parse_args() -> argparse.Namespace:
 
 async def main() -> None:
     args = _parse_args()
-    items = load_golden_items()
+    items = load_golden_items(limit=LIMIT)
     if args.limit is not None:
         items = items[: args.limit]
 
@@ -47,9 +48,9 @@ async def main() -> None:
 
     metrics = aggregate_metrics(results)
 
-    METRICS_DIR.mkdir(exist_ok=True)
+    REPORTS_DIR.mkdir(exist_ok=True)
     timestamp = dt.datetime.now(dt.UTC).strftime("%Y%m%d-%H%M%S")
-    out_path = METRICS_DIR / f"{timestamp}.md"
+    out_path = REPORTS_DIR / f"{timestamp}.md"
     out_path.write_text(render_metrics_md(metrics, results))
     print(f"wrote {out_path}")
 

@@ -5,12 +5,7 @@ from leaseclear.types import ChunkBase
 
 
 def check_recall(item: GoldenItem, retrieved: list[ChunkBase]) -> bool | None:
-    """Whether the ground-truth clause for `item` is in `retrieved`.
-
-    Returns None when the item has no ground-truth clause/page to check
-    against (e.g. unanswerable items), so callers can exclude it from
-    recall@8 rather than counting it as a miss.
-    """
+    """Whether the ground-truth clause for `item` is in `retrieved`."""
     target_slug = item.canonical_document_slug
     if target_slug is None or (item.clause_number is None and item.page_number is None):
         return None
