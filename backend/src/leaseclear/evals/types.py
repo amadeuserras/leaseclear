@@ -1,46 +1,56 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
 
-from leaseclear.types import ChunkBase
-
-GoldenType = Literal["answerable", "unanswerable", "hard"]
+from leaseclear.types import ChunkBase, GenerationResult, ValidationResult
 
 
 @dataclass(frozen=True)
-class GoldenItem:
-    id: str
-    type: GoldenType
-    question: str
-    document_slug: str
-    expected_answer: str | None = None
-    expected_refusal: bool = False
-    clause_number: str | None = None
-    page_number: int | None = None
+class ClaimJudgment:
+    text: str
+    cited_ids: list[str]
+    supported_by_citation: bool
+    supported_by_context: bool
+
+
+@dataclass(frozen=True)
+class JudgeVerdict:
+    claims: list[ClaimJudgment]
+
+    @property
+    def faithfulness(self) -> float | None:
+        if not self.claims:
+            return None
+        return sum(c.supported_by_context for c in self.claims) / len(self.claims)
+
+    @property
+    def citation_precision(self) -> float | None:
+        if not self.claims:
+            return None
+        return sum(c.supported_by_citation for c in self.claims) / len(self.claims)
+
+    @property
+    def hallucination_rate(self) -> float | None:
+        if not self.claims:
+            return None
+        return sum(not c.supported_by_context for c in self.claims) / len(self.claims)
 
 
 @dataclass
-class EvalResult:
-    item: GoldenItem
-    answer: str
-    confidence: float
+class CaseResult:
+    item_id: str
+    item_type: str
+    question: str
+    retrieved: list[ChunkBase]
+    retrieval_hit: bool | None
+    result: GenerationResult
+    validation: ValidationResult
     refused: bool
-    retrieved_chunks: list[ChunkBase]
-    cited_chunks: list[ChunkBase]
-    validation_passed: bool
-    retrieval_recall: float = 0.0
-    refusal_accuracy: float = 0.0
-    answer_match: float = 0.0
-    faithfulness: float | None = None
-    citation_precision: float | None = None
-
-
-@dataclass(frozen=True)
-class AggregateMetrics:
-    count: int
-    retrieval_recall: float
-    refusal_accuracy: float
-    answer_match: float
-    faithfulness: float | None
-    citation_precision: float | None
+    expected_refusal: bool
+    correctly_refused: bool
+    judge: JudgeVerdict | None
+    ttft_s: float | None
+    total_s: float
+    input_tokens: int | None
+    output_tokens: int | None
+    error: str | None = None

@@ -1,103 +1,119 @@
 from __future__ import annotations
 
-from leaseclear.evals.types import AggregateMetrics, EvalResult
+import statistics
+from dataclasses import dataclass
 
-_STOPWORDS = {
-    "a",
-    "an",
-    "the",
-    "of",
-    "to",
-    "in",
-    "on",
-    "at",
-    "for",
-    "and",
-    "or",
-    "is",
-    "are",
-    "per",
-    "with",
-    "by",
-    "as",
-    "least",
-    "up",
-    "may",
-    "must",
-    "be",
-    "than",
-    "that",
-    "this",
+from leaseclear.evals.types import CaseResult, ClaimJudgment
+
+TARGETS = {
+    "retrieval_recall_at_8": 0.90,
+    "faithfulness": 0.90,
+    "citation_precision": 0.90,
+    "refusal_accuracy": 0.93,
+    "hallucination_rate": 0.05,
 }
-_STRIP_CHARS = ".,;:!?'\"()*_`"
 
 
-def _normalize_token(token: str) -> str:
-    return token.strip(_STRIP_CHARS).casefold()
+@dataclass(frozen=True)
+class MetricScore:
+    name: str
+    value: float | None
+    target: float
+    higher_is_better: bool
+    n: int
+
+    @property
+    def passed(self) -> bool | None:
+        if self.value is None:
+            return None
+        if self.higher_is_better:
+            return self.value >= self.target
+        return self.value <= self.target
 
 
-def _significant_tokens(text: str) -> set[str]:
-    tokens = {_normalize_token(t) for t in text.split()}
-    return {t for t in tokens if t and t not in _STOPWORDS}
+@dataclass(frozen=True)
+class AggregateMetrics:
+    retrieval_recall_at_8: MetricScore
+    faithfulness: MetricScore
+    citation_precision: MetricScore
+    refusal_accuracy: MetricScore
+    hallucination_rate: MetricScore
+    p95_ttft_s: float | None
+    p95_total_s: float | None
+    n_cases: int
+    n_errors: int
 
 
-def _answer_matches(expected: str, answer: str) -> bool:
-    """Loose match: exact substring, or every significant word/number in the
-    expected answer shows up somewhere in the generated answer. This avoids
-    penalizing correct answers for cosmetic differences (extra detail,
-    "twenty-four (24)" vs "24", markdown formatting, etc.)."""
-    if expected.casefold() in answer.casefold():
-        return True
-    expected_tokens = _significant_tokens(expected)
-    if not expected_tokens:
-        return False
-    return expected_tokens.issubset(_significant_tokens(answer))
+def _percentile(values: list[float], p: float) -> float | None:
+    if not values:
+        return None
+    if len(values) == 1:
+        return values[0]
+    cut_points = statistics.quantiles(values, n=100, method="inclusive")
+    return cut_points[int(p) - 1]
 
 
-def score(result: EvalResult) -> None:
-    """Compute automated scores and write them onto the result in place."""
-    item = result.item
-
-    if item.clause_number is None:
-        result.retrieval_recall = 1.0
-    else:
-        numbers = [c.clause_number for c in result.retrieved_chunks if c.clause_number]
-        result.retrieval_recall = 1.0 if item.clause_number in numbers else 0.0
-
-    result.refusal_accuracy = 1.0 if result.refused == item.expected_refusal else 0.0
-
-    if item.expected_refusal:
-        result.answer_match = 1.0 if result.refused else 0.0
-    elif item.expected_answer is None:
-        result.answer_match = 1.0
-    elif result.refused:
-        result.answer_match = 0.0
-    else:
-        result.answer_match = (
-            1.0 if _answer_matches(item.expected_answer, result.answer) else 0.0
-        )
+def _rate(flags: list[bool]) -> float | None:
+    if not flags:
+        return None
+    return sum(flags) / len(flags)
 
 
-def aggregate(results: list[EvalResult]) -> AggregateMetrics:
-    n = len(results)
-    if n == 0:
-        return AggregateMetrics(
-            count=0,
-            retrieval_recall=0.0,
-            refusal_accuracy=0.0,
-            answer_match=0.0,
-            faithfulness=None,
-            citation_precision=None,
-        )
+def aggregate_metrics(results: list[CaseResult]) -> AggregateMetrics:
+    recall_flags = [r.retrieval_hit for r in results if r.retrieval_hit is not None]
+    recall = MetricScore(
+        "retrieval_recall_at_8",
+        _rate(recall_flags),
+        TARGETS["retrieval_recall_at_8"],
+        higher_is_better=True,
+        n=len(recall_flags),
+    )
 
-    faith = [r.faithfulness for r in results if r.faithfulness is not None]
-    cit = [r.citation_precision for r in results if r.citation_precision is not None]
+    claims: list[ClaimJudgment] = [
+        c for r in results if r.judge is not None for c in r.judge.claims
+    ]
+    faithfulness = MetricScore(
+        "faithfulness",
+        _rate([c.supported_by_context for c in claims]),
+        TARGETS["faithfulness"],
+        higher_is_better=True,
+        n=len(claims),
+    )
+    citation_precision = MetricScore(
+        "citation_precision",
+        _rate([c.supported_by_citation for c in claims]),
+        TARGETS["citation_precision"],
+        higher_is_better=True,
+        n=len(claims),
+    )
+    hallucination_rate = MetricScore(
+        "hallucination_rate",
+        _rate([not c.supported_by_context for c in claims]),
+        TARGETS["hallucination_rate"],
+        higher_is_better=False,
+        n=len(claims),
+    )
+
+    unanswerable = [r for r in results if r.item_type == "unanswerable"]
+    refusal_accuracy = MetricScore(
+        "refusal_accuracy",
+        _rate([r.correctly_refused for r in unanswerable]),
+        TARGETS["refusal_accuracy"],
+        higher_is_better=True,
+        n=len(unanswerable),
+    )
+
+    ttfts = [r.ttft_s for r in results if r.ttft_s is not None]
+    totals = [r.total_s for r in results if r.error is None]
 
     return AggregateMetrics(
-        count=n,
-        retrieval_recall=sum(r.retrieval_recall for r in results) / n,
-        refusal_accuracy=sum(r.refusal_accuracy for r in results) / n,
-        answer_match=sum(r.answer_match for r in results) / n,
-        faithfulness=sum(faith) / len(faith) if faith else None,
-        citation_precision=sum(cit) / len(cit) if cit else None,
+        retrieval_recall_at_8=recall,
+        faithfulness=faithfulness,
+        citation_precision=citation_precision,
+        refusal_accuracy=refusal_accuracy,
+        hallucination_rate=hallucination_rate,
+        p95_ttft_s=_percentile(ttfts, 95),
+        p95_total_s=_percentile(totals, 95),
+        n_cases=len(results),
+        n_errors=sum(1 for r in results if r.error is not None),
     )

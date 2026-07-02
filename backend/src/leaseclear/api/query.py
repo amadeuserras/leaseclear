@@ -14,7 +14,7 @@ from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import DELIMITER, REFUSAL_MESSAGE
 from leaseclear.generation.validate import validate
 from leaseclear.retrieval import hybrid
-from leaseclear.types import ChunkBase, GenerationResult, QueryLogEntry
+from leaseclear.types import ChunkBase, GenerationResult, ParsedResponse, QueryLogEntry
 from leaseclear.types import Citation as GenCitation
 
 logger = logging.getLogger(__name__)
@@ -88,11 +88,11 @@ async def query_events(
         prose_parts.append(prose)
         yield {"event": "token", "data": prose}
 
-    prose, citation_ids, confidence = parse_response("".join(raw_parts))
+    parsed: ParsedResponse = parse_response("".join(raw_parts))
     result = GenerationResult(
         answer="".join(prose_parts).strip(),
-        citations=[GenCitation(id=cid) for cid in citation_ids],
-        confidence=confidence,
+        citations=[GenCitation(id=cid) for cid in parsed.citation_ids],
+        confidence=parsed.confidence,
     )
     validate(result, retrieved, REFUSAL_MESSAGE)
     payload = _to_response(result, retrieved)

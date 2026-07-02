@@ -5,125 +5,99 @@ import json
 from openai import AsyncOpenAI
 
 from leaseclear.core.config import settings
-from leaseclear.evals.types import EvalResult
+from leaseclear.evals.types import ClaimJudgment, JudgeVerdict
 from leaseclear.types import ChunkBase
+from leaseclear.utils.text import strip_markdown_fence
 
-MODEL = "gpt-4o-mini"
+JUDGE_MODEL = "gpt-4o-mini"
+
+SYSTEM_PROMPT = """
+You are a strict fact-checking judge for a residential lease Q&A system. You
+did not write the answer below - your job is to check it against source text.
+
+You will receive:
+- QUESTION: the user's question
+- ANSWER: the system's answer, with inline citation ids like [doc §3]
+- CITED CLAUSES: the full text of every clause the answer cited
+- RETRIEVED CLAUSES: the full text of every clause the system had available,
+  a superset of CITED CLAUSES
+
+Break the answer into its atomic factual claims (ignore hedging language and
+the refusal sentence itself, if present). For each claim, report:
+- "text": the claim, verbatim or close to it
+- "cited_ids": the citation ids attached to that claim in the answer text
+  (empty list if the claim carries no citation)
+- "supported_by_citation": true only if the CITED CLAUSES text for this
+  claim's cited_ids actually states the fact; false if unsupported or if
+  cited_ids is empty
+- "supported_by_context": true if ANY clause in RETRIEVED CLAUSES supports
+  the fact stated, whether cited or not
+
+Respond with JSON only, no prose, no markdown fences, in this exact shape:
+{"claims": [{"text": "...", "cited_ids": ["[doc §3]"],
+"supported_by_citation": true, "supported_by_context": true}]}
+
+If the answer makes no factual claims (e.g. it is a refusal), return
+{"claims": []}.
+""".strip()
+
+
+def _build_user_message(
+    question: str,
+    answer: str,
+    cited: list[ChunkBase],
+    retrieved: list[ChunkBase],
+) -> str:
+    cited_block = "\n\n".join(f"{c.citation_id}\n{c.text}" for c in cited) or "(none)"
+    retrieved_block = "\n\n".join(f"{c.citation_id}\n{c.text}" for c in retrieved)
+    return (
+        f"QUESTION: {question}\n\n"
+        f"ANSWER:\n{answer}\n\n"
+        f"CITED CLAUSES:\n{cited_block}\n\n"
+        f"RETRIEVED CLAUSES:\n{retrieved_block}"
+    )
+
+
+def _parse_verdict(raw: str) -> JudgeVerdict:
+    try:
+        data = json.loads(strip_markdown_fence(raw))
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Judge returned invalid JSON: {e}\n\nRaw:\n{raw}") from e
+
+    claims = [
+        ClaimJudgment(
+            text=claim["text"],
+            cited_ids=list(claim.get("cited_ids", [])),
+            supported_by_citation=bool(claim["supported_by_citation"]),
+            supported_by_context=bool(claim["supported_by_context"]),
+        )
+        for claim in data.get("claims", [])
+    ]
+    return JudgeVerdict(claims=claims)
 
 
 def _get_client() -> AsyncOpenAI:
     return AsyncOpenAI(api_key=settings.openai_judge_api_key)
 
 
-async def _ask_yes_no(client: AsyncOpenAI, system: str, user: str) -> bool:
+async def judge_answer(
+    question: str,
+    answer: str,
+    cited: list[ChunkBase],
+    retrieved: list[ChunkBase],
+) -> JudgeVerdict:
+    client = _get_client()
     response = await client.chat.completions.create(
-        model=MODEL,
-        temperature=0,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-    )
-    text = response.choices[0].message.content or ""
-    return text.strip().casefold().startswith("y")
-
-
-async def _judge_faithfulness(
-    client: AsyncOpenAI, question: str, answer: str, passages: list[str]
-) -> bool:
-    joined = "\n---\n".join(passages)
-    return await _ask_yes_no(
-        client,
-        system=(
-            "You grade lease Q&A answers. Given lease passages and an answer, "
-            "decide whether every factual claim in the answer is supported by "
-            "the passages. Reply YES or NO only."
-        ),
-        user=(
-            f"Question: {question}\n\n"
-            f"Passages:\n{joined}\n\n"
-            f"Answer: {answer}\n\n"
-            "Is the answer fully supported?"
-        ),
-    )
-
-
-async def _judge_citations(
-    client: AsyncOpenAI, question: str, answer: str, chunks: list[ChunkBase]
-) -> list[bool]:
-    """Judge all citations in one call, with the full answer and every cited
-    passage visible together. This lets a citation be marked valid when it
-    provides supporting/contextual grounding for a claim alongside the other
-    cited passages, rather than requiring each passage to prove the entire
-    answer in isolation."""
-    passages = "\n\n".join(
-        f"[{i}] {chunk.clause_label or 'unknown'} "
-        f"(p.{chunk.page_number}):\n{chunk.text}"
-        for i, chunk in enumerate(chunks)
-    )
-    response = await client.chat.completions.create(
-        model=MODEL,
+        model=JUDGE_MODEL,
         temperature=0,
         response_format={"type": "json_object"},
         messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You grade lease citations. You are given a question, an "
-                    "answer that cites one or more numbered lease passages, and "
-                    "the full text of each cited passage. For each passage, "
-                    "decide whether it is an accurate, non-misleading source for "
-                    "the specific claim it is cited for -- either directly, or "
-                    "by providing supporting/contextual grounding together with "
-                    "the other cited passages. Mark it invalid only if it is "
-                    "irrelevant, contradicts the answer, or is fabricated. "
-                    'Respond with JSON: {"verdicts": [true, false, ...]}, one '
-                    "boolean per passage in the given order."
-                ),
-            },
+            {"role": "system", "content": SYSTEM_PROMPT},
             {
                 "role": "user",
-                "content": (
-                    f"Question: {question}\n\n"
-                    f"Answer: {answer}\n\n"
-                    f"Cited passages:\n{passages}"
-                ),
+                "content": _build_user_message(question, answer, cited, retrieved),
             },
         ],
     )
-    text = response.choices[0].message.content or "{}"
-    try:
-        verdicts = json.loads(text).get("verdicts", [])
-    except json.JSONDecodeError:
-        verdicts = []
-    verdicts = [bool(v) for v in verdicts][: len(chunks)]
-    if len(verdicts) < len(chunks):
-        verdicts += [False] * (len(chunks) - len(verdicts))
-    return verdicts
-
-
-async def judge(result: EvalResult) -> tuple[float, float]:
-    """Return (faithfulness_score, citation_precision_score)."""
-    if result.refused:
-        return 1.0, 1.0
-
-    client = _get_client()
-    passages = [chunk.text for chunk in result.cited_chunks]
-
-    if passages:
-        faithful = await _judge_faithfulness(
-            client, result.item.question, result.answer, passages
-        )
-        faithfulness_score = 1.0 if faithful else 0.0
-    else:
-        faithfulness_score = 0.0
-
-    if not result.cited_chunks:
-        citation_precision = 0.0
-    else:
-        verdicts = await _judge_citations(
-            client, result.item.question, result.answer, result.cited_chunks
-        )
-        citation_precision = sum(verdicts) / len(verdicts)
-
-    return faithfulness_score, citation_precision
+    raw = response.choices[0].message.content or "{}"
+    return _parse_verdict(raw)

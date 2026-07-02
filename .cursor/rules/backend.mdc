@@ -1,7 +1,7 @@
 ---
 description: "Backend, corpus, and Python conventions for LeaseClear"
 globs: ["backend/**/*.py", "backend/**/*.sql", "corpus/**/*.py"]
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Backend Python Standards
@@ -10,7 +10,7 @@ alwaysApply: false
 
 - Prefer idiomatic, declarative and simple code. 
 - Favor small, single-purpose functions over monolithic blocks.
-- Avoid adding complexity to handle edge cases that are not known to exist.
+- Prefer **fail-fast** code: assume invariants (or `assert` them) instead of “defensive just in case” branching. Add guards only for known boundary/I/O failure modes with a clear recovery.
 - Single-letter loop variables are preferred for list comprehensions: `x`, `i`, `j`, `k`, `s`, `ch`, `f`, `_`.
 - Comments should be rare and intentional: non-obvious business rules, external constraints, API quirks, or non-intuitive edge cases.
 
@@ -21,7 +21,7 @@ alwaysApply: false
 
 ## Verification
 
-After backend or corpus changes, run from `backend/` when relevant:
+After backend changes, run from `backend/` when relevant:
 
 ```bash
 uv run pytest
