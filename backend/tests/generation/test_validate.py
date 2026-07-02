@@ -16,7 +16,6 @@ def test_phantom_id_fails(chunks):
     bad_result = GenerationResult(
         answer="The fee is $500. [lease §99]",
         citations=[Citation(id="[lease §99]")],
-        confidence=0.9,
     )
     result = validate(bad_result, chunks, REFUSAL_MESSAGE)
     assert not result.passed
@@ -32,7 +31,6 @@ def test_uncited_answer_fails(chunks):
     bad_result = GenerationResult(
         answer="The rent is $2,875.00.",
         citations=[],
-        confidence=0.8,
     )
     result = validate(bad_result, chunks, REFUSAL_MESSAGE)
     assert not result.passed

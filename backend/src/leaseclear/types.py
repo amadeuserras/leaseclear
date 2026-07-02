@@ -79,14 +79,12 @@ class Citation:
 class GenerationResult:
     answer: str
     citations: list[Citation]
-    confidence: float
 
 
 @dataclass(frozen=True)
 class ParsedResponse:
     prose: str
     citation_ids: list[str]
-    confidence: float
 
 
 @dataclass

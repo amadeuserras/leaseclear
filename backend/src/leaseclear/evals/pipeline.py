@@ -41,7 +41,6 @@ async def _generate(
     result = GenerationResult(
         answer=parsed.prose,
         citations=[Citation(id=cid) for cid in parsed.citation_ids],
-        confidence=parsed.confidence,
     )
     return result, meta, ttft_s, time.perf_counter() - start
 
@@ -88,9 +87,9 @@ async def run_case(item: GoldenItem) -> CaseResult:
             question=item.question,
             retrieved=[],
             retrieval_hit=None,
-            result=GenerationResult(answer="", citations=[], confidence=0.0),
+            result=GenerationResult(answer="", citations=[]),
             validation=validate(
-                GenerationResult(answer="", citations=[], confidence=0.0),
+                GenerationResult(answer="", citations=[]),
                 [],
                 REFUSAL_MESSAGE,
             ),

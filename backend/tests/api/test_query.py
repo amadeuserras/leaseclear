@@ -52,7 +52,6 @@ def test_query_endpoint_streams_sse(
     payload = json.loads(done_events[0][1])
     assert isinstance(payload["answer"], str)
     assert isinstance(payload["citations"], list)
-    assert 0.0 <= payload["confidence"] <= 1.0
 
 
 async def test_query_writes_log_row(

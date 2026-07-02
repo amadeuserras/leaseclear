@@ -20,11 +20,11 @@ def parse_response(raw: str) -> ParsedResponse:
         raise ValueError(
             f"Claude returned invalid metadata JSON: {e}\n\nRaw:\n{raw}"
         ) from e
-    return ParsedResponse(
-        prose=prose,
-        citation_ids=data.get("citations", []),
-        confidence=float(data["confidence"]),
-    )
+    if not isinstance(data, list):
+        raise ValueError(
+            f"Expected metadata to be a JSON array of citation ids\n\nRaw:\n{raw}"
+        )
+    return ParsedResponse(prose=prose, citation_ids=data)
 
 
 def resolve_citations(

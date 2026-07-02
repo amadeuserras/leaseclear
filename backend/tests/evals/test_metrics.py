@@ -17,7 +17,7 @@ def _case(
         question="q",
         retrieved=[],
         retrieval_hit=retrieval_hit,
-        result=GenerationResult(answer="a", citations=[], confidence=1.0),
+        result=GenerationResult(answer="a", citations=[]),
         validation=ValidationResult(passed=True, phantom_ids=[], uncited_claims=False),
         refused=False,
         expected_refusal=False,

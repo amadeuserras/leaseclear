@@ -35,7 +35,7 @@ def mock_generate_stream(monkeypatch: pytest.MonkeyPatch) -> None:
             cid = chunks[0].citation_id if chunks else "[lease §unknown]"
             yield (
                 f"A mock answer. {cid}\n{DELIMITER}\n"
-                f'{{"citations": ["{cid}"], "confidence": 0.9}}'
+                f'["{cid}"]'
             )
 
         return tokens(), GenerationStreamMeta(

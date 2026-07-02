@@ -44,7 +44,6 @@ def cited_result() -> GenerationResult:
     return GenerationResult(
         answer="The security deposit is $5,750.00. [lease §4]",
         citations=[Citation(id="[lease §4]")],
-        confidence=1.0,
     )
 
 
@@ -53,5 +52,4 @@ def refusal_result() -> GenerationResult:
     return GenerationResult(
         answer=REFUSAL_MESSAGE,
         citations=[],
-        confidence=0.0,
     )

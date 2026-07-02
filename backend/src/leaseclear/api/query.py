@@ -33,7 +33,6 @@ def _to_response(result: GenerationResult, retrieved: list[ChunkBase]) -> QueryR
             )
             for chunk in cited
         ],
-        confidence=result.confidence,
     )
 
 
@@ -92,7 +91,6 @@ async def query_events(
     result = GenerationResult(
         answer="".join(prose_parts).strip(),
         citations=[GenCitation(id=cid) for cid in parsed.citation_ids],
-        confidence=parsed.confidence,
     )
     validate(result, retrieved, REFUSAL_MESSAGE)
     payload = _to_response(result, retrieved)
