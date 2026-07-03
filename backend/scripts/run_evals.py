@@ -10,7 +10,7 @@ from leaseclear.evals.pipeline import run_all
 from leaseclear.evals.report import render_metrics_md
 
 REPORTS_DIR = Path(__file__).resolve().parents[1] / "src/leaseclear/evals/reports"
-LIMIT = 3
+LIMIT = 10
 
 
 async def _ensure_corpus_ingested() -> None:
