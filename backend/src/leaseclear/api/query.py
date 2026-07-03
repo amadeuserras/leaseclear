@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 import time
 from collections.abc import AsyncIterator
@@ -9,10 +8,11 @@ from uuid import UUID, uuid4
 from leaseclear.api.schemas import Citation, QueryResponse
 from leaseclear.db.connection import db_session
 from leaseclear.db.logs import insert_query_log
+from leaseclear.filtering.documents import list_document_metadata
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import DELIMITER, REFUSAL_MESSAGE
-from leaseclear.generation.validate import validate
+from leaseclear.generation.validate import is_refusal, validate
 from leaseclear.retrieval import hybrid
 from leaseclear.types import ChunkBase, GenerationResult, ParsedResponse, QueryLogEntry
 from leaseclear.types import Citation as GenCitation
@@ -77,10 +77,13 @@ async def query_events(
 
     async with db_session():
         retrieved = await hybrid.search(question, document_ids=document_ids)
+        documents = await list_document_metadata(
+            list({c.document_id for c in retrieved})
+        )
 
     raw_parts: list[str] = []
     prose_parts: list[str] = []
-    tokens, stream_meta = generate_stream(question, retrieved)
+    tokens, stream_meta = generate_stream(question, retrieved, documents)
     async for prose in _stream_prose(tokens, raw_parts):
         if ttft_s is None:
             ttft_s = time.perf_counter() - start
@@ -94,7 +97,7 @@ async def query_events(
     )
     validate(result, retrieved, REFUSAL_MESSAGE)
     payload = _to_response(result, retrieved)
-    yield {"event": "done", "data": json.dumps(payload.model_dump())}
+    yield {"event": "done", "data": payload.model_dump_json()}
 
     total_s = time.perf_counter() - start
     entry = QueryLogEntry(
@@ -106,7 +109,7 @@ async def query_events(
         total_s=total_s,
         input_tokens=stream_meta.input_tokens,
         output_tokens=stream_meta.output_tokens,
-        refused=result.answer.strip() == REFUSAL_MESSAGE,
+        refused=is_refusal(result, REFUSAL_MESSAGE),
     )
     try:
         async with db_session():

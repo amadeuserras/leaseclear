@@ -8,14 +8,16 @@ from leaseclear.evals import judge as judge_module
 from leaseclear.evals.golden.loader import GoldenItem
 from leaseclear.evals.retrieval_recall import check_recall
 from leaseclear.evals.types import CaseResult
+from leaseclear.filtering.documents import list_document_metadata
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import REFUSAL_MESSAGE
-from leaseclear.generation.validate import validate
+from leaseclear.generation.validate import is_refusal, validate
 from leaseclear.retrieval import hybrid
 from leaseclear.types import (
     ChunkBase,
     Citation,
+    DocumentMetadata,
     GenerationResult,
     GenerationStreamMeta,
     ParsedResponse,
@@ -25,13 +27,13 @@ MAX_CONCURRENT_CASES = 4
 
 
 async def _generate(
-    question: str, chunks: list[ChunkBase]
+    question: str, chunks: list[ChunkBase], documents: list[DocumentMetadata]
 ) -> tuple[GenerationResult, GenerationStreamMeta, float | None, float]:
     start = time.perf_counter()
     ttft_s: float | None = None
     raw_parts: list[str] = []
 
-    tokens, meta = generate_stream(question, chunks)
+    tokens, meta = generate_stream(question, chunks, documents)
     async for token in tokens:
         if ttft_s is None:
             ttft_s = time.perf_counter() - start
@@ -49,11 +51,16 @@ async def run_case(item: GoldenItem) -> CaseResult:
     try:
         async with db_session():
             retrieved = await hybrid.search(item.question)
+            documents = await list_document_metadata(
+                list({c.document_id for c in retrieved})
+            )
 
         retrieval_hit = check_recall(item, retrieved)
-        result, meta, ttft_s, total_s = await _generate(item.question, retrieved)
+        result, meta, ttft_s, total_s = await _generate(
+            item.question, retrieved, documents
+        )
         validation = validate(result, retrieved, REFUSAL_MESSAGE)
-        refused = result.answer.strip() == REFUSAL_MESSAGE
+        refused = is_refusal(result, REFUSAL_MESSAGE)
         correctly_refused = refused == item.expected_refusal
 
         verdict = None

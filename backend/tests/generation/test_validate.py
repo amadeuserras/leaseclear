@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from leaseclear.generation.prompts import REFUSAL_MESSAGE
-from leaseclear.generation.validate import validate
+from leaseclear.generation.validate import is_refusal, validate
 from leaseclear.types import Citation, GenerationResult
 
 
@@ -35,3 +35,27 @@ def test_uncited_answer_fails(chunks):
     result = validate(bad_result, chunks, REFUSAL_MESSAGE)
     assert not result.passed
     assert result.uncited_claims
+
+
+def test_wrapped_refusal_is_detected(chunks):
+    wrapped = GenerationResult(
+        answer=(
+            "There is no lease clause about this in the provided documents. "
+            f'"{REFUSAL_MESSAGE}"'
+        ),
+        citations=[],
+    )
+    assert is_refusal(wrapped, REFUSAL_MESSAGE)
+    assert validate(wrapped, chunks, REFUSAL_MESSAGE).passed
+
+
+def test_cited_answer_quoting_refusal_is_not_a_refusal(chunks):
+    mixed = GenerationResult(
+        answer=(f"The rent is $2,875.00. [lease §3] As for parking: {REFUSAL_MESSAGE}"),
+        citations=[Citation(id="[lease §3]")],
+    )
+    assert not is_refusal(mixed, REFUSAL_MESSAGE)
+
+
+def test_exact_refusal_is_detected(refusal_result):
+    assert is_refusal(refusal_result, REFUSAL_MESSAGE)

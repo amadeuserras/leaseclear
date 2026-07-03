@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS documents CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE TABLE users (
     id UUID PRIMARY KEY,
@@ -44,6 +45,10 @@ CREATE INDEX chunks_embedding_hnsw_idx
 
 CREATE INDEX chunks_text_tsv_gin_idx
     ON chunks USING gin (text_tsv);
+
+-- Supports the ORDER BY text <->> query (word-similarity KNN) in trigram search.
+CREATE INDEX chunks_text_trgm_gist_idx
+    ON chunks USING gist (text gist_trgm_ops);
 
 CREATE TABLE logs (
     id UUID PRIMARY KEY,
