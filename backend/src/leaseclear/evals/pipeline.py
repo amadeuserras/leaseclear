@@ -61,7 +61,6 @@ async def run_case(item: GoldenItem) -> CaseResult:
         )
         validation = validate(result, retrieved, REFUSAL_MESSAGE)
         refused = is_refusal(result, REFUSAL_MESSAGE)
-        correctly_refused = refused == item.expected_refusal
 
         verdict = None
         if not refused and result.answer.strip():
@@ -75,12 +74,12 @@ async def run_case(item: GoldenItem) -> CaseResult:
             item_type=item.type,
             question=item.question,
             retrieved=retrieved,
+            documents=documents,
             retrieval_hit=retrieval_hit,
             result=result,
             validation=validation,
             refused=refused,
             expected_refusal=item.expected_refusal,
-            correctly_refused=correctly_refused,
             judge=verdict,
             ttft_s=ttft_s,
             total_s=total_s,
@@ -93,6 +92,7 @@ async def run_case(item: GoldenItem) -> CaseResult:
             item_type=item.type,
             question=item.question,
             retrieved=[],
+            documents=[],
             retrieval_hit=None,
             result=GenerationResult(answer="", citations=[]),
             validation=validate(
@@ -102,7 +102,6 @@ async def run_case(item: GoldenItem) -> CaseResult:
             ),
             refused=False,
             expected_refusal=item.expected_refusal,
-            correctly_refused=False,
             judge=None,
             ttft_s=None,
             total_s=0.0,

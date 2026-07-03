@@ -3,9 +3,11 @@ from __future__ import annotations
 import dataclasses
 import datetime as dt
 import json
+from typing import Any
 
 from leaseclear.evals.metrics import AggregateMetrics, MetricScore
-from leaseclear.evals.types import CaseResult
+from leaseclear.evals.types import CaseResult, JudgeVerdict
+from leaseclear.generation.generate import _build_user_message
 
 
 def _fmt_pct(value: float | None) -> str:
@@ -23,15 +25,59 @@ def _row(label: str, score: MetricScore) -> str:
     return f"| {label} | {_fmt_pct(score.value)} | {target} | {score.n} | {status} |"
 
 
-def _case_dump(result: CaseResult) -> str:
-    data = dataclasses.asdict(result)
-    for chunk, raw in zip(result.retrieved, data["retrieved"], strict=True):
-        raw["citation_id"] = chunk.citation_id
+def _section(title: str, body: list[str]) -> list[str]:
+    return [f"**{title}**", ""] + body + [""]
+
+
+def _text_fence(text: str) -> list[str]:
+    return ["```", text, "```"]
+
+
+def _json_fence(data: Any) -> list[str]:
+    return [
+        "```json",
+        json.dumps(data, indent=2, default=str, ensure_ascii=False),
+        "```",
+    ]
+
+
+def _judge_data(verdict: JudgeVerdict) -> dict[str, Any]:
+    data = dataclasses.asdict(verdict)
+    data["faithfulness"] = verdict.faithfulness
+    data["citation_precision"] = verdict.citation_precision
+    data["hallucination_rate"] = verdict.hallucination_rate
+    return data
+
+
+def _generation_body(result: CaseResult) -> list[str]:
+    citation_ids = [c.id for c in result.result.citations]
+    return _text_fence(result.result.answer) + [""] + _json_fence(citation_ids)
+
+
+def _render_case(result: CaseResult) -> list[str]:
+    user_message = _build_user_message(
+        result.question, result.retrieved, result.documents
+    )
+    lines = [f"### {result.item_id}", ""]
+    lines.extend(_section("User message", _text_fence(user_message)))
+    lines.extend(_section("Generation result", _generation_body(result)))
+    lines.extend(
+        _section("Validation", _json_fence(dataclasses.asdict(result.validation)))
+    )
+    lines.extend(
+        _section(
+            "Refusal",
+            _json_fence(
+                {
+                    "refused": result.refused,
+                    "expected_refusal": result.expected_refusal,
+                }
+            ),
+        )
+    )
     if result.judge is not None:
-        data["judge"]["faithfulness"] = result.judge.faithfulness
-        data["judge"]["citation_precision"] = result.judge.citation_precision
-        data["judge"]["hallucination_rate"] = result.judge.hallucination_rate
-    return json.dumps(data, indent=2, default=str, ensure_ascii=False)
+        lines.extend(_section("Judge", _json_fence(_judge_data(result.judge))))
+    return lines
 
 
 def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> str:
@@ -73,11 +119,6 @@ def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> s
     ]
 
     for r in results:
-        lines.append(f"### {r.item_id}")
-        lines.append("")
-        lines.append("```json")
-        lines.append(_case_dump(r))
-        lines.append("```")
-        lines.append("")
+        lines.extend(_render_case(r))
 
     return "\n".join(lines)
