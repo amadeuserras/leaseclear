@@ -8,12 +8,13 @@ async def insert_query_log(entry: QueryLogEntry) -> None:
     await get_conn().execute(
         """--sql
         INSERT INTO logs (
-            id, question, document_ids, chunk_ids_retrieved,
+            id, user_id, question, document_ids, chunk_ids_retrieved,
             ttft_s, total_s, input_tokens, output_tokens, refused
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         """,
         entry.id,
+        entry.user_id,
         entry.question,
         entry.document_ids,
         entry.chunk_ids_retrieved,

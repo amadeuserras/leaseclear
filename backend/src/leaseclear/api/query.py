@@ -8,7 +8,10 @@ from uuid import UUID, uuid4
 from leaseclear.api.schemas import Citation, QueryResponse
 from leaseclear.db.connection import db_session
 from leaseclear.db.logs import insert_query_log
-from leaseclear.filtering.documents import list_document_metadata
+from leaseclear.filtering.documents import (
+    list_document_metadata,
+    list_owned_document_ids,
+)
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import DELIMITER, REFUSAL_MESSAGE
@@ -70,13 +73,20 @@ async def _stream_prose(
 
 async def query_events(
     question: str,
+    user_id: UUID,
     document_ids: list[UUID] | None = None,
 ) -> AsyncIterator[dict[str, str]]:
     start = time.perf_counter()
     ttft_s: float | None = None
 
     async with db_session():
-        retrieved = await hybrid.search(question, document_ids=document_ids)
+        owned = await list_owned_document_ids(user_id)
+        if document_ids:
+            owned_set = set(owned)
+            scope = [d for d in document_ids if d in owned_set]
+        else:
+            scope = owned
+        retrieved = await hybrid.search(question, document_ids=scope)
         documents = await list_document_metadata(
             list({c.document_id for c in retrieved})
         )
@@ -102,6 +112,7 @@ async def query_events(
     total_s = time.perf_counter() - start
     entry = QueryLogEntry(
         id=uuid4(),
+        user_id=user_id,
         question=question,
         document_ids=document_ids,
         chunk_ids_retrieved=[c.id for c in retrieved],
@@ -120,9 +131,10 @@ async def query_events(
 
 async def run_query(
     question: str,
+    user_id: UUID,
     document_ids: list[UUID] | None = None,
 ) -> QueryResponse:
-    async for event in query_events(question, document_ids):
+    async for event in query_events(question, user_id, document_ids):
         if event["event"] == "done":
             return QueryResponse.model_validate_json(event["data"])
     raise RuntimeError("stream ended without done event")

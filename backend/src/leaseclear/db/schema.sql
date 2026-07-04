@@ -17,6 +17,8 @@ CREATE TABLE users (
 
 CREATE TABLE documents (
     id UUID PRIMARY KEY,
+    -- NULL for system-level ingests (corpus/evals); API uploads always set it.
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     filename TEXT NOT NULL,
     slug TEXT NOT NULL,
     landlord_name TEXT,
@@ -24,6 +26,8 @@ CREATE TABLE documents (
     property_address TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX documents_user_id_idx ON documents (user_id);
 
 CREATE TABLE chunks (
     id UUID PRIMARY KEY,
@@ -52,6 +56,7 @@ CREATE INDEX chunks_text_trgm_gist_idx
 
 CREATE TABLE logs (
     id UUID PRIMARY KEY,
+    user_id UUID,
     question TEXT NOT NULL,
     document_ids UUID[],
     chunk_ids_retrieved UUID[] NOT NULL,

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shutil
 import tempfile
+from uuid import UUID
 
 from fastapi import HTTPException, UploadFile
 
@@ -10,7 +11,7 @@ from leaseclear.ingestion.ingest import ingest_documents
 from leaseclear.types import UploadDocument
 
 
-async def upload_documents(files: list[UploadFile]) -> None:
+async def upload_documents(files: list[UploadFile], user_id: UUID) -> None:
     if not files:
         raise HTTPException(status_code=400, detail="At least one PDF file is required")
 
@@ -31,7 +32,7 @@ async def upload_documents(files: list[UploadFile]) -> None:
                 UploadDocument(path=temp_paths[-1], filename=file.filename or "")
             )
 
-        await ingest_documents(pending)
+        await ingest_documents(pending, user_id=user_id)
     finally:
         for path in temp_paths:
             os.unlink(path)

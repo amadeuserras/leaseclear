@@ -104,6 +104,7 @@ class GenerationStreamMeta:
 @dataclass
 class QueryLogEntry:
     id: UUID
+    user_id: UUID | None
     question: str
     document_ids: list[UUID] | None
     chunk_ids_retrieved: list[UUID]

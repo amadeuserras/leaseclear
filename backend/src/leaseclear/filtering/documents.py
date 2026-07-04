@@ -27,3 +27,11 @@ async def list_document_metadata(
         )
         for row in rows
     ]
+
+
+async def list_owned_document_ids(user_id: UUID) -> list[UUID]:
+    rows = await get_conn().fetch(
+        "SELECT id FROM documents WHERE user_id = $1",
+        user_id,
+    )
+    return [row["id"] for row in rows]

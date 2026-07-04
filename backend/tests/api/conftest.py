@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from uuid import UUID
 
 import asyncpg
+import jwt
 import pytest
 from fastapi.testclient import TestClient
 
@@ -45,7 +47,7 @@ def mock_generate_stream(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture
 def mock_upload_document(monkeypatch: pytest.MonkeyPatch) -> None:
-    async def fake_upload_documents(_files: object) -> None:
+    async def fake_upload_documents(_files: object, _user_id: object) -> None:
         return None
 
     monkeypatch.setattr("leaseclear.api.main.upload_documents", fake_upload_documents)
@@ -54,6 +56,27 @@ def mock_upload_document(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.fixture(autouse=True)
 def reset_rate_limits() -> None:
     limiter.reset()
+
+
+@pytest.fixture
+def owner(api_client: TestClient) -> tuple[dict[str, str], UUID]:
+    """A registered user: (auth headers, user id)."""
+    response = api_client.post(
+        "/auth/register",
+        json={"email": "owner@test.com", "password": "hunter2"},
+    )
+    token = response.json()["access_token"]
+    sub = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])["sub"]
+    return {"Authorization": f"Bearer {token}"}, UUID(sub)
+
+
+@pytest.fixture
+async def owned_seed(
+    owner: tuple[dict[str, str], UUID], seed_db: asyncpg.Connection
+) -> None:
+    """Assign the seeded document to the `owner` user."""
+    _, user_id = owner
+    await seed_db.execute("UPDATE documents SET user_id = $1", user_id)
 
 
 @pytest.fixture

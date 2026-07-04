@@ -12,6 +12,7 @@ async def test_insert_query_log(seed_db: DbConnection) -> None:
     chunk_id = uuid4()
     entry = QueryLogEntry(
         id=uuid4(),
+        user_id=None,
         question="How much is the security deposit?",
         document_ids=[CORPUS_LEASE_DOCUMENT_ID],
         chunk_ids_retrieved=[chunk_id],
