@@ -20,6 +20,12 @@ if str(ROOT) not in sys.path:
 OUTPUT_DIR = ROOT / "generated"
 MARGIN = 20
 
+# Real-world uploads rarely keep descriptive filenames. One case uses a messy
+# name so evals can measure whether citation ids leak tenant/landlord hints.
+MESSY_OUTPUT_FILENAMES: dict[tuple[str, str], str] = {
+    ("meridian", "nadkarni_osei"): "lease_agreement_FINAL_v3 (1).pdf",
+}
+
 
 def load_case(case_path: Path):
     """Import a case file and return its LEASE object."""
@@ -71,6 +77,10 @@ def render_pdf(html: str, output_path: Path) -> None:
     tmp_path.unlink()
 
 
+def output_filename(corpus: str, case: str) -> str:
+    return MESSY_OUTPUT_FILENAMES.get((corpus, case), f"{corpus}-{case}.pdf")
+
+
 def discover() -> list[tuple[Path, Path]]:
     """Return (template_dir, case_file) pairs for every corpus/cases/*.py."""
     pairs = []
@@ -98,7 +108,7 @@ def main() -> None:
         case = case_file.stem
         lease = load_case(case_file)
         html = render_html(template_dir, lease.to_context())
-        output_path = OUTPUT_DIR / f"{corpus}-{case}.pdf"
+        output_path = OUTPUT_DIR / output_filename(corpus, case)
         render_pdf(html, output_path)
         print(f"generated {output_path}")
 
