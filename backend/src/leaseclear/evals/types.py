@@ -53,6 +53,7 @@ class CaseResult:
     validation: ValidationResult
     refused: bool
     expected_refusal: bool
+    expected_answer: str | None
     judge: JudgeVerdict | None
     ttft_s: float | None
     total_s: float

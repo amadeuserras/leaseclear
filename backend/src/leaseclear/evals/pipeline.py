@@ -9,6 +9,7 @@ from leaseclear.evals.golden.loader import GoldenItem
 from leaseclear.evals.retrieval_recall import check_recall
 from leaseclear.evals.types import CaseResult
 from leaseclear.filtering.documents import list_document_metadata
+from leaseclear.filtering.filter import filter_documents
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import REFUSAL_MESSAGE
@@ -50,10 +51,9 @@ async def _generate(
 async def run_case(item: GoldenItem) -> CaseResult:
     try:
         async with db_session():
-            retrieved = await hybrid.search(item.question)
-            documents = await list_document_metadata(
-                list({c.document_id for c in retrieved})
-            )
+            document_ids = await filter_documents(item.question)
+            retrieved = await hybrid.search(item.question, document_ids=document_ids)
+            documents = await list_document_metadata(document_ids)
 
         retrieval_hit = check_recall(item, retrieved)
         result, meta, ttft_s, total_s = await _generate(
@@ -80,6 +80,7 @@ async def run_case(item: GoldenItem) -> CaseResult:
             validation=validation,
             refused=refused,
             expected_refusal=item.expected_refusal,
+            expected_answer=item.expected_answer,
             judge=verdict,
             ttft_s=ttft_s,
             total_s=total_s,
@@ -102,6 +103,7 @@ async def run_case(item: GoldenItem) -> CaseResult:
             ),
             refused=False,
             expected_refusal=item.expected_refusal,
+            expected_answer=item.expected_answer,
             judge=None,
             ttft_s=None,
             total_s=0.0,

@@ -61,6 +61,8 @@ def _render_case(result: CaseResult) -> list[str]:
     lines = [f"### {result.item_id}", ""]
     lines.extend(_section("User message", _text_fence(user_message)))
     lines.extend(_section("Generation result", _generation_body(result)))
+    golden_answer = result.expected_answer or "(Refusal)"
+    lines.extend(_section("Golden Answer", _text_fence(golden_answer)))
     lines.extend(
         _section("Validation", _json_fence(dataclasses.asdict(result.validation)))
     )
