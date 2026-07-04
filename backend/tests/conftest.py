@@ -6,8 +6,8 @@ import asyncpg
 import pytest
 
 from leaseclear.core.config import settings
-from leaseclear.db.admin import ensure_database
 from leaseclear.db.connection import _session_ctx, apply_schema
+from leaseclear.db.create import ensure_database
 from leaseclear.ingestion.store import store_chunks, store_documents
 from tests.data.corpus import SEED_CHUNKS, SEED_DOCUMENT
 

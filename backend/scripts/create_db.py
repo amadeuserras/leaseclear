@@ -2,7 +2,7 @@ import argparse
 import asyncio
 
 from leaseclear.core.config import settings
-from leaseclear.db.admin import create_database
+from leaseclear.db.create import create_database
 
 
 def _parse_args() -> argparse.Namespace:

@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 
 from leaseclear.core.config import settings
-from leaseclear.db.admin import ensure_database
 from leaseclear.db.connection import (
     apply_schema,
     bind_database,
@@ -14,6 +13,7 @@ from leaseclear.db.connection import (
     get_conn,
     unbind_database,
 )
+from leaseclear.db.create import ensure_database
 from leaseclear.evals.golden.loader import GoldenItem, load_golden_items
 from leaseclear.evals.pipeline import run_all
 from leaseclear.evals.types import CaseResult
