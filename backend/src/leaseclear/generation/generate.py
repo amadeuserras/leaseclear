@@ -38,7 +38,7 @@ async def _token_stream(
 ) -> AsyncIterator[str]:
     client = AsyncAnthropic(api_key=settings.anthropic_generate_api_key)
     async with client.messages.stream(
-        model="claude-sonnet-4-6",
+        model="claude-haiku-4-5",
         max_tokens=1024,
         system=SYSTEM_PROMPT,
         messages=[
