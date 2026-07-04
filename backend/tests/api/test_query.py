@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from leaseclear.generation.prompts import DELIMITER
 from tests.api.conftest import MOCK_INPUT_TOKENS, MOCK_OUTPUT_TOKENS
+from tests.data.corpus import CORPUS_LEASE_DOCUMENT_ID
 
 
 def parse_sse_events(body: str) -> list[tuple[str, str]]:
@@ -65,8 +66,6 @@ def test_query_only_searches_own_documents(
     mock_generate_stream: None,
     owned_seed: None,
 ) -> None:
-    # The seeded document belongs to `owner`; a different user must not
-    # retrieve anything from it.
     response = api_client.post(
         "/auth/register",
         json={"email": "stranger@test.com", "password": "hunter2"},
@@ -76,7 +75,10 @@ def test_query_only_searches_own_documents(
     with api_client.stream(
         "POST",
         "/query",
-        json={"question": "How much is the security deposit?"},
+        json={
+            "question": "How much is the security deposit?",
+            "document_ids": [str(CORPUS_LEASE_DOCUMENT_ID)],
+        },
         headers=headers,
     ) as response:
         assert response.status_code == 200
