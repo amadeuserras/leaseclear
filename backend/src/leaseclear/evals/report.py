@@ -63,6 +63,10 @@ def _render_case(result: CaseResult) -> list[str]:
     lines.extend(_section("Generation result", _generation_body(result)))
     golden_answer = result.expected_answer or "(Refusal)"
     lines.extend(_section("Golden Answer", _text_fence(golden_answer)))
+    if result.answer_match is not None:
+        lines.extend(
+            _section("Answer match", _json_fence({"matches": result.answer_match}))
+        )
     lines.extend(
         _section("Validation", _json_fence(dataclasses.asdict(result.validation)))
     )
@@ -79,10 +83,6 @@ def _render_case(result: CaseResult) -> list[str]:
     )
     if result.judge is not None:
         lines.extend(_section("Judge", _json_fence(_judge_data(result.judge))))
-    if result.answer_match is not None:
-        lines.extend(
-            _section("Answer match", _json_fence({"matches": result.answer_match}))
-        )
     return lines
 
 

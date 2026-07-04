@@ -30,7 +30,7 @@ async def main() -> None:
     metrics = aggregate_metrics(results)
 
     REPORTS_DIR.mkdir(exist_ok=True)
-    timestamp = dt.datetime.now(dt.UTC).strftime("%Y%m%d-%H%M%S")
+    timestamp = dt.datetime.now(dt.UTC).strftime("%H%M%S-%Y%m%d")
     out_path = REPORTS_DIR / f"eval-{timestamp}.md"
     out_path.write_text(render_metrics_md(metrics, results))
     print(f"wrote {out_path}")
