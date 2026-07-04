@@ -9,7 +9,12 @@ from slugify import slugify
 
 GoldenType = Literal["answerable", "unanswerable", "hard"]
 
-DEFAULT_GOLDEN_PATH = Path(__file__).with_name("golden.jsonl")
+GOLDEN_DIR = Path(__file__).parent
+DEFAULT_GOLDEN_PATHS = (
+    GOLDEN_DIR / "answerable.jsonl",
+    GOLDEN_DIR / "unanswerable.jsonl",
+    GOLDEN_DIR / "hard.jsonl",
+)
 
 
 @dataclass(frozen=True)
@@ -31,9 +36,7 @@ class GoldenItem:
         return slugify(self.document_slug)
 
 
-def load_golden_items(
-    path: Path = DEFAULT_GOLDEN_PATH, *, limit: int | None = None
-) -> list[GoldenItem]:
+def _load_golden_file(path: Path, *, limit: int | None) -> list[GoldenItem]:
     items: list[GoldenItem] = []
     for line in path.read_text().splitlines():
         line = line.strip()
@@ -54,4 +57,13 @@ def load_golden_items(
         )
         if limit is not None and len(items) >= limit:
             break
+    return items
+
+
+def load_golden_items(
+    paths: tuple[Path, ...] = DEFAULT_GOLDEN_PATHS, *, limit: int | None = None
+) -> list[GoldenItem]:
+    items: list[GoldenItem] = []
+    for path in paths:
+        items.extend(_load_golden_file(path, limit=limit))
     return items

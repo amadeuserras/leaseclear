@@ -1,4 +1,3 @@
-import argparse
 import asyncio
 import datetime as dt
 from pathlib import Path
@@ -11,36 +10,18 @@ from leaseclear.evals.pipeline import run_all
 from leaseclear.evals.report import render_metrics_md
 
 REPORTS_DIR = Path(__file__).resolve().parents[1] / "src/leaseclear/evals/reports"
-LIMIT = 10
+LIMIT = 3
 
 
 async def _ensure_corpus_ingested() -> None:
     async with db_session():
         count = await get_conn().fetchval("SELECT count(*) FROM documents")
     if not count:
-        raise SystemExit(
-            "No documents in the eval database. Run "
-            "`uv run python scripts/create_db.py --eval` then "
-            "`uv run python scripts/seed_db.py --eval`."
-        )
-
-
-def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=None,
-        help="only run the first N golden items (for quick, cheap dev runs)",
-    )
-    return parser.parse_args()
+        raise SystemExit("No documents in the eval database.")
 
 
 async def main() -> None:
-    args = _parse_args()
     items = load_golden_items(limit=LIMIT)
-    if args.limit is not None:
-        items = items[: args.limit]
 
     async with use_database(settings.eval_database_url):
         await _ensure_corpus_ingested()
@@ -50,7 +31,7 @@ async def main() -> None:
 
     REPORTS_DIR.mkdir(exist_ok=True)
     timestamp = dt.datetime.now(dt.UTC).strftime("%Y%m%d-%H%M%S")
-    out_path = REPORTS_DIR / f"{timestamp}.md"
+    out_path = REPORTS_DIR / f"eval-{timestamp}.md"
     out_path.write_text(render_metrics_md(metrics, results))
     print(f"wrote {out_path}")
 
