@@ -48,8 +48,7 @@ pythonpath = ["."]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
-addopts = "-m 'not real_api and not eval'"
+addopts = "-m 'not real_api'"
 markers = [
     "real_api: tests that call external APIs (OpenAI embeddings)",
-    "eval: the golden-dataset eval suite (real APIs + full corpus ingest, run on demand/nightly)",
 ]
