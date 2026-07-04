@@ -44,6 +44,7 @@ class DocumentMetadata:
     landlord_name: str | None
     tenant_names: list[str]
     property_address: str | None
+    filename: str = ""
 
 
 @dataclass
