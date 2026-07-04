@@ -4,6 +4,7 @@ import asyncio
 import time
 
 from leaseclear.db.connection import db_session
+from leaseclear.evals import answer_match as answer_match_module
 from leaseclear.evals import judge as judge_module
 from leaseclear.evals.golden.loader import GoldenItem
 from leaseclear.evals.retrieval_recall import check_recall
@@ -63,10 +64,15 @@ async def run_case(item: GoldenItem) -> CaseResult:
         refused = is_refusal(result, REFUSAL_MESSAGE)
 
         verdict = None
+        matched = None
         if not refused and result.answer.strip():
             cited = resolve_citations([c.id for c in result.citations], retrieved)
             verdict = await judge_module.judge_answer(
                 item.question, result.answer, cited, retrieved
+            )
+        if item.expected_answer is not None and not refused:
+            matched = await answer_match_module.check_answer_match(
+                item.question, result.answer, item.expected_answer
             )
 
         return CaseResult(
@@ -81,6 +87,7 @@ async def run_case(item: GoldenItem) -> CaseResult:
             refused=refused,
             expected_refusal=item.expected_refusal,
             expected_answer=item.expected_answer,
+            answer_match=matched,
             judge=verdict,
             ttft_s=ttft_s,
             total_s=total_s,
@@ -104,6 +111,7 @@ async def run_case(item: GoldenItem) -> CaseResult:
             refused=False,
             expected_refusal=item.expected_refusal,
             expected_answer=item.expected_answer,
+            answer_match=None,
             judge=None,
             ttft_s=None,
             total_s=0.0,

@@ -79,6 +79,10 @@ def _render_case(result: CaseResult) -> list[str]:
     )
     if result.judge is not None:
         lines.extend(_section("Judge", _json_fence(_judge_data(result.judge))))
+    if result.answer_match is not None:
+        lines.extend(
+            _section("Answer match", _json_fence({"matches": result.answer_match}))
+        )
     return lines
 
 
@@ -105,6 +109,10 @@ def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> s
             metrics.citation_precision,
         ),
         _row("Refusal accuracy", metrics.refusal_accuracy),
+        _row(
+            "Answer match (LLM) – generated answer matches golden answer",
+            metrics.answer_match,
+        ),
         _row(
             "Hallucination rate (LLM) – claims not supported by retrieved chunks",
             metrics.hallucination_rate,

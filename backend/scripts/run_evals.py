@@ -10,7 +10,7 @@ from leaseclear.evals.pipeline import run_all
 from leaseclear.evals.report import render_metrics_md
 
 REPORTS_DIR = Path(__file__).resolve().parents[1] / "src/leaseclear/evals/reports"
-LIMIT = 3
+LIMIT = 4
 
 
 async def _ensure_corpus_ingested() -> None:
@@ -40,6 +40,7 @@ async def main() -> None:
         metrics.faithfulness,
         metrics.citation_precision,
         metrics.refusal_accuracy,
+        metrics.answer_match,
         metrics.hallucination_rate,
     ):
         print(f"{score.name}: {score.value} (target {score.target}, n={score.n})")

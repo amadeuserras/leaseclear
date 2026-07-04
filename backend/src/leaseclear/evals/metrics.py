@@ -11,6 +11,7 @@ TARGETS = {
     "citation_precision": 0.90,
     "refusal_accuracy": 0.93,
     "hallucination_rate": 0.05,
+    "answer_match": 0.90,
 }
 
 
@@ -38,6 +39,7 @@ class AggregateMetrics:
     citation_precision: MetricScore
     refusal_accuracy: MetricScore
     hallucination_rate: MetricScore
+    answer_match: MetricScore
     p95_ttft_s: float | None
     p95_total_s: float | None
     n_cases: int
@@ -103,6 +105,15 @@ def aggregate_metrics(results: list[CaseResult]) -> AggregateMetrics:
         n=len(unanswerable),
     )
 
+    answer_match_flags = [r.answer_match for r in results if r.answer_match is not None]
+    answer_match = MetricScore(
+        "answer_match",
+        _rate(answer_match_flags),
+        TARGETS["answer_match"],
+        higher_is_better=True,
+        n=len(answer_match_flags),
+    )
+
     ttfts = [r.ttft_s for r in results if r.ttft_s is not None]
     totals = [r.total_s for r in results if r.error is None]
 
@@ -112,6 +123,7 @@ def aggregate_metrics(results: list[CaseResult]) -> AggregateMetrics:
         citation_precision=citation_precision,
         refusal_accuracy=refusal_accuracy,
         hallucination_rate=hallucination_rate,
+        answer_match=answer_match,
         p95_ttft_s=_percentile(ttfts, 95),
         p95_total_s=_percentile(totals, 95),
         n_cases=len(results),
