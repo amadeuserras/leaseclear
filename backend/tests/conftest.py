@@ -6,6 +6,7 @@ import asyncpg
 import pytest
 
 from leaseclear.core.config import settings
+from leaseclear.db.admin import ensure_database
 from leaseclear.db.connection import _session_ctx, apply_schema
 from leaseclear.ingestion.store import store_chunks, store_documents
 from tests.data.corpus import SEED_CHUNKS, SEED_DOCUMENT
@@ -18,18 +19,7 @@ def database_url() -> str:
 
 @pytest.fixture(scope="session")
 async def ensure_test_database(database_url: str) -> None:
-    db_name = database_url.rsplit("/", 1)[-1]
-    admin_url = f"{database_url.rsplit('/', 1)[0]}/postgres"
-    conn = await asyncpg.connect(admin_url)
-    try:
-        exists = await conn.fetchval(
-            "SELECT 1 FROM pg_database WHERE datname = $1",
-            db_name,
-        )
-        if not exists:
-            await conn.execute(f'CREATE DATABASE "{db_name}"')
-    finally:
-        await conn.close()
+    await ensure_database(database_url)
 
 
 @pytest.fixture

@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from leaseclear.core.config import settings
+from leaseclear.db.admin import ensure_database
 from leaseclear.db.connection import apply_schema, close_pool, db_session, get_conn
 from leaseclear.evals.golden.loader import GoldenItem, load_golden_items
 from leaseclear.evals.pipeline import run_all
@@ -20,12 +21,22 @@ def golden_items() -> list[GoldenItem]:
 
 
 @pytest.fixture(scope="session")
-async def full_corpus_db(
-    database_url: str, ensure_test_database: None
-) -> AsyncIterator[None]:
-    """Ingest the full generated corpus into the test database, once per session.
+def eval_database_url() -> str:
+    return settings.eval_database_url
 
-    Points `settings.database_url` at the test DB (same trick tests/api/conftest.py
+
+@pytest.fixture(scope="session")
+async def ensure_eval_database(eval_database_url: str) -> None:
+    await ensure_database(eval_database_url)
+
+
+@pytest.fixture(scope="session")
+async def full_corpus_db(
+    eval_database_url: str, ensure_eval_database: None
+) -> AsyncIterator[None]:
+    """Ingest the full generated corpus into the eval database, once per session.
+
+    Points `settings.database_url` at the eval DB (same trick tests/api/conftest.py
     uses) so the pipeline exercises the exact connection-pool path production
     code uses, instead of a special-cased test-only wiring.
 
@@ -45,7 +56,7 @@ async def full_corpus_db(
     from leaseclear.types import UploadDocument
 
     monkeypatch = pytest.MonkeyPatch()
-    monkeypatch.setattr(settings, "database_url", database_url)
+    monkeypatch.setattr(settings, "database_url", eval_database_url)
     await close_pool()
     try:
         async with db_session():

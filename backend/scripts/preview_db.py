@@ -1,7 +1,9 @@
+import argparse
 import asyncio
 
 import asyncpg
 
+from leaseclear.core.config import settings
 from leaseclear.db.connection import close_pool, get_pool
 
 MAX_ROWS = 4
@@ -129,7 +131,23 @@ def print_table(
         )
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--eval",
+        action="store_true",
+        help="use EVAL_DATABASE_URL instead of DATABASE_URL",
+    )
+    return parser.parse_args()
+
+
 async def main() -> None:
+    args = _parse_args()
+    settings.database_url = (
+        settings.eval_database_url if args.eval else settings.database_url
+    )
+    await close_pool()
+
     pool = await get_pool()
     try:
         async with pool.acquire() as conn:

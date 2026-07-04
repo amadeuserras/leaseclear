@@ -3,6 +3,7 @@ import asyncio
 import datetime as dt
 from pathlib import Path
 
+from leaseclear.core.config import settings
 from leaseclear.db.connection import close_pool, db_session, get_conn
 from leaseclear.evals.golden.loader import load_golden_items
 from leaseclear.evals.metrics import aggregate_metrics
@@ -18,8 +19,9 @@ async def _ensure_corpus_ingested() -> None:
         count = await get_conn().fetchval("SELECT count(*) FROM documents")
     if not count:
         raise SystemExit(
-            "No documents in the database. Run `uv run python scripts/ingest.py` "
-            "against the corpus in corpus/generated first."
+            "No documents in the eval database. Run "
+            "`uv run python scripts/create_db.py --eval` then "
+            "`uv run python scripts/seed_db.py --eval`."
         )
 
 
@@ -39,6 +41,9 @@ async def main() -> None:
     items = load_golden_items(limit=LIMIT)
     if args.limit is not None:
         items = items[: args.limit]
+
+    settings.database_url = settings.eval_database_url
+    await close_pool()
 
     try:
         await _ensure_corpus_ingested()
