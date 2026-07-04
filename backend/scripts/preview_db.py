@@ -4,7 +4,7 @@ import asyncio
 import asyncpg
 
 from leaseclear.core.config import settings
-from leaseclear.db.connection import close_pool, get_pool
+from leaseclear.db.connection import close_pool, get_pool, use_database
 
 MAX_ROWS = 4
 MAX_CELL_WIDTH = 48
@@ -143,26 +143,24 @@ def _parse_args() -> argparse.Namespace:
 
 async def main() -> None:
     args = _parse_args()
-    settings.database_url = (
-        settings.eval_database_url if args.eval else settings.database_url
-    )
-    await close_pool()
+    database_url = settings.eval_database_url if args.eval else settings.database_url
 
-    pool = await get_pool()
-    try:
-        async with pool.acquire() as conn:
-            tables = await list_tables(conn)
-            if not tables:
-                print("No tables in public schema.")
-                return
+    async with use_database(database_url):
+        pool = await get_pool()
+        try:
+            async with pool.acquire() as conn:
+                tables = await list_tables(conn)
+                if not tables:
+                    print("No tables in public schema.")
+                    return
 
-            for table in tables:
-                columns = await list_columns(conn, table)
-                total_rows = await conn.fetchval(f'SELECT COUNT(*) FROM "{table}"')
-                rows = await conn.fetch(f'SELECT * FROM "{table}" LIMIT {MAX_ROWS}')
-                print_table(table, columns, rows, total_rows)
-    finally:
-        await close_pool()
+                for table in tables:
+                    columns = await list_columns(conn, table)
+                    total_rows = await conn.fetchval(f'SELECT COUNT(*) FROM "{table}"')
+                    rows = await conn.fetch(f'SELECT * FROM "{table}" LIMIT {MAX_ROWS}')
+                    print_table(table, columns, rows, total_rows)
+        finally:
+            await close_pool()
 
 
 if __name__ == "__main__":

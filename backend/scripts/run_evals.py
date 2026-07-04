@@ -4,7 +4,7 @@ import datetime as dt
 from pathlib import Path
 
 from leaseclear.core.config import settings
-from leaseclear.db.connection import close_pool, db_session, get_conn
+from leaseclear.db.connection import db_session, get_conn, use_database
 from leaseclear.evals.golden.loader import load_golden_items
 from leaseclear.evals.metrics import aggregate_metrics
 from leaseclear.evals.pipeline import run_all
@@ -42,14 +42,9 @@ async def main() -> None:
     if args.limit is not None:
         items = items[: args.limit]
 
-    settings.database_url = settings.eval_database_url
-    await close_pool()
-
-    try:
+    async with use_database(settings.eval_database_url):
         await _ensure_corpus_ingested()
         results = await run_all(items)
-    finally:
-        await close_pool()
 
     metrics = aggregate_metrics(results)
 

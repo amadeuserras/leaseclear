@@ -4,8 +4,7 @@ from pathlib import Path
 from uuid import UUID
 
 from leaseclear.auth.users import register_user
-from leaseclear.core.config import settings
-from leaseclear.db.connection import close_pool, db_session
+from leaseclear.db.connection import db_session, use_database
 from leaseclear.ingestion.ingest import ingest_documents
 from leaseclear.types import UploadDocument
 
@@ -27,15 +26,9 @@ async def seed_database(database_url: str) -> tuple[UUID, int, int]:
         )
 
     uploads = [UploadDocument(path=str(p), filename=p.name) for p in pdfs]
-    prev_url = settings.database_url
-    settings.database_url = database_url
-    await close_pool()
-    try:
+    async with use_database(database_url):
         async with db_session() as conn:
             await conn.execute("TRUNCATE logs, chunks, users, documents")
         user_id = UUID(await register_user(OWNER_EMAIL, OWNER_PASSWORD))
         chunks = await ingest_documents(uploads, user_id=user_id)
         return user_id, len(pdfs), len(chunks)
-    finally:
-        settings.database_url = prev_url
-        await close_pool()

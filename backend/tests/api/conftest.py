@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from leaseclear.api.limiter import limiter
 from leaseclear.api.main import app
 from leaseclear.core.config import settings
-from leaseclear.db.connection import close_pool
+from leaseclear.db.connection import use_database
 from leaseclear.generation.prompts import DELIMITER
 from leaseclear.types import ChunkBase, DocumentMetadata, GenerationStreamMeta
 
@@ -85,13 +85,10 @@ async def api_client(
     database_url: str,
     seed_db: asyncpg.Connection,
 ) -> AsyncIterator[TestClient]:
-    monkeypatch.setattr(settings, "database_url", database_url)
     monkeypatch.setattr(
         settings, "jwt_secret", "test-jwt-secret-for-leaseclear-tests-only"
     )
-    await close_pool()
 
-    with TestClient(app) as client:
-        yield client
-
-    await close_pool()
+    async with use_database(database_url):
+        with TestClient(app) as client:
+            yield client

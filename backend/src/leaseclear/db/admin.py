@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import asyncpg
 
-from leaseclear.core.config import settings
-from leaseclear.db.connection import apply_schema, close_pool, db_session
+from leaseclear.db.connection import apply_schema, db_session, use_database
 
 
 async def ensure_database(database_url: str) -> None:
@@ -23,12 +22,5 @@ async def ensure_database(database_url: str) -> None:
 
 async def create_database(database_url: str) -> None:
     await ensure_database(database_url)
-    prev_url = settings.database_url
-    settings.database_url = database_url
-    await close_pool()
-    try:
-        async with db_session():
-            await apply_schema()
-    finally:
-        settings.database_url = prev_url
-        await close_pool()
+    async with use_database(database_url), db_session():
+        await apply_schema()

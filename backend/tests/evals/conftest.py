@@ -7,7 +7,13 @@ import pytest
 
 from leaseclear.core.config import settings
 from leaseclear.db.admin import ensure_database
-from leaseclear.db.connection import apply_schema, close_pool, db_session, get_conn
+from leaseclear.db.connection import (
+    apply_schema,
+    bind_database,
+    db_session,
+    get_conn,
+    unbind_database,
+)
 from leaseclear.evals.golden.loader import GoldenItem, load_golden_items
 from leaseclear.evals.pipeline import run_all
 from leaseclear.evals.types import CaseResult
@@ -31,14 +37,22 @@ async def ensure_eval_database(eval_database_url: str) -> None:
 
 
 @pytest.fixture(scope="session")
-async def full_corpus_db(
-    eval_database_url: str, ensure_eval_database: None
+async def eval_db(
+    ensure_eval_database: None, eval_database_url: str
 ) -> AsyncIterator[None]:
+    binding = await bind_database(eval_database_url)
+    try:
+        yield
+    finally:
+        await unbind_database(binding)
+
+
+@pytest.fixture(scope="session")
+async def full_corpus_db(eval_db: None) -> AsyncIterator[None]:
     """Ingest the full generated corpus into the eval database, once per session.
 
-    Points `settings.database_url` at the eval DB (same trick tests/api/conftest.py
-    uses) so the pipeline exercises the exact connection-pool path production
-    code uses, instead of a special-cased test-only wiring.
+    Routes the connection pool to the eval DB via `bind_database()` so the
+    pipeline exercises the same path production code uses.
 
     Imports ingestion lazily: it pulls in tiktoken, which fetches its BPE
     file over the network on first use. That cost belongs to this `eval`
@@ -55,21 +69,14 @@ async def full_corpus_db(
     from leaseclear.ingestion.ingest import ingest_documents
     from leaseclear.types import UploadDocument
 
-    monkeypatch = pytest.MonkeyPatch()
-    monkeypatch.setattr(settings, "database_url", eval_database_url)
-    await close_pool()
-    try:
-        async with db_session():
-            await apply_schema()
-            await get_conn().execute("TRUNCATE chunks, logs, users, documents")
-        uploads = [UploadDocument(path=str(p), filename=p.name) for p in pdfs]
-        await ingest_documents(uploads)
-        yield
-    finally:
-        async with db_session():
-            await get_conn().execute("TRUNCATE chunks, logs, users, documents")
-        await close_pool()
-        monkeypatch.undo()
+    async with db_session():
+        await apply_schema()
+        await get_conn().execute("TRUNCATE chunks, logs, users, documents")
+    uploads = [UploadDocument(path=str(p), filename=p.name) for p in pdfs]
+    await ingest_documents(uploads)
+    yield
+    async with db_session():
+        await get_conn().execute("TRUNCATE chunks, logs, users, documents")
 
 
 @pytest.fixture(scope="session")
