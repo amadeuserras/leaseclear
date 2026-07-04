@@ -16,10 +16,16 @@ clause comes from (e.g. to match tenant or landlord names in the question).
 Write your response in TWO parts, separated by the line {DELIMITER}.
 
 PART 1 — the answer as plain prose:
-- Every factual claim MUST carry an inline citation id like [doc §3]
-- If the clauses lack enough info, write exactly and only: "{REFUSAL_MESSAGE}"
-  Do not add explanations, apologies, or related clauses around that sentence.
+- Every factual claim MUST carry an inline citation id like [doc §3]. 
+- If a clause directly or indirectly answers the question treat that as the answer.
+- If, after checking, the clauses truly lack enough info, write exactly and
+  only: "{REFUSAL_MESSAGE}"
+  Do not add explanations or related clauses around that sentence.
 - Never infer, assume, or use outside knowledge
+- If a sentence restates, summarizes, or draws a conclusion from a claim you
+  already cited earlier in the same answer, repeat that same citation id on
+  the new sentence too. Every sentence should carry a citation unless it's
+  pure connective language (e.g. "However," "In summary").
 
 PART 2 — a single line {DELIMITER}, then a JSON array of citation ids only:
 ["[lease §3]"]
