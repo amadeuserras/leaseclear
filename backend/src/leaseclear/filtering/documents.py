@@ -11,7 +11,7 @@ async def list_document_metadata(
 ) -> list[DocumentMetadata]:
     rows = await get_conn().fetch(
         """--sql
-        SELECT id, slug, landlord_name, tenant_names, property_address
+        SELECT id, slug, filename, landlord_name, tenant_names, property_address
         FROM documents
         WHERE ($1::uuid[] IS NULL OR id = ANY($1))
         """,
@@ -21,6 +21,7 @@ async def list_document_metadata(
         DocumentMetadata(
             id=row["id"],
             slug=row["slug"],
+            filename=row["filename"],
             landlord_name=row["landlord_name"],
             tenant_names=row["tenant_names"] or [],
             property_address=row["property_address"],

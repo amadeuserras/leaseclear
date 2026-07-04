@@ -14,18 +14,18 @@ MODEL = "claude-haiku-4-5"
 
 SYSTEM_PROMPT = """
 You match a user's question about residential leases to the specific lease
-document(s) it refers to, based on tenant names, landlord name, and property
-address.
+document(s) it refers to, based on tenant names, landlord name, property
+address or filename.
 
 You will receive a JSON array of documents, each shaped like:
-{"idx": 1, "tenants": [...], "landlord": ..., "address": ...}
+{"idx": 1, "tenants": [...], "landlord": ..., "address": ..., "filename": "..."}
 
 Respond with JSON only, no prose, no markdown fences, in this exact shape:
 {"idx": [1, 3]}
 
 Rules:
 - Include a document's idx only if the question identifies it by tenant
-  name, landlord name, address, or another clearly matching detail.
+  name, landlord name, address, filename, or another clearly matching detail.
 - If the question does not reference any particular document (e.g. it's a
   general question), include every idx.
 - If the question references a document but none of the candidates match,
@@ -47,6 +47,7 @@ def _build_metadata_prompt(
             "tenants": doc.tenant_names,
             "landlord": doc.landlord_name,
             "address": doc.property_address,
+            "filename": doc.filename,
         }
         for idx, doc in enumerate(documents, start=1)
     ]
