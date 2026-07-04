@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from leaseclear.types import ChunkBase, GenerationResult, ValidationResult
+from leaseclear.types import (
+    ChunkBase,
+    DocumentMetadata,
+    GenerationResult,
+    ValidationResult,
+)
 
 
 @dataclass(frozen=True)
@@ -42,12 +47,12 @@ class CaseResult:
     item_type: str
     question: str
     retrieved: list[ChunkBase]
+    documents: list[DocumentMetadata]
     retrieval_hit: bool | None
     result: GenerationResult
     validation: ValidationResult
     refused: bool
     expected_refusal: bool
-    correctly_refused: bool
     judge: JudgeVerdict | None
     ttft_s: float | None
     total_s: float

@@ -1,19 +1,26 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from fastapi.testclient import TestClient
 
 
 def test_query_returns_429_after_limit(
-    api_client: TestClient, mock_generate_stream: None
+    api_client: TestClient,
+    mock_generate_stream: None,
+    owner: tuple[dict[str, str], UUID],
 ) -> None:
+    headers, _ = owner
     payload = {"question": "How much is the security deposit?"}
 
     for _ in range(10):
-        with api_client.stream("POST", "/query", json=payload) as response:
+        with api_client.stream(
+            "POST", "/query", json=payload, headers=headers
+        ) as response:
             assert response.status_code == 200
             response.read()
 
-    response = api_client.post("/query", json=payload)
+    response = api_client.post("/query", json=payload, headers=headers)
     assert response.status_code == 429
 
 

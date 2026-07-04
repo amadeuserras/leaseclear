@@ -1,20 +1,27 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from leaseclear.db.connection import get_conn
 from leaseclear.types import EmbeddedChunk, EnrichedDocument
 
 
-async def store_documents(documents: list[EnrichedDocument]) -> None:
+async def store_documents(
+    documents: list[EnrichedDocument],
+    user_id: UUID | None = None,
+) -> None:
     await get_conn().executemany(
         """--sql
         INSERT INTO documents (
-            id, filename, slug, landlord_name, tenant_names, property_address
+            id, user_id, filename, slug, landlord_name, tenant_names,
+            property_address
         )
-        VALUES ($1, $2, $3, $4, $5, $6)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         """,
         [
             (
                 doc.id,
+                user_id,
                 doc.filename,
                 doc.slug,
                 doc.landlord_name,

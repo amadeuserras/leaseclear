@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import Depends, FastAPI, File, Request, UploadFile
 from sse_starlette.sse import EventSourceResponse
@@ -42,14 +43,18 @@ def health() -> HealthResponse:
 async def documents_upload(
     request: Request,
     files: Annotated[list[UploadFile], File()],
-    _user_id: Annotated[str, Depends(current_user)],
+    user_id: Annotated[UUID, Depends(current_user)],
 ) -> None:
-    await upload_documents(files)
+    await upload_documents(files, user_id)
 
 
 @app.post("/query")
 @limiter.limit("10/minute")
-async def query(request: Request, req: QueryRequest) -> EventSourceResponse:
+async def query(
+    request: Request,
+    req: QueryRequest,
+    user_id: Annotated[UUID, Depends(current_user)],
+) -> EventSourceResponse:
     return EventSourceResponse(
-        query_events(req.question, req.document_ids),
+        query_events(req.question, user_id, req.document_ids),
     )

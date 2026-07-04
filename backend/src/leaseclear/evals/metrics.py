@@ -97,7 +97,7 @@ def aggregate_metrics(results: list[CaseResult]) -> AggregateMetrics:
     unanswerable = [r for r in results if r.item_type == "unanswerable"]
     refusal_accuracy = MetricScore(
         "refusal_accuracy",
-        _rate([r.correctly_refused for r in unanswerable]),
+        _rate([r.refused == r.expected_refusal for r in unanswerable]),
         TARGETS["refusal_accuracy"],
         higher_is_better=True,
         n=len(unanswerable),

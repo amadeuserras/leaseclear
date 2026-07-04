@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS documents CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE TABLE users (
     id UUID PRIMARY KEY,
@@ -16,6 +17,8 @@ CREATE TABLE users (
 
 CREATE TABLE documents (
     id UUID PRIMARY KEY,
+    -- NULL for system-level ingests (corpus/evals); API uploads always set it.
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     filename TEXT NOT NULL,
     slug TEXT NOT NULL,
     landlord_name TEXT,
@@ -23,6 +26,8 @@ CREATE TABLE documents (
     property_address TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX documents_user_id_idx ON documents (user_id);
 
 CREATE TABLE chunks (
     id UUID PRIMARY KEY,
@@ -45,8 +50,13 @@ CREATE INDEX chunks_embedding_hnsw_idx
 CREATE INDEX chunks_text_tsv_gin_idx
     ON chunks USING gin (text_tsv);
 
+-- Supports the ORDER BY text <->> query (word-similarity KNN) in trigram search.
+CREATE INDEX chunks_text_trgm_gist_idx
+    ON chunks USING gist (text gist_trgm_ops);
+
 CREATE TABLE logs (
     id UUID PRIMARY KEY,
+    user_id UUID,
     question TEXT NOT NULL,
     document_ids UUID[],
     chunk_ids_retrieved UUID[] NOT NULL,

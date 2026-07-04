@@ -40,6 +40,7 @@ class EnrichedDocument(AssignedDocument):
 @dataclass
 class DocumentMetadata:
     id: UUID
+    slug: str
     landlord_name: str | None
     tenant_names: list[str]
     property_address: str | None
@@ -103,6 +104,7 @@ class GenerationStreamMeta:
 @dataclass
 class QueryLogEntry:
     id: UUID
+    user_id: UUID | None
     question: str
     document_ids: list[UUID] | None
     chunk_ids_retrieved: list[UUID]

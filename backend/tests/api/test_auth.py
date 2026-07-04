@@ -94,12 +94,9 @@ def test_documents_accepts_valid_token(
     assert response.status_code == 204
 
 
-def test_query_does_not_require_auth(
-    api_client: TestClient, mock_generate_stream: None
-) -> None:
-    with api_client.stream(
-        "POST",
+def test_query_requires_auth(api_client: TestClient) -> None:
+    response = api_client.post(
         "/query",
         json={"question": "How much is the security deposit?"},
-    ) as response:
-        assert response.status_code == 200
+    )
+    assert response.status_code == 401
