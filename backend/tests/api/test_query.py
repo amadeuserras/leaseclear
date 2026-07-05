@@ -8,7 +8,6 @@ import asyncpg
 from fastapi.testclient import TestClient
 
 from leaseclear.generation.prompts import DELIMITER
-from tests.api.conftest import MOCK_INPUT_TOKENS, MOCK_OUTPUT_TOKENS
 from tests.data.corpus import CORPUS_LEASE_DOCUMENT_ID
 
 
@@ -116,8 +115,8 @@ async def test_query_writes_log_row(
     assert row["document_ids"] is None
     assert isinstance(row["chunk_ids_retrieved"], list)
     assert row["chunk_ids_retrieved"]
-    assert row["input_tokens"] == MOCK_INPUT_TOKENS
-    assert row["output_tokens"] == MOCK_OUTPUT_TOKENS
+    assert row["input_tokens"] == 10
+    assert row["output_tokens"] == 20
     assert row["refused"] is False
     assert row["ttft_s"] is not None and row["ttft_s"] > 0
     assert row["total_s"] is not None and row["total_s"] >= row["ttft_s"]
