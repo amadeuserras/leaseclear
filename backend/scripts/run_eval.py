@@ -17,7 +17,7 @@ from leaseclear.evals.generation.metrics import aggregate_metrics
 from leaseclear.evals.generation.pipeline import run_all
 from leaseclear.evals.generation.report import render_metrics_md
 from leaseclear.evals.golden.loader import load_golden_items
-from leaseclear.evals.retrieval.eval import evaluate_retrievers
+from leaseclear.evals.retrieval.pipeline import evaluate_retrievers
 from leaseclear.evals.retrieval.report import render_retrieval_md
 
 REPORTS_DIR = Path(__file__).resolve().parents[1] / "src/leaseclear/evals/reports"

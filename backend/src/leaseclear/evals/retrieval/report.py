@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from leaseclear.evals.retrieval.eval import RetrievalEvalResult
+from leaseclear.evals.retrieval.pipeline import RetrievalEvalResult
 
 
 def render_retrieval_md(result: RetrievalEvalResult) -> str:
