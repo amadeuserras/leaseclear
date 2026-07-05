@@ -53,9 +53,12 @@ async def run_case(item: GoldenItem) -> CaseResult:
     try:
         async with db_session():
             all_docs = await get_all_documents()
-            filtered_ids = await filter_documents(item.question, all_docs)
-            filtered_ids_set = set(filtered_ids)
-            filtered_docs = [d for d in all_docs if d.id in filtered_ids_set]
+
+        filtered_ids = await filter_documents(item.question, all_docs)
+        filtered_ids_set = set(filtered_ids)
+        filtered_docs = [d for d in all_docs if d.id in filtered_ids_set]
+
+        async with db_session():
             retrieved_chunks = await hybrid.search(
                 item.question, document_ids=filtered_ids
             )

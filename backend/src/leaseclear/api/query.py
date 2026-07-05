@@ -80,15 +80,17 @@ async def query_events(
     async with db_session():
         user_docs = await get_documents(user_id)
 
-        if document_ids:
-            document_ids_set = set(document_ids)
-            candidate_docs = [d for d in user_docs if d.id in document_ids_set]
-        else:
-            candidate_docs = user_docs
+    if document_ids:
+        document_ids_set = set(document_ids)
+        authorized_docs = [d for d in user_docs if d.id in document_ids_set]
+    else:
+        authorized_docs = user_docs
 
-        filtered_ids = await filter_documents(question, candidate_docs)
-        filtered_ids_set = set(filtered_ids)
-        filtered_docs = [d for d in candidate_docs if d.id in filtered_ids_set]
+    filtered_ids = await filter_documents(question, authorized_docs)
+    filtered_ids_set = set(filtered_ids)
+    filtered_docs = [d for d in authorized_docs if d.id in filtered_ids_set]
+
+    async with db_session():
         retrieved_chunks = await hybrid.search(question, document_ids=filtered_ids)
 
     raw_parts: list[str] = []
