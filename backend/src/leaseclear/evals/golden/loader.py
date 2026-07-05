@@ -17,6 +17,8 @@ DEFAULT_GOLDEN_PATHS = (
     GOLDEN_DIR / "hard.jsonl",
 )
 
+_CLAUSE_NUM = re.compile(r"^(\d+(?:\.\d+)?)\.")
+
 
 @dataclass(frozen=True)
 class GoldenItem:
@@ -25,21 +27,23 @@ class GoldenItem:
     question: str
     expected_answer: str | None
     expected_refusal: bool
-    document_slug: str | None
+    document_filename: str | None
     clause_label: str | None
     page_number: int | None
 
     @property
-    def canonical_document_slug(self) -> str | None:
-        if self.document_slug is None:
+    def document_slug(self) -> str | None:
+        """Slugified filename — matches the slug stored on chunks in the DB."""
+        if self.document_filename is None:
             return None
-        return slugify(self.document_slug)
+        return slugify(self.document_filename)
 
     @property
     def clause_number(self) -> str | None:
+        """Numeric prefix extracted from clause_label, e.g. '3' from '3. Rent'."""
         if self.clause_label is None:
             return None
-        m = re.compile(r"^(\d+(?:\.\d+)?)\.").match(self.clause_label)
+        m = _CLAUSE_NUM.match(self.clause_label)
         return m.group(1) if m else None
 
 
@@ -57,7 +61,7 @@ def _load_golden_file(path: Path) -> list[GoldenItem]:
                 question=data["question"],
                 expected_answer=data.get("expected_answer"),
                 expected_refusal=data["expected_refusal"],
-                document_slug=data.get("document_slug"),
+                document_filename=data.get("document_filename"),
                 clause_label=data.get("clause_label"),
                 page_number=data.get("page_number"),
             )

@@ -6,14 +6,14 @@ from leaseclear.types import ChunkBase
 
 def has_relevance_label(item: GoldenItem) -> bool:
     """Whether `item` carries a ground-truth we can score retrieval against."""
-    return item.canonical_document_slug is not None and (
+    return item.document_slug is not None and (
         item.clause_number is not None or item.page_number is not None
     )
 
 
 def is_relevant_chunk(item: GoldenItem, chunk: ChunkBase) -> bool:
     """Whether `chunk` is the ground-truth chunk for `item`."""
-    if chunk.document_slug != item.canonical_document_slug:
+    if chunk.document_slug != item.document_slug:
         return False
     if item.clause_number is not None:
         return chunk.clause_number == item.clause_number
