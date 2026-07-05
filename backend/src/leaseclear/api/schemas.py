@@ -32,3 +32,12 @@ class Citation(BaseModel):
 class QueryResponse(BaseModel):
     answer: str
     citations: list[Citation]
+
+
+class DocumentResponse(BaseModel):
+    id: UUID
+    filename: str
+    slug: str
+    landlord_name: str | None
+    tenant_names: list[str]
+    property_address: str | None

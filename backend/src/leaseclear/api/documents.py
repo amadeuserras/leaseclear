@@ -7,6 +7,9 @@ from uuid import UUID
 
 from fastapi import HTTPException, UploadFile
 
+from leaseclear.api.schemas import DocumentResponse
+from leaseclear.db.connection import db_session
+from leaseclear.filtering.documents import list_user_documents
 from leaseclear.ingestion.ingest import ingest_documents
 from leaseclear.types import UploadDocument
 
@@ -36,3 +39,19 @@ async def upload_documents(files: list[UploadFile], user_id: UUID) -> None:
     finally:
         for path in temp_paths:
             os.unlink(path)
+
+
+async def get_documents(user_id: UUID) -> list[DocumentResponse]:
+    async with db_session():
+        docs = await list_user_documents(user_id)
+    return [
+        DocumentResponse(
+            id=d.id,
+            filename=d.filename,
+            slug=d.slug,
+            landlord_name=d.landlord_name,
+            tenant_names=d.tenant_names,
+            property_address=d.property_address,
+        )
+        for d in docs
+    ]

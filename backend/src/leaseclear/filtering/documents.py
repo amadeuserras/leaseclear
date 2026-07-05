@@ -36,3 +36,26 @@ async def list_owned_document_ids(user_id: UUID) -> list[UUID]:
         user_id,
     )
     return [row["id"] for row in rows]
+
+
+async def list_user_documents(user_id: UUID) -> list[DocumentMetadata]:
+    rows = await get_conn().fetch(
+        """--sql
+        SELECT id, slug, filename, landlord_name, tenant_names, property_address
+        FROM documents
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+        """,
+        user_id,
+    )
+    return [
+        DocumentMetadata(
+            id=row["id"],
+            slug=row["slug"],
+            filename=row["filename"],
+            landlord_name=row["landlord_name"],
+            tenant_names=row["tenant_names"] or [],
+            property_address=row["property_address"],
+        )
+        for row in rows
+    ]

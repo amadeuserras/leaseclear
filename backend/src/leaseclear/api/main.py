@@ -8,14 +8,14 @@ from fastapi import Depends, FastAPI, File, Request, UploadFile
 from sse_starlette.sse import EventSourceResponse
 
 from leaseclear.api.auth import router as auth_router
-from leaseclear.api.documents import upload_documents
+from leaseclear.api.documents import get_documents, upload_documents
 from leaseclear.api.limiter import (
     RateLimitExceeded,
     limiter,
     rate_limit_exceeded_handler,
 )
 from leaseclear.api.query import query_events
-from leaseclear.api.schemas import HealthResponse, QueryRequest
+from leaseclear.api.schemas import DocumentResponse, HealthResponse, QueryRequest
 from leaseclear.auth.deps import current_user
 from leaseclear.db.connection import close_pool, get_pool
 
@@ -36,6 +36,13 @@ app.include_router(auth_router)
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse(status="ok")
+
+
+@app.get("/documents", response_model=list[DocumentResponse])
+async def documents_list(
+    user_id: Annotated[UUID, Depends(current_user)],
+) -> list[DocumentResponse]:
+    return await get_documents(user_id)
 
 
 @app.post("/documents", status_code=204)
