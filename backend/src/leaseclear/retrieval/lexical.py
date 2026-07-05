@@ -8,14 +8,6 @@ from leaseclear.types import ChunkBase
 
 
 def _or_query(question: str) -> str:
-    """Question text -> websearch query matching ANY of its words.
-
-    plainto_tsquery ANDs every term, so one term absent from a chunk (e.g.
-    "dog" in a question about a cats-only lease) discards it entirely, and
-    punctuation like "Lindqvist/Patel" survives as a single lexeme that no
-    chunk contains. Splitting on non-word characters and OR-ing the words
-    fixes both; ts_rank still ranks multi-term matches first.
-    """
     return " OR ".join(re.findall(r"\w+", question))
 
 
