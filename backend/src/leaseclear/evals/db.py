@@ -1,20 +1,15 @@
 from __future__ import annotations
 
-from uuid import UUID
-
 from leaseclear.db.connection import get_conn
 from leaseclear.types import DocumentMetadata
 
 
-async def get_documents(user_id: UUID) -> list[DocumentMetadata]:
+async def get_all_documents() -> list[DocumentMetadata]:
     rows = await get_conn().fetch(
         """--sql
         SELECT id, slug, filename, landlord_name, tenant_names, property_address
         FROM documents
-        WHERE user_id = $1
-        ORDER BY created_at DESC
         """,
-        user_id,
     )
     return [
         DocumentMetadata(

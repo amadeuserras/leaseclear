@@ -4,12 +4,12 @@ import asyncio
 import time
 
 from leaseclear.db.connection import db_session
+from leaseclear.evals.db import get_all_documents
 from leaseclear.evals.generation import judge as judge_module
 from leaseclear.evals.generation import match as match_module
 from leaseclear.evals.generation.types import CaseResult
 from leaseclear.evals.golden.loader import GoldenItem
 from leaseclear.evals.retrieval_recall import check_recall
-from leaseclear.filtering.documents import list_document_metadata
 from leaseclear.filtering.filter import filter_documents
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
@@ -52,23 +52,29 @@ async def _generate(
 async def run_case(item: GoldenItem) -> CaseResult:
     try:
         async with db_session():
-            document_ids = await filter_documents(item.question)
-            retrieved = await hybrid.search(item.question, document_ids=document_ids)
-            documents = await list_document_metadata(document_ids)
+            all_docs = await get_all_documents()
+            filtered_ids = await filter_documents(item.question, all_docs)
+            filtered_ids_set = set(filtered_ids)
+            filtered_docs = [d for d in all_docs if d.id in filtered_ids_set]
+            retrieved_chunks = await hybrid.search(
+                item.question, document_ids=filtered_ids
+            )
 
-        retrieval_hit = check_recall(item, retrieved)
+        retrieval_hit = check_recall(item, retrieved_chunks)
         result, meta, ttft_s, total_s = await _generate(
-            item.question, retrieved, documents
+            item.question, retrieved_chunks, filtered_docs
         )
-        validation = validate(result, retrieved, REFUSAL_MESSAGE)
+        validation = validate(result, retrieved_chunks, REFUSAL_MESSAGE)
         refused = is_refusal(result, REFUSAL_MESSAGE)
 
         verdict = None
         matched = None
         if not refused and result.answer.strip():
-            cited = resolve_citations([c.id for c in result.citations], retrieved)
+            cited = resolve_citations(
+                [c.id for c in result.citations], retrieved_chunks
+            )
             verdict = await judge_module.judge_answer(
-                item.question, result.answer, cited, retrieved
+                item.question, result.answer, cited, retrieved_chunks
             )
         if item.expected_answer is not None and not item.expected_refusal:
             matched = await match_module.check_match(
@@ -79,8 +85,8 @@ async def run_case(item: GoldenItem) -> CaseResult:
             item_id=item.id,
             item_type=item.type,
             question=item.question,
-            retrieved=retrieved,
-            documents=documents,
+            retrieved=retrieved_chunks,
+            documents=filtered_docs,
             retrieval_hit=retrieval_hit,
             result=result,
             validation=validation,

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from leaseclear.db.connection import db_session
+from leaseclear.evals.db import get_all_documents
 from leaseclear.evals.golden.loader import GoldenItem
 from leaseclear.evals.retrieval_recall import has_relevance_label, is_relevant_chunk
 from leaseclear.filtering.filter import filter_documents
@@ -59,9 +60,7 @@ class RetrievalEvalResult:
         return self.scores[0]
 
 
-async def _retrieve_base(
-    question: str, document_ids: list[UUID] | None = None
-) -> BaseResults:
+async def _search_base(question: str, document_ids: list[UUID]) -> BaseResults:
     return BaseResults(
         vector=await vector.search(
             question, top_k=RETRIEVER_TOP_K, document_ids=document_ids
@@ -101,8 +100,9 @@ async def evaluate_retrievers(
 
     async def _base_for(item: GoldenItem) -> BaseResults:
         async with semaphore, db_session():
-            document_ids = await filter_documents(item.question)
-            return await _retrieve_base(item.question, document_ids=document_ids)
+            all_docs = await get_all_documents()
+            filtered_ids = await filter_documents(item.question, all_docs)
+            return await _search_base(item.question, document_ids=filtered_ids)
 
     bases = await asyncio.gather(*(_base_for(item) for item in scored))
 

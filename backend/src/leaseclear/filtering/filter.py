@@ -6,7 +6,6 @@ from uuid import UUID
 from openai import AsyncOpenAI
 
 from leaseclear.core.config import settings
-from leaseclear.filtering.documents import list_document_metadata
 from leaseclear.types import DocumentMetadata
 from leaseclear.utils.text import strip_markdown_fence
 
@@ -64,9 +63,9 @@ def _parse_indices(raw: str) -> list[int]:
     return [int(idx) for idx in data.get("idx", [])]
 
 
-async def filter_documents(question: str) -> list[UUID]:
-    """Return the ids of documents relevant to `question`, per the filter LLM."""
-    documents = await list_document_metadata()
+async def filter_documents(
+    question: str, documents: list[DocumentMetadata]
+) -> list[UUID]:
     if not documents:
         return []
 
@@ -83,6 +82,7 @@ async def filter_documents(question: str) -> list[UUID]:
             },
         ],
     )
+
     raw = response.choices[0].message.content or ""
     indices = _parse_indices(raw)
     return [by_idx[idx] for idx in indices if idx in by_idx]

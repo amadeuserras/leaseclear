@@ -28,6 +28,16 @@ def mock_embed_texts(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("leaseclear.retrieval.vector.embed_texts", fake_embed_texts)
 
 
+@pytest.fixture(autouse=True)
+def mock_filter_documents(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def fake_filter_documents(
+        question: str, documents: list[DocumentMetadata]
+    ) -> list[UUID]:
+        return [d.id for d in documents]
+
+    monkeypatch.setattr("leaseclear.api.query.filter_documents", fake_filter_documents)
+
+
 @pytest.fixture
 def mock_generate_stream(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_generate_stream(

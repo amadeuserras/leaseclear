@@ -8,10 +8,8 @@ from uuid import UUID, uuid4
 from leaseclear.api.schemas import Citation, QueryResponse
 from leaseclear.db.connection import db_session
 from leaseclear.db.logs import insert_query_log
-from leaseclear.filtering.documents import (
-    list_document_metadata,
-    list_owned_document_ids,
-)
+from leaseclear.filtering.documents import get_documents
+from leaseclear.filtering.filter import filter_documents
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import DELIMITER, REFUSAL_MESSAGE
@@ -80,20 +78,22 @@ async def query_events(
     ttft_s: float | None = None
 
     async with db_session():
-        owned = await list_owned_document_ids(user_id)
+        user_docs = await get_documents(user_id)
+
         if document_ids:
-            owned_set = set(owned)
-            scope = [d for d in document_ids if d in owned_set]
+            document_ids_set = set(document_ids)
+            candidate_docs = [d for d in user_docs if d.id in document_ids_set]
         else:
-            scope = owned
-        retrieved = await hybrid.search(question, document_ids=scope)
-        documents = await list_document_metadata(
-            list({c.document_id for c in retrieved})
-        )
+            candidate_docs = user_docs
+
+        filtered_ids = await filter_documents(question, candidate_docs)
+        filtered_ids_set = set(filtered_ids)
+        filtered_docs = [d for d in candidate_docs if d.id in filtered_ids_set]
+        retrieved_chunks = await hybrid.search(question, document_ids=filtered_ids)
 
     raw_parts: list[str] = []
     prose_parts: list[str] = []
-    tokens, stream_meta = generate_stream(question, retrieved, documents)
+    tokens, stream_meta = generate_stream(question, retrieved_chunks, filtered_docs)
     async for prose in _stream_prose(tokens, raw_parts):
         if ttft_s is None:
             ttft_s = time.perf_counter() - start
@@ -105,8 +105,8 @@ async def query_events(
         answer="".join(prose_parts).strip(),
         citations=[GenCitation(id=cid) for cid in parsed.citation_ids],
     )
-    validate(result, retrieved, REFUSAL_MESSAGE)
-    payload = _to_response(result, retrieved)
+    validate(result, retrieved_chunks, REFUSAL_MESSAGE)
+    payload = _to_response(result, retrieved_chunks)
     yield {"event": "done", "data": payload.model_dump_json()}
 
     total_s = time.perf_counter() - start
@@ -115,7 +115,7 @@ async def query_events(
         user_id=user_id,
         question=question,
         document_ids=document_ids,
-        chunk_ids_retrieved=[c.id for c in retrieved],
+        chunk_ids_retrieved=[c.id for c in retrieved_chunks],
         ttft_s=ttft_s,
         total_s=total_s,
         input_tokens=stream_meta.input_tokens,
