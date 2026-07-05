@@ -17,6 +17,7 @@ DEFAULT_GOLDEN_PATHS = (
     GOLDEN_DIR / "hard.jsonl",
 )
 
+
 @dataclass(frozen=True)
 class GoldenItem:
     id: str
@@ -71,5 +72,6 @@ def load_golden_items(
 ) -> list[GoldenItem]:
     items: list[GoldenItem] = []
     for path in paths:
-        items.extend(_load_golden_file(path))
-    return items[:limit] if limit is not None else items
+        file_items = _load_golden_file(path)
+        items.extend(file_items[:limit] if limit is not None else file_items)
+    return items
