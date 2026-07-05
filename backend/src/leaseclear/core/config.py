@@ -17,7 +17,7 @@ class Settings(BaseSettings):
         "postgresql://leaseclear:leaseclear@localhost:5433/leaseclear_eval"
     )
     openai_embeddings_api_key: str
-    openai_judge_api_key: str
+    openai_api_key: str
     anthropic_generate_api_key: str
     anthropic_metadata_api_key: str
     anthropic_filter_api_key: str

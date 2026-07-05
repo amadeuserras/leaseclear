@@ -50,7 +50,7 @@ def _parse_match(raw: str) -> bool:
 
 
 def _get_client() -> AsyncOpenAI:
-    return AsyncOpenAI(api_key=settings.openai_judge_api_key)
+    return AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 async def check_match(

@@ -3,14 +3,14 @@ from __future__ import annotations
 import json
 from uuid import UUID
 
-from anthropic import AsyncAnthropic
+from openai import AsyncOpenAI
 
 from leaseclear.core.config import settings
 from leaseclear.filtering.documents import list_document_metadata
 from leaseclear.types import DocumentMetadata
 from leaseclear.utils.text import strip_markdown_fence
 
-MODEL = "claude-haiku-4-5"
+MODEL = "gpt-5-mini"
 
 SYSTEM_PROMPT = """
 You match a user's question about residential leases to the specific lease
@@ -33,8 +33,8 @@ Rules:
 """.strip()
 
 
-def _get_client() -> AsyncAnthropic:
-    return AsyncAnthropic(api_key=settings.anthropic_filter_api_key)
+def _get_client() -> AsyncOpenAI:
+    return AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 def _build_metadata_prompt(
@@ -72,17 +72,17 @@ async def filter_documents(question: str) -> list[UUID]:
 
     metadata_json, by_idx = _build_metadata_prompt(documents)
     client = _get_client()
-    message = await client.messages.create(
+    response = await client.chat.completions.create(
         model=MODEL,
-        max_tokens=256,
-        system=SYSTEM_PROMPT,
+        max_completion_tokens=256,
         messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
             {
                 "role": "user",
                 "content": f"DOCUMENTS:\n{metadata_json}\n\nQUESTION: {question}",
-            }
+            },
         ],
     )
-    raw = "".join(block.text for block in message.content if block.type == "text")
+    raw = response.choices[0].message.content or ""
     indices = _parse_indices(raw)
     return [by_idx[idx] for idx in indices if idx in by_idx]

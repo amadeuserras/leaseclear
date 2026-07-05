@@ -77,7 +77,7 @@ def _parse_verdict(raw: str) -> JudgeVerdict:
 
 
 def _get_client() -> AsyncOpenAI:
-    return AsyncOpenAI(api_key=settings.openai_judge_api_key)
+    return AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 async def judge_answer(
