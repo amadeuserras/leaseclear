@@ -70,7 +70,7 @@ async def run_case(item: GoldenItem) -> CaseResult:
             verdict = await judge_module.judge_answer(
                 item.question, result.answer, cited, retrieved
             )
-        if item.expected_answer is not None and not refused:
+        if item.expected_answer is not None and not item.expected_refusal:
             matched = await match_module.check_match(
                 item.question, result.answer, item.expected_answer
             )
