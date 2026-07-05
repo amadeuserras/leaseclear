@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from leaseclear.retrieval.fusion import reciprocal_rank_fusion
 from leaseclear.types import ChunkBase
 
-TEST_DOCUMENT_ID = UUID("00000000-0000-4000-8000-000000000003")
-CHUNK_A = UUID("00000000-0000-4000-8000-000000000010")
-CHUNK_B = UUID("00000000-0000-4000-8000-000000000011")
-CHUNK_C = UUID("00000000-0000-4000-8000-000000000012")
-CHUNK_D = UUID("00000000-0000-4000-8000-000000000013")
+TEST_DOCUMENT_ID = uuid4()
+CHUNK_A = uuid4()
+CHUNK_B = uuid4()
+CHUNK_C = uuid4()
+CHUNK_D = uuid4()
 
 
 def _chunk(chunk_id: UUID) -> ChunkBase:
