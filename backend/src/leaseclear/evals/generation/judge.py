@@ -5,7 +5,7 @@ import json
 from openai import AsyncOpenAI
 
 from leaseclear.core.config import settings
-from leaseclear.evals.types import ClaimJudgment, JudgeVerdict
+from leaseclear.evals.generation.types import ClaimJudgment, JudgeVerdict
 from leaseclear.types import ChunkBase
 from leaseclear.utils.text import strip_markdown_fence
 

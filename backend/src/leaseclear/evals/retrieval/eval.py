@@ -1,0 +1,120 @@
+from __future__ import annotations
+
+import asyncio
+from collections.abc import Callable
+from dataclasses import dataclass
+from uuid import UUID
+
+from leaseclear.db.connection import db_session
+from leaseclear.evals.golden.loader import GoldenItem
+from leaseclear.evals.retrieval_recall import has_relevance_label, is_relevant_chunk
+from leaseclear.filtering.filter import filter_documents
+from leaseclear.retrieval import fusion, lexical, trigram, vector
+from leaseclear.types import ChunkBase
+
+RETRIEVER_TOP_K = 20
+EVAL_TOP_K = 8
+MAX_CONCURRENT_ITEMS = 4
+
+
+@dataclass(frozen=True)
+class BaseResults:
+    """Raw ranked lists from each retriever for a single question."""
+
+    vector: list[ChunkBase]
+    lexical: list[ChunkBase]
+    trigram: list[ChunkBase]
+
+
+Strategy = Callable[[BaseResults], list[ChunkBase]]
+
+STRATEGIES: dict[str, Strategy] = {
+    "vector": lambda b: b.vector,
+    "lexical": lambda b: b.lexical,
+    "trigram": lambda b: b.trigram,
+    "vector+lexical": lambda b: fusion.reciprocal_rank_fusion(b.vector, b.lexical),
+    "vector+trigram": lambda b: fusion.reciprocal_rank_fusion(b.vector, b.trigram),
+    "trigram+lexical": lambda b: fusion.reciprocal_rank_fusion(b.trigram, b.lexical),
+    "vector+lexical+trigram": lambda b: fusion.reciprocal_rank_fusion(
+        b.vector, b.lexical, b.trigram
+    ),
+}
+
+
+@dataclass(frozen=True)
+class StrategyScore:
+    name: str
+    mrr: float
+    recall_at_k: float
+
+
+@dataclass(frozen=True)
+class RetrievalEvalResult:
+    k: int
+    n_items: int
+    scores: list[StrategyScore]
+
+    @property
+    def winner(self) -> StrategyScore:
+        return self.scores[0]
+
+
+async def _retrieve_base(
+    question: str, document_ids: list[UUID] | None = None
+) -> BaseResults:
+    return BaseResults(
+        vector=await vector.search(
+            question, top_k=RETRIEVER_TOP_K, document_ids=document_ids
+        ),
+        lexical=await lexical.search(
+            question, top_k=RETRIEVER_TOP_K, document_ids=document_ids
+        ),
+        trigram=await trigram.search(
+            question, top_k=RETRIEVER_TOP_K, document_ids=document_ids
+        ),
+    )
+
+
+def _reciprocal_rank(item: GoldenItem, ranked: list[ChunkBase], k: int) -> float:
+    for position, chunk in enumerate(ranked[:k], start=1):
+        if is_relevant_chunk(item, chunk):
+            return 1.0 / position
+    return 0.0
+
+
+def _hit(item: GoldenItem, ranked: list[ChunkBase], k: int) -> float:
+    return float(any(is_relevant_chunk(item, chunk) for chunk in ranked[:k]))
+
+
+def _mean(values: list[float]) -> float:
+    return sum(values) / len(values) if values else 0.0
+
+
+async def evaluate_retrievers(
+    items: list[GoldenItem], *, k: int = EVAL_TOP_K
+) -> RetrievalEvalResult:
+    scored = [item for item in items if has_relevance_label(item)]
+    reciprocal_ranks: dict[str, list[float]] = {name: [] for name in STRATEGIES}
+    hits: dict[str, list[float]] = {name: [] for name in STRATEGIES}
+
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_ITEMS)
+
+    async def _base_for(item: GoldenItem) -> BaseResults:
+        async with semaphore, db_session():
+            document_ids = await filter_documents(item.question)
+            return await _retrieve_base(item.question, document_ids=document_ids)
+
+    bases = await asyncio.gather(*(_base_for(item) for item in scored))
+
+    for item, base in zip(scored, bases, strict=True):
+        for name, strategy in STRATEGIES.items():
+            ranked = strategy(base)
+            reciprocal_ranks[name].append(_reciprocal_rank(item, ranked, k))
+            hits[name].append(_hit(item, ranked, k))
+
+    scores = [
+        StrategyScore(name, _mean(reciprocal_ranks[name]), _mean(hits[name]))
+        for name in STRATEGIES
+    ]
+    scores.sort(key=lambda s: s.mrr, reverse=True)
+    return RetrievalEvalResult(k=k, n_items=len(scored), scores=scores)

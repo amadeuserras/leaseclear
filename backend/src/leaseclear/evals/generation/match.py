@@ -53,7 +53,7 @@ def _get_client() -> AsyncOpenAI:
     return AsyncOpenAI(api_key=settings.openai_judge_api_key)
 
 
-async def check_answer_match(
+async def check_match(
     question: str, generated_answer: str, golden_answer: str
 ) -> bool:
     client = _get_client()

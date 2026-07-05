@@ -3,7 +3,7 @@ from __future__ import annotations
 import statistics
 from dataclasses import dataclass
 
-from leaseclear.evals.types import CaseResult, ClaimJudgment
+from leaseclear.evals.generation.types import CaseResult, ClaimJudgment
 
 TARGETS = {
     "retrieval_recall_at_8": 0.90,

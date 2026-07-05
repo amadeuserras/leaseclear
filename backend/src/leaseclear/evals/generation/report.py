@@ -5,8 +5,8 @@ import datetime as dt
 import json
 from typing import Any
 
-from leaseclear.evals.metrics import AggregateMetrics, MetricScore
-from leaseclear.evals.types import CaseResult, JudgeVerdict
+from leaseclear.evals.generation.metrics import AggregateMetrics, MetricScore
+from leaseclear.evals.generation.types import CaseResult, JudgeVerdict
 from leaseclear.generation.generate import _build_user_message
 
 
@@ -91,7 +91,7 @@ def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> s
     lines = [
         "# METRICS",
         "",
-        f"_Generated {generated} by `scripts/run_evals.py` against "
+        f"_Generated {generated} by `scripts/run_eval.py --mode generation` against "
         f"{metrics.n_cases} golden items ({metrics.n_errors} errored)._",
         "",
         "| Metric | Score | Target | n | Status |",

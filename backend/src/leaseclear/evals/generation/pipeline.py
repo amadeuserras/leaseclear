@@ -4,11 +4,11 @@ import asyncio
 import time
 
 from leaseclear.db.connection import db_session
-from leaseclear.evals import answer_match as answer_match_module
-from leaseclear.evals import judge as judge_module
+from leaseclear.evals.generation import judge as judge_module
+from leaseclear.evals.generation import match as match_module
+from leaseclear.evals.generation.types import CaseResult
 from leaseclear.evals.golden.loader import GoldenItem
 from leaseclear.evals.retrieval_recall import check_recall
-from leaseclear.evals.types import CaseResult
 from leaseclear.filtering.documents import list_document_metadata
 from leaseclear.filtering.filter import filter_documents
 from leaseclear.generation.generate import generate_stream
@@ -71,7 +71,7 @@ async def run_case(item: GoldenItem) -> CaseResult:
                 item.question, result.answer, cited, retrieved
             )
         if item.expected_answer is not None and not refused:
-            matched = await answer_match_module.check_answer_match(
+            matched = await match_module.check_match(
                 item.question, result.answer, item.expected_answer
             )
 
