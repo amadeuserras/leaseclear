@@ -17,9 +17,6 @@ DEFAULT_GOLDEN_PATHS = (
     GOLDEN_DIR / "hard.jsonl",
 )
 
-_CLAUSE_NUM = re.compile(r"^(\d+(?:\.\d+)?)\.")
-
-
 @dataclass(frozen=True)
 class GoldenItem:
     id: str
@@ -43,7 +40,7 @@ class GoldenItem:
         """Numeric prefix extracted from clause_label, e.g. '3' from '3. Rent'."""
         if self.clause_label is None:
             return None
-        m = _CLAUSE_NUM.match(self.clause_label)
+        m = re.match(r"^(\d+(?:\.\d+)?)\.", self.clause_label)
         return m.group(1) if m else None
 
 
