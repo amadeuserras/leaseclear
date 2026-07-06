@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ApiError, streamQuery } from "@/lib/api";
-import { clearSession, getToken } from "@/lib/session";
+import { ApiError, streamQuery } from '@/lib/api';
+import { clearSession, getToken } from '@/lib/session';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export type ChatMessage = {
   id: string;
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   text: string;
   streaming?: boolean;
   error?: boolean;
@@ -15,9 +15,9 @@ export type ChatMessage = {
 
 const errorText = (e: unknown): string => {
   if (e instanceof ApiError && e.status === 429) {
-    return "Too many questions — try again in a minute.";
+    return 'Too many questions — try again in a minute.';
   }
-  return "Something went wrong answering that. Please try again.";
+  return 'Something went wrong answering that. Please try again.';
 };
 
 export const useChat = (selectedIds: string[]) => {
@@ -34,8 +34,8 @@ export const useChat = (selectedIds: string[]) => {
     const answerId = crypto.randomUUID();
     setMessages((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), role: "user", text: question.trim() },
-      { id: answerId, role: "assistant", text: "", streaming: true },
+      { id: crypto.randomUUID(), role: 'user', text: question.trim() },
+      { id: answerId, role: 'assistant', text: '', streaming: true },
     ]);
     setIsStreaming(true);
 
@@ -43,7 +43,7 @@ export const useChat = (selectedIds: string[]) => {
       await streamQuery({
         question: question.trim(),
         documentIds: selectedIds,
-        token: getToken() ?? "",
+        token: getToken() ?? '',
         onToken: (t) =>
           setMessages((prev) =>
             prev.map((m) => (m.id === answerId ? { ...m, text: m.text + t } : m)),
@@ -53,7 +53,7 @@ export const useChat = (selectedIds: string[]) => {
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         clearSession();
-        router.push("/login");
+        router.push('/login');
         return;
       }
       patchMessage(answerId, { text: errorText(e), streaming: false, error: true });

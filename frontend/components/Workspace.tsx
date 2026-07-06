@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
-import { ChatPanel } from "@/components/ChatPanel";
-import { SourcesPanel } from "@/components/SourcesPanel";
-import { useChat } from "@/hooks/useChat";
-import { useSources } from "@/hooks/useSources";
-import type { LeaseDocument } from "@/lib/api";
+import { ChatPanel } from '@/components/ChatPanel';
+import { SourcesPanel } from '@/components/SourcesPanel';
+import { useChat } from '@/hooks/useChat';
+import { useSources } from '@/hooks/useSources';
+import type { LeaseDocument } from '@/lib/api';
+import { useMemo } from 'react';
 
-const filenameStem = (filename: string) => filename.replace(/\.[^.]+$/, "");
+const filenameStem = (filename: string) => filename.replace(/\.[^.]+$/, '');
 
 type WorkspaceProps = {
   documents: LeaseDocument[];

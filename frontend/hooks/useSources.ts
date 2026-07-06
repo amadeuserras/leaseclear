@@ -1,25 +1,20 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import type { LeaseDocument } from "@/lib/api";
+import type { LeaseDocument } from '@/lib/api';
+import { useMemo, useState } from 'react';
 
 export type Source = LeaseDocument & { checked: boolean };
 
 // Tracks the unchecked set so newly uploaded documents default to selected.
 export const useSources = (documents: LeaseDocument[]) => {
-  const [uncheckedIds, setUncheckedIds] = useState<ReadonlySet<string>>(
-    new Set(),
-  );
+  const [uncheckedIds, setUncheckedIds] = useState<ReadonlySet<string>>(new Set());
 
   const sources: Source[] = useMemo(
     () => documents.map((d) => ({ ...d, checked: !uncheckedIds.has(d.id) })),
     [documents, uncheckedIds],
   );
 
-  const selectedIds = useMemo(
-    () => sources.filter((s) => s.checked).map((s) => s.id),
-    [sources],
-  );
+  const selectedIds = useMemo(() => sources.filter((s) => s.checked).map((s) => s.id), [sources]);
 
   const allChecked = sources.length > 0 && sources.every((s) => s.checked);
 
@@ -32,9 +27,7 @@ export const useSources = (documents: LeaseDocument[]) => {
     });
 
   const toggleAll = () =>
-    setUncheckedIds(
-      allChecked ? new Set(documents.map((d) => d.id)) : new Set(),
-    );
+    setUncheckedIds(allChecked ? new Set(documents.map((d) => d.id)) : new Set());
 
   return { sources, selectedIds, allChecked, toggle, toggleAll };
 };

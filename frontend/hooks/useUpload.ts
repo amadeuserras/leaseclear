@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ApiError, uploadDocuments } from "@/lib/api";
-import { getToken } from "@/lib/session";
+import { ApiError, uploadDocuments } from '@/lib/api';
+import { getToken } from '@/lib/session';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export const useUpload = () => {
   const router = useRouter();
@@ -15,15 +15,15 @@ export const useUpload = () => {
     setIsUploading(true);
     setError(null);
     try {
-      await uploadDocuments(Array.from(files), getToken() ?? "");
+      await uploadDocuments(Array.from(files), getToken() ?? '');
       router.refresh();
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) {
-        setError("Too many uploads — try again in a minute.");
+        setError('Too many uploads — try again in a minute.');
       } else if (e instanceof ApiError) {
         setError(e.message);
       } else {
-        setError("Upload failed. Please try again.");
+        setError('Upload failed. Please try again.');
       }
     } finally {
       setIsUploading(false);

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, type ReactNode } from "react";
-import { LogoMark } from "@/components/Logo";
-import { useLogin, type LoginNotice } from "@/hooks/useLogin";
+import { LogoMark } from '@/components/Logo';
+import { useLogin, type LoginNotice } from '@/hooks/useLogin';
+import { useState, type ReactNode } from 'react';
 
 const INPUT_CLASSES =
-  "w-full rounded-lg border border-hairline-input bg-bg-inset px-3 py-2.5 text-sm text-text-main outline-none focus:border-white/40 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.12)]";
+  'w-full rounded-lg border border-hairline-input bg-bg-inset px-3 py-2.5 text-sm text-text-main outline-none focus:border-white/40 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.12)]';
 
 type FieldProps = {
   label: string;
@@ -15,7 +15,7 @@ type FieldProps = {
 function Field({ label, children }: FieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[12.5px] font-medium text-text-secondary">{label}</label>
+      <label className="text-text-secondary text-[12.5px] font-medium">{label}</label>
       {children}
     </div>
   );
@@ -26,7 +26,7 @@ type NoticeProps = {
 };
 
 function Notice({ notice }: NoticeProps) {
-  const color = notice.kind === "error" ? "text-[#e07f84]" : "text-text-secondary";
+  const color = notice.kind === 'error' ? 'text-[#e07f84]' : 'text-text-secondary';
   return <div className={`text-[12.5px] ${color}`}>{notice.text}</div>;
 }
 
@@ -54,15 +54,15 @@ function GoogleIcon() {
 }
 
 export function LoginCard() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const { isSubmitting, notice, submit, googleSignIn, tryDemo } = useLogin();
 
   return (
-    <div className="w-[380px] max-w-full rounded-xl border border-hairline bg-bg-surface px-8 py-9 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+    <div className="border-hairline bg-bg-surface w-[380px] max-w-full rounded-xl border px-8 py-9 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
       <div className="mb-7 flex flex-col items-center gap-3.5">
         <LogoMark size="login" />
-        <div className="text-[17px] font-semibold tracking-[-0.01em] text-text-main">
+        <div className="text-text-main text-[17px] font-semibold tracking-[-0.01em]">
           LeaseClear
         </div>
       </div>
@@ -75,7 +75,7 @@ export function LoginCard() {
         className="flex flex-col gap-3.5"
         onSubmit={(e) => {
           e.preventDefault();
-          submit("login", email, password);
+          submit('login', email, password);
         }}
       >
         <Field label="Email">
@@ -98,7 +98,7 @@ export function LoginCard() {
         </Field>
 
         <div className="-mt-1.5 flex justify-end">
-          <span className="cursor-pointer whitespace-nowrap text-[12.5px] text-[rgba(236,237,239,0.55)] hover:text-text-main">
+          <span className="hover:text-text-main cursor-pointer text-[12.5px] whitespace-nowrap text-[rgba(236,237,239,0.55)]">
             Forgot password?
           </span>
         </div>
@@ -108,21 +108,21 @@ export function LoginCard() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-1 w-full cursor-pointer rounded-lg bg-emphasis p-[11px] text-sm font-semibold text-on-emphasis hover:bg-emphasis-hover disabled:cursor-default disabled:opacity-70"
+          className="bg-emphasis text-on-emphasis hover:bg-emphasis-hover mt-1 w-full cursor-pointer rounded-lg p-[11px] text-sm font-semibold disabled:cursor-default disabled:opacity-70"
         >
-          {isSubmitting ? "Signing in…" : "Sign in"}
+          {isSubmitting ? 'Signing in…' : 'Sign in'}
         </button>
 
         <div className="my-1.5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-hairline" />
-          <div className="text-xs text-text-muted">or</div>
-          <div className="h-px flex-1 bg-hairline" />
+          <div className="bg-hairline h-px flex-1" />
+          <div className="text-text-muted text-xs">or</div>
+          <div className="bg-hairline h-px flex-1" />
         </div>
 
         <button
           type="button"
           onClick={googleSignIn}
-          className="flex w-full cursor-pointer items-center justify-center gap-[9px] rounded-lg border border-hairline-input bg-bg-inset p-2.5 text-sm font-medium text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover"
+          className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex w-full cursor-pointer items-center justify-center gap-[9px] rounded-lg border p-2.5 text-sm font-medium"
         >
           <GoogleIcon />
           Continue with Google
@@ -130,16 +130,16 @@ export function LoginCard() {
       </form>
 
       <div className="mt-[22px] text-center text-[12.5px] text-[rgba(236,237,239,0.5)]">
-        Don&apos;t have an account?{" "}
+        Don&apos;t have an account?{' '}
         <span
-          className="cursor-pointer font-medium text-text-main hover:text-emphasis-hover"
-          onClick={() => submit("register", email, password)}
+          className="text-text-main hover:text-emphasis-hover cursor-pointer font-medium"
+          onClick={() => submit('register', email, password)}
         >
           Create one
-        </span>{" "}
-        or{" "}
+        </span>{' '}
+        or{' '}
         <span
-          className="cursor-pointer font-medium text-text-main hover:text-emphasis-hover"
+          className="text-text-main hover:text-emphasis-hover cursor-pointer font-medium"
           onClick={tryDemo}
         >
           try demo

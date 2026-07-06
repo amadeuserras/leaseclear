@@ -42,14 +42,13 @@ export class ApiError extends Error {
   }
 }
 
-const baseUrl = () =>
-  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+const baseUrl = () => process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
 
 const errorFromResponse = async (res: Response): Promise<ApiError> => {
-  let detail = "";
+  let detail = '';
   try {
     const body: unknown = await res.json();
-    if (body && typeof body === "object" && "detail" in body) {
+    if (body && typeof body === 'object' && 'detail' in body) {
       detail = String((body as { detail: unknown }).detail);
     }
   } catch {}
@@ -58,8 +57,8 @@ const errorFromResponse = async (res: Response): Promise<ApiError> => {
 
 const postJson = async <T>(path: string, body: unknown): Promise<T> => {
   const res = await fetch(`${baseUrl()}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw await errorFromResponse(res);
@@ -67,30 +66,25 @@ const postJson = async <T>(path: string, body: unknown): Promise<T> => {
 };
 
 export const login = (email: string, password: string) =>
-  postJson<TokenResponse>("/auth/login", { email, password });
+  postJson<TokenResponse>('/auth/login', { email, password });
 
 export const register = (email: string, password: string) =>
-  postJson<TokenResponse>("/auth/register", { email, password });
+  postJson<TokenResponse>('/auth/register', { email, password });
 
-export const listDocuments = async (
-  token: string,
-): Promise<LeaseDocument[]> => {
+export const listDocuments = async (token: string): Promise<LeaseDocument[]> => {
   const res = await fetch(`${baseUrl()}/documents`, {
     headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
+    cache: 'no-store',
   });
   if (!res.ok) throw await errorFromResponse(res);
   return (await res.json()) as LeaseDocument[];
 };
 
-export const uploadDocuments = async (
-  files: File[],
-  token: string,
-): Promise<void> => {
+export const uploadDocuments = async (files: File[], token: string): Promise<void> => {
   const form = new FormData();
-  for (const f of files) form.append("files", f);
+  for (const f of files) form.append('files', f);
   const res = await fetch(`${baseUrl()}/documents`, {
-    method: "POST",
+    method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body: form,
   });
@@ -103,14 +97,13 @@ type SseEvent = {
 };
 
 const parseSseEvent = (block: string): SseEvent => {
-  let event = "message";
+  let event = 'message';
   const data: string[] = [];
   for (const line of block.split(/\r?\n/)) {
-    if (line.startsWith("event:")) event = line.slice(6).trimStart();
-    else if (line.startsWith("data:"))
-      data.push(line.slice(5).replace(/^ /, ""));
+    if (line.startsWith('event:')) event = line.slice(6).trimStart();
+    else if (line.startsWith('data:')) data.push(line.slice(5).replace(/^ /, ''));
   }
-  return { event, data: data.join("\n") };
+  return { event, data: data.join('\n') };
 };
 
 export const streamQuery = async ({
@@ -122,9 +115,9 @@ export const streamQuery = async ({
   signal,
 }: StreamQueryParams): Promise<void> => {
   const res = await fetch(`${baseUrl()}/query`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ question, document_ids: documentIds }),
@@ -134,12 +127,12 @@ export const streamQuery = async ({
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = "";
+  let buffer = '';
 
   const dispatch = (block: string) => {
     const { event, data } = parseSseEvent(block);
-    if (event === "token") onToken(data);
-    else if (event === "done") onDone(JSON.parse(data) as QueryResult);
+    if (event === 'token') onToken(data);
+    else if (event === 'done') onDone(JSON.parse(data) as QueryResult);
   };
 
   for (;;) {
@@ -147,7 +140,7 @@ export const streamQuery = async ({
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
     const blocks = buffer.split(/\r?\n\r?\n/);
-    buffer = blocks.pop() ?? "";
+    buffer = blocks.pop() ?? '';
     for (const b of blocks) if (b.trim()) dispatch(b);
   }
   if (buffer.trim()) dispatch(buffer);

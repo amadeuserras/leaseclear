@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 // One open menu at a time; any click elsewhere closes it.
 export const useKebabMenu = () => {
@@ -9,8 +9,8 @@ export const useKebabMenu = () => {
   useEffect(() => {
     if (openId === null) return;
     const close = () => setOpenId(null);
-    document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
   }, [openId]);
 
   const toggle = (id: string) => setOpenId((prev) => (prev === id ? null : id));
