@@ -11,8 +11,8 @@ The files in this bundle (`LeaseClear.dc.html`) are **design references built in
 
 ## Design Tokens
 
-### Color palette — "tonal grayscale, no accent hue"
-The product deliberately has **no colored accent**. All emphasis is done through neutral value contrast (near-black surfaces, near-white for emphasis) rather than hue. This was chosen over four other explored options (blue, teal, indigo, warm/amber accents) specifically for a calmer, more neutral "legal document" feel.
+### Color palette — "tonal grayscale + single blue logo mark"
+The UI is deliberately near-monochrome: all emphasis is done through neutral value contrast (near-black surfaces, near-white for emphasis) rather than hue, for a calm, neutral "legal document" feel. The **one** exception is the speech-bubble logo mark, which is blue (`#4C9EEB`) — the single point of brand color. Everything else (buttons, chips, send button) stays grayscale.
 
 - Page background: `#16171b` (login), `#17181b`/`#16171b` interchangeable near-black
 - Panel/card background: `#1e2025`
@@ -22,7 +22,8 @@ The product deliberately has **no colored accent**. All emphasis is done through
 - Primary text: `#ECEDEF`
 - Secondary text: `rgba(236,237,239,0.62)`
 - Tertiary / muted text (placeholders, counts): `rgba(236,237,239,0.4)` – `rgba(236,237,239,0.5)`
-- **Emphasis color (replaces "accent")**: `#EDEDEF` (near-white) — used for the logo mark, primary buttons, and the send button. Text/icons on top of it are dark: `#17181b`
+- **Logo mark**: `#4C9EEB` (blue) — the one intentional splash of color, used only for the speech-bubble logo mark. Checkmark on top is white (`#ffffff`).
+- **Emphasis color (replaces "accent")**: `#EDEDEF` (near-white) — used for primary buttons and the send button. Text/icons on top of it are dark: `#17181b`
 - Emphasis hover: `#ffffff`
 - Citation chip: text `#ECEDEF`, background `rgba(255,255,255,0.1)`, border `rgba(255,255,255,0.18)`
 - Avatar background (neutral, distinct from emphasis color): `#3C4450`, initials text `#ECEDEF`
@@ -54,7 +55,7 @@ The product deliberately has **no colored accent**. All emphasis is done through
 - Form field gap: 14px
 
 ## Logo
-Speech-bubble mark: a rounded rectangle with one flat corner (`border-radius: 14px 14px 14px 4px`, ~46×38px on login, ~32×26px in the top bar), filled `#EDEDEF`, with a centered checkmark icon (`stroke: #17181b`, stroke-width ~2.6–2.8, rounded caps/joins). Paired with the wordmark "LeaseClear" in Inter 600.
+Speech-bubble mark: a rounded rectangle with one flat corner (`border-radius: 14px 14px 14px 4px`, ~46×38px on login, ~32×26px in the top bar), filled `#4C9EEB` (blue), with a centered checkmark icon (`stroke: #ffffff`, stroke-width ~2.6–2.8, rounded caps/joins). Paired with the wordmark "LeaseClear" in Inter 600.
 
 ## Screens
 
