@@ -5,6 +5,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, File, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 
 from leaseclear.api.auth import router as auth_router
@@ -17,6 +18,7 @@ from leaseclear.api.limiter import (
 from leaseclear.api.query import query_events
 from leaseclear.api.schemas import DocumentResponse, HealthResponse, QueryRequest
 from leaseclear.auth.deps import current_user
+from leaseclear.core.config import settings
 from leaseclear.db.connection import close_pool, get_pool
 
 
@@ -28,6 +30,13 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="LeaseClear", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 app.include_router(auth_router)
