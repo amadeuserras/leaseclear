@@ -1,38 +1,53 @@
 ---
 description: "Frontend React, Next.js, TypeScript, and Tailwind conventions"
-globs: ["frontend/**/*.{ts,tsx,js,jsx}", "frontend/**/*.css"]
+globs: ["frontend/"]
 alwaysApply: false
 ---
 
 # Frontend React Standards
 
-Use small, focused React components and Tailwind CSS utility patterns.
+## General
 
-## Components And Types
+- Keep components thin and logic-free; move logic into custom hooks.
+- Prefer flat file structure — avoid nested component folders unless reuse demands it.
+- Define subcomponents only used by one parent in the same file, above that component.
+- In array method callbacks (`.map`, `.filter`, `.reduce`, etc.), prefer short single-letter params for concise callbacks.
 
-- Define subcomponents in the same file above the component when they are only used there.
-- Components with a single expression body should use an implicit return.
-- Always use `type`, never `interface`, for custom types including component props.
-- Define component-specific types immediately above the component that uses them.
-- Prefer named exports. Use default exports only where the framework requires them, such as Next.js `page.tsx` or `layout.tsx` files.
-- Keep internal subcomponents, helpers, and types unexported unless reused elsewhere.
-- Single-letter loop variables are preferred for array methods: `x`, `i`, `j`, `k`, `s`, `ch`, `f`, `_`.
+## Next.js
+
+- Default to Server Components; use Client Components only at interactive leaves.
+- Use the modern App Router (`app/` directory) for layouts and page structures.
+- Fetch data in Server Components (`async` components, direct `await`) — never in `useEffect`.
+
+## Functions
+
+- Components (pages, layouts, exported React components): function declarations (`export default function Page() {}`).
+- Everything else (hooks, callbacks, helpers): arrow functions.
+
+## Types
+
+- Use `type`, never `interface`.
+- Define prop types immediately above the component that uses them.
+- Import hooks/types from `"react"` by name (`import { useState }`) — no namespace access (`React.useState`).
+
+## Exports
+
+- Next.js special files (`page`, `layout`, `loading`, `error`, `template`, `not-found`): default export (framework requirement).
+- Route handlers (`route.ts`): named exports per HTTP method.
+- Everything else: named exports. Keep internal helpers/subcomponents/types unexported unless reused elsewhere.
 
 ## Styling
 
-- Use Tailwind CSS for styling.
-- Prefer modern utility patterns like `flex`, `grid`, `gap`, `p-*`, and `space-*`.
-- Prefer layout spacing with `gap` and container padding over manually adding `pt-*` or `pb-*` to every child.
+- Embrace Tailwind's utility-first filosophy. Extend `globals.css` only for styles missing globally, not one-offs. 
+- Prefer `flex`/`grid`/`gap`/container padding over per-child spacing.
+- Design-system tokens as CSS custom properties: `--color-bg-main`, `--color-bg-surface`, `--color-text-main`, `--color-text-muted`.
 
-## Canonical References
-
-- Work in progress.
 
 ## Verification
 
-After frontend changes, run from `frontend/` when relevant:
+After frontend changes, from `frontend/`:
 
-```bash
+\`\`\`bash
 npm run lint
 npm run build
-```
+\`\`\`

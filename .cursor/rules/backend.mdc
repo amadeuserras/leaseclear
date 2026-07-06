@@ -1,7 +1,7 @@
 ---
 description: "Backend, corpus, and Python conventions for LeaseClear"
-globs: ["backend/**/*.py", "backend/**/*.sql", "corpus/**/*.py"]
-alwaysApply: true
+globs: ["backend/"]
+alwaysApply: false
 ---
 
 # Backend Python Standards
