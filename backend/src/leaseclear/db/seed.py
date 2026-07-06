@@ -9,7 +9,7 @@ from leaseclear.ingestion.ingest import ingest_documents
 from leaseclear.types import UploadDocument
 
 GENERATED_DIR = Path(__file__).resolve().parents[4] / "corpus" / "generated"
-OWNER_EMAIL = "owner@leaseclear.local"
+OWNER_EMAIL = "owner@leaseclear.example"
 OWNER_PASSWORD = "leaseclear"
 
 
