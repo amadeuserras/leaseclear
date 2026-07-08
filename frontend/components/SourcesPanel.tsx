@@ -2,6 +2,7 @@
 
 import { LoginCard } from '@/components/LoginCard';
 import { Spinner } from '@/components/Spinner';
+import { ChevronIcon, CheckIcon, UploadIcon } from '@/components/icons';
 import { useKebabMenu } from '@/hooks/useKebabMenu';
 import type { Source } from '@/hooks/useSources';
 import { useUpload } from '@/hooks/useUpload';
@@ -22,17 +23,7 @@ function Checkbox({ checked, onToggle }: CheckboxProps) {
         checked ? 'border-checkbox-checked bg-checkbox-checked' : 'border-white/25 bg-transparent'
       }`}
     >
-      {checked && (
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M5 13l4 4L19 7"
-            stroke="#ECEDEF"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      )}
+      {checked && <CheckIcon size={13} color="#ECEDEF" strokeWidth={3} />}
     </div>
   );
 }
@@ -56,27 +47,6 @@ function PdfIcon({ title, onClick }: PdfIconProps) {
         PDF
       </div>
     </div>
-  );
-}
-
-function UploadIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M12 4v12M12 4l-5 5M12 4l5 5"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 
@@ -182,15 +152,7 @@ export function SourcesPanel({
               title="Expand"
               className="hover:text-text-main flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-[rgba(236,237,239,0.5)] hover:bg-white/8"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M9 5l6 7-6 7"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ChevronIcon direction="right" />
             </button>
           </div>
 
@@ -220,15 +182,7 @@ export function SourcesPanel({
               title="Collapse"
               className="hover:text-text-main flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-[rgba(236,237,239,0.5)] hover:bg-white/8"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M15 5l-6 7 6 7"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ChevronIcon direction="left" />
             </button>
           </div>
 

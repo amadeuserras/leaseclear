@@ -2,6 +2,7 @@
 
 import { LogoMark } from '@/components/Logo';
 import { Spinner } from '@/components/Spinner';
+import { CloseIcon, GoogleIcon } from '@/components/icons';
 import { useLogin, type LoginNotice } from '@/hooks/useLogin';
 import { useState, type ReactNode } from 'react';
 
@@ -31,29 +32,6 @@ function Notice({ notice }: NoticeProps) {
   return <div className={`text-[12.5px] ${color}`}>{notice.text}</div>;
 }
 
-function GoogleIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24">
-      <path
-        fill="#4285F4"
-        d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.47c-.28 1.5-1.13 2.77-2.4 3.62v3h3.88c2.27-2.09 3.58-5.17 3.58-8.65z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3c-1.08.72-2.45 1.16-4.05 1.16-3.11 0-5.74-2.1-6.68-4.92H1.32v3.09C3.29 21.3 7.31 24 12 24z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.32 14.33A7.2 7.2 0 0 1 4.9 12c0-.81.14-1.6.42-2.33V6.58H1.32A11.98 11.98 0 0 0 0 12c0 1.93.46 3.76 1.32 5.42l4-3.09z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 4.75c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.29 2.7 1.32 6.58l4 3.09C6.26 6.85 8.89 4.75 12 4.75z"
-      />
-    </svg>
-  );
-}
-
 type LoginCardProps = {
   isDemo?: boolean;
   onClose?: () => void;
@@ -72,14 +50,7 @@ export function LoginCard({ isDemo = false, onClose }: LoginCardProps = {}) {
           className="hover:text-text-main absolute top-4 right-4 flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[rgba(236,237,239,0.45)] hover:bg-white/8"
           aria-label="Close"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M18 6L6 18M6 6l12 12"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-          </svg>
+          <CloseIcon />
         </button>
       )}
       <div className="mb-7 flex flex-col items-center gap-3.5">

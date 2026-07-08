@@ -1,5 +1,6 @@
 'use client';
 
+import { CloseIcon } from '@/components/icons';
 import type { ViewerTarget } from '@/hooks/useViewer';
 import type { DocumentChunk } from '@/lib/api';
 import { chunkCitationId } from '@/lib/citations';
@@ -55,15 +56,7 @@ export function DocumentViewer({ target, chunks, isLoading, error, onClose }: Do
           title="Close"
           className="hover:text-text-main flex h-[26px] w-[26px] shrink-0 cursor-pointer items-center justify-center rounded-md text-[rgba(236,237,239,0.5)] hover:bg-white/8"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M6 6l12 12M18 6L6 18"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <CloseIcon />
         </button>
       </div>
 

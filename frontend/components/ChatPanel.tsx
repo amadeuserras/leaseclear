@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowUpIcon } from '@/components/icons';
 import type { ChatMessage } from '@/hooks/useChat';
 import { segmentAnswer, withholdPartialCitation } from '@/lib/citations';
 import { Fragment, useState } from 'react';
@@ -137,15 +138,7 @@ function Composer({
           disabled={selectedCount === 0}
           className="bg-emphasis hover:bg-emphasis-hover disabled:hover:bg-emphasis flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 19V5M12 5l-6 6M12 5l6 6"
-              stroke="#17181b"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <ArrowUpIcon color="#17181b" />
         </button>
       </div>
       <div
