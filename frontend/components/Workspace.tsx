@@ -60,7 +60,7 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
           sources={sources}
           allChecked={allChecked}
           collapsed={collapsed}
-          readOnly={isDemo}
+          isDemo={isDemo}
           onToggle={toggle}
           onToggleAll={toggleAll}
           onToggleCollapsed={() => setCollapsed((c) => !c)}

@@ -53,13 +53,34 @@ function GoogleIcon() {
   );
 }
 
-export function LoginCard() {
+type LoginCardProps = {
+  isDemo?: boolean;
+  onClose?: () => void;
+};
+
+export function LoginCard({ isDemo = false, onClose }: LoginCardProps = {}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { isSubmitting, notice, submit, googleSignIn, tryDemo } = useLogin();
 
   return (
-    <div className="border-hairline bg-bg-surface w-[380px] max-w-full rounded-xl border px-8 py-9 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+    <div className="border-hairline bg-bg-surface relative w-[380px] max-w-full rounded-xl border px-8 py-9 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+      {isDemo && onClose && (
+        <button
+          onClick={onClose}
+          className="hover:text-text-main absolute top-4 right-4 flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[rgba(236,237,239,0.45)] hover:bg-white/8"
+          aria-label="Close"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M18 6L6 18M6 6l12 12"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+      )}
       <div className="mb-7 flex flex-col items-center gap-3.5">
         <LogoMark size="login" />
         <div className="text-text-main text-[17px] font-semibold tracking-[-0.01em]">
@@ -136,14 +157,19 @@ export function LoginCard() {
           onClick={() => submit('register', email, password)}
         >
           Create one
-        </span>{' '}
-        or{' '}
-        <span
-          className="text-text-main hover:text-emphasis-hover cursor-pointer font-medium"
-          onClick={tryDemo}
-        >
-          try demo
         </span>
+        {!isDemo && (
+          <>
+            {' '}
+            or{' '}
+            <span
+              className="text-text-main hover:text-emphasis-hover cursor-pointer font-medium"
+              onClick={tryDemo}
+            >
+              try demo
+            </span>
+          </>
+        )}
       </div>
     </div>
   );
