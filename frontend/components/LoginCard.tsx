@@ -61,7 +61,7 @@ type LoginCardProps = {
 export function LoginCard({ isDemo = false, onClose }: LoginCardProps = {}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { isSubmitting, notice, submit, googleSignIn, tryDemo } = useLogin();
+  const { isSubmitting, notice, submit, googleSignIn, tryDemo } = useLogin(onClose);
 
   return (
     <div className="border-hairline bg-bg-surface relative w-[380px] max-w-full rounded-xl border px-8 py-9 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">

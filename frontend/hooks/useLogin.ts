@@ -19,7 +19,7 @@ const messageFor = (e: unknown): string => {
   return 'Could not reach the server. Please try again.';
 };
 
-export const useLogin = () => {
+export const useLogin = (onSuccess?: () => void) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notice, setNotice] = useState<LoginNotice | null>(null);
@@ -35,6 +35,7 @@ export const useLogin = () => {
       const auth = mode === 'login' ? login : register;
       const { access_token } = await auth(email, password);
       saveSession(access_token, email);
+      onSuccess?.();
       router.push('/');
     } catch (e) {
       setNotice({ kind: 'error', text: messageFor(e) });
@@ -46,8 +47,6 @@ export const useLogin = () => {
   const googleSignIn = () =>
     setNotice({ kind: 'info', text: "Google sign-in isn't available yet." });
 
-  // The /demo route logs into the shared read-only demo account and hands off
-  // to the workspace — same destination as the shareable demo link.
   const tryDemo = () => router.push('/demo');
 
   return { isSubmitting, notice, submit, googleSignIn, tryDemo };
