@@ -1,15 +1,11 @@
 import type { ChatMessage } from '@/hooks/useChat';
 import type { DocumentChunk } from '@/lib/api';
 
-// Prefilled demo credentials for the login form (see components/LoginCard.tsx).
-// Remove once a real demo/seed account flow exists.
 export const MOCK_LOGIN_CREDENTIALS = {
   email: 'owner@leaseclear.example',
   password: 'leaseclear',
 };
 
-// Seed conversation shown before the user asks anything (see hooks/useChat.ts).
-// Remove once the chat should start empty against the real backend.
 export const MOCK_MESSAGES: ChatMessage[] = [
   { id: 'mock-1', role: 'user', text: 'What happens if I pay rent 5 days late?' },
   {
@@ -35,9 +31,6 @@ export const MOCK_MESSAGES: ChatMessage[] = [
   },
 ];
 
-// Sample chunks backing the mocked `getDocumentChunks` endpoint (see lib/api.ts).
-// Keyed by document slug. Replace once a real `GET /documents/{slug}/chunks`
-// (or equivalent) endpoint exists.
 export const MOCK_DOCUMENT_CHUNKS: Record<string, DocumentChunk[]> = {
   lease: [
     {
