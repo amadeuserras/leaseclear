@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  ::selection { background: rgba(255,255,255,0.22); }
+  input::placeholder, textarea::placeholder { color: rgba(236,237,239,0.36); }
+</style>
+</helmet>
+
+<div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #16171b; min-height: 100vh; width: 100%; color: #ECEDEF; position: relative;">
+
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;">
+      <div style="width: 380px; max-width: 100%; background: #1e2025; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 36px 32px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);">
+
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px;">
+          <div style="width: 46px; height: 38px; border-radius: 14px 14px 14px 4px; background: #4C9EEB; display: flex; align-items: center; justify-content: center;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="font-size: 17px; font-weight: 600; color: #ECEDEF; letter-spacing: -0.01em;">LeaseClear</div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 28px;">
+          <div style="font-size: 13px; color: rgba(236,237,239,0.55); line-height: 1.5;">Sign in to ask questions about your lease</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 500; color: rgba(236,237,239,0.62);">Email</label>
+            <input type="email" placeholder="you@example.com" style="width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit; color: #ECEDEF; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; outline: none;" style-focus="border-color: rgba(255,255,255,0.4); box-shadow: 0 0 0 3px rgba(255,255,255,0.12);" />
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 500; color: rgba(236,237,239,0.62);">Password</label>
+            <input type="password" placeholder="••••••••" style="width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit; color: #ECEDEF; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; outline: none;" style-focus="border-color: rgba(255,255,255,0.4); box-shadow: 0 0 0 3px rgba(255,255,255,0.12);" />
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: -6px;">
+            <span style="font-size: 12.5px; color: rgba(236,237,239,0.55); cursor: pointer; white-space: nowrap;" style-hover="color: #ECEDEF;">Forgot password?</span>
+          </div>
+
+          <button onClick="{{ goToApp }}" style="width: 100%; padding: 11px; margin-top: 4px; font-size: 14px; font-weight: 600; font-family: inherit; color: #17181b; background: #EDEDEF; border: none; border-radius: 8px; cursor: pointer;" style-hover="background: #ffffff;">Sign in</button>
+
+          <div style="display: flex; align-items: center; gap: 12px; margin: 6px 0;">
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.08);"></div>
+            <div style="font-size: 12px; color: rgba(236,237,239,0.4);">or</div>
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.08);"></div>
+          </div>
+
+          <button onClick="{{ goToApp }}" style="width: 100%; padding: 10px; font-size: 14px; font-weight: 500; font-family: inherit; color: #ECEDEF; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;" style-hover="background: #2c2f36; border-color: rgba(255,255,255,0.16);">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.47c-.28 1.5-1.13 2.77-2.4 3.62v3h3.88c2.27-2.09 3.58-5.17 3.58-8.65z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3c-1.08.72-2.45 1.16-4.05 1.16-3.11 0-5.74-2.1-6.68-4.92H1.32v3.09C3.29 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.32 14.33A7.2 7.2 0 0 1 4.9 12c0-.81.14-1.6.42-2.33V6.58H1.32A11.98 11.98 0 0 0 0 12c0 1.93.46 3.76 1.32 5.42l4-3.09z"/><path fill="#EA4335" d="M12 4.75c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.29 2.7 1.32 6.58l4 3.09C6.26 6.85 8.89 4.75 12 4.75z"/></svg>
+            Continue with Google
+          </button>
+        </div>
+
+        <div style="text-align: center; margin-top: 22px; font-size: 12.5px; color: rgba(236,237,239,0.5);">
+Don't have an account? <span onClick="{{ goToApp }}" style="color: #ECEDEF; font-weight: 500; cursor: pointer;" style-hover="color: #4C9EEB;">Create one</span> or <span onClick="{{ goToApp }}" style="color: #ECEDEF; font-weight: 500; cursor: pointer;" style-hover="color: #4C9EEB;">try demo</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+    <div style="height: 100vh; overflow: hidden; display: flex; flex-direction: column;">
+
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 26px; border-radius: 10px 10px 10px 3px; background: #4C9EEB; display: flex; align-items: center; justify-content: center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="font-size: 15px; font-weight: 600; color: #ECEDEF; letter-spacing: -0.01em;">LeaseClear</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 12px; color: rgba(236,237,239,0.5); white-space: nowrap;">You're in demo mode · <span onClick="{{ goToLogin }}" style="color: rgba(236,237,239,0.85); cursor: pointer; text-decoration: underline; text-underline-offset: 2px;" style-hover="color: #ECEDEF;">sign up</span></div>
+          <div style="position: relative;">
+            <button onClick="{{ toggleAccountMenu }}" title="More" style="width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; color: rgba(236,237,239,0.5); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;" style-hover="background: rgba(255,255,255,0.08); color: #ECEDEF;">⋯</button>
+            <sc-if value="{{ accountMenuOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: 32px; right: 0; z-index: 10; width: 170px; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); padding: 5px;">
+                <div style="padding: 8px 10px; font-size: 12.5px; color: #ECEDEF; border-radius: 6px; cursor: pointer;" style-hover="background: rgba(255,255,255,0.06);">Export chat</div>
+                <div onClick="{{ toggleAccountMenu }}" style="padding: 8px 10px; font-size: 12.5px; color: #E0776F; border-radius: 6px; cursor: pointer;" style-hover="background: rgba(224,87,79,0.12);">Clear chat</div>
+              </div>
+            </sc-if>
+          </div>
+          <div style="position: relative;">
+            <div onClick="{{ toggleAvatarMenu }}" style="width: 32px; height: 32px; border-radius: 50%; background: #3C4450; color: #ECEDEF; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 600; cursor: pointer;">D</div>
+            <sc-if value="{{ avatarMenuOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: 40px; right: 0; z-index: 10; width: 200px; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); padding: 5px;">
+                <div style="padding: 10px 10px 8px; font-size: 12.5px; color: rgba(236,237,239,0.5); border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7014151d1f301c15110315131c1511025e110000">[email&#160;protected]</a></div>
+                <div onClick="{{ toggleAvatarMenu }}" style="padding: 8px 10px; font-size: 12.5px; color: #ECEDEF; border-radius: 6px; cursor: pointer;" style-hover="background: rgba(255,255,255,0.06);">Log out</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex: 1; display: flex; gap: 16px; padding: 20px 24px; min-height: 0; overflow-x: auto;">
+
+        <div style="width: {{ sourcesPanelWidth }}; flex-shrink: 0; background: #1e2025; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; display: flex; flex-direction: column; min-height: 0; transition: width 0.15s ease;">
+
+          <sc-if value="{{ sourcesExpanded }}" hint-placeholder-val="{{ true }}">
+          <div style="padding: 16px 18px 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+            <div style="font-size: 13.5px; font-weight: 600; color: #ECEDEF;">Sources</div>
+            <button onClick="{{ toggleSourcesCollapsed }}" title="Collapse" style="width: 24px; height: 24px; border-radius: 6px; border: none; background: transparent; color: rgba(236,237,239,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="background: rgba(255,255,255,0.08); color: #ECEDEF;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 5l-6 7 6 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+
+          <div style="padding: 0 18px 14px; flex-shrink: 0;">
+            <button style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 9px; font-size: 13px; font-weight: 500; font-family: inherit; color: #ECEDEF; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer;" style-hover="background: #2c2f36; border-color: rgba(255,255,255,0.16);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 4v12M12 4l-5 5M12 4l5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Upload documents
+            </button>
+          </div>
+
+          <div style="padding: 4px 18px 12px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-shrink: 0;">
+            <label style="font-size: 13px; color: rgba(236,237,239,0.7); cursor: pointer; white-space: nowrap; flex-shrink: 0;" onClick="{{ toggleSelectAll }}">Select all</label>
+            <div onClick="{{ toggleSelectAll }}" style="width: 19px; height: 19px; border-radius: 5px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 1.5px solid {{ selectAllBorder }}; background: {{ selectAllBg }};">
+              <sc-if value="{{ allChecked }}" hint-placeholder-val="{{ false }}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#ECEDEF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="flex: 1; overflow-y: auto; padding: 8px 10px;">
+            <sc-for list="{{ sources }}" as="src" hint-placeholder-count="4">
+              <div style="position: relative; display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 8px; margin-bottom: 2px; background: {{ src.rowBg }};" style-hover="background: rgba(255,255,255,0.05);">
+                <div onClick="{{ src.onOpen }}" style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; cursor: pointer;">
+                  <div style="width: 26px; height: 30px; flex-shrink: 0; border-radius: 3px; background: #2c2f36; border: 1px solid rgba(255,255,255,0.08); position: relative; display: flex; align-items: flex-end; justify-content: center; overflow: hidden;">
+                    <div style="position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 8px 8px 0; border-color: transparent #16171b transparent transparent;"></div>
+                    <div style="font-size: 6px; font-weight: 700; color: rgba(236,237,239,0.5); margin-bottom: 3px; letter-spacing: 0.02em;">PDF</div>
+                  </div>
+                  <div style="flex: 1; min-width: 0; font-size: 13px; color: #ECEDEF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ src.name }}</div>
+                </div>
+                <div style="position: relative; flex-shrink: 0;">
+                  <button onClick="{{ src.onMenuToggle }}" style="width: 22px; height: 22px; border-radius: 6px; border: none; background: transparent; color: rgba(236,237,239,0.5); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;" style-hover="background: rgba(255,255,255,0.08); color: #ECEDEF;">⋯</button>
+                  <sc-if value="{{ src.menuOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; top: 26px; left: 0; z-index: 10; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); padding: 4px; min-width: 110px;">
+                      <div onClick="{{ src.onMenuToggle }}" style="padding: 7px 10px; font-size: 12.5px; color: #ECEDEF; border-radius: 5px; cursor: pointer;" style-hover="background: rgba(255,255,255,0.06);">Remove</div>
+                    </div>
+                  </sc-if>
+                </div>
+                <div onClick="{{ src.onToggle }}" style="width: 19px; height: 19px; border-radius: 5px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 1.5px solid {{ src.checkboxBorder }}; background: {{ src.checkboxBg }};">
+                  <sc-if value="{{ src.checked }}" hint-placeholder-val="{{ false }}">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#ECEDEF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ sourcesCollapsed }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 16px 0 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <button onClick="{{ toggleSourcesCollapsed }}" title="Expand" style="width: 24px; height: 24px; border-radius: 6px; border: none; background: transparent; color: rgba(236,237,239,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="background: rgba(255,255,255,0.08); color: #ECEDEF;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5l6 7-6 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+
+          <div style="padding: 0 0 14px; display: flex; justify-content: center; flex-shrink: 0;">
+            <button title="Upload documents" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #26282e; color: #ECEDEF; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="background: #2c2f36; border-color: rgba(255,255,255,0.16);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 4v12M12 4l-5 5M12 4l5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+
+          <div style="flex: 1; overflow-y: auto; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+            <sc-for list="{{ sources }}" as="src" hint-placeholder-count="4">
+              <div onClick="{{ src.onToggle }}" title="{{ src.name }}" style="width: 26px; height: 30px; flex-shrink: 0; border-radius: 3px; background: #2c2f36; border: 1.5px solid rgba(255,255,255,0.08); position: relative; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; cursor: pointer;">
+                <div style="position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 8px 8px 0; border-color: transparent #16171b transparent transparent;"></div>
+                <div style="font-size: 6px; font-weight: 700; color: rgba(236,237,239,0.5); margin-bottom: 3px; letter-spacing: 0.02em;">PDF</div>
+              </div>
+            </sc-for>
+          </div>
+          </sc-if>
+
+        </div>
+
+        <div style="flex: 1; min-width: 380px; display: flex; justify-content: center; min-height: 0;">
+        <div style="width: 100%; max-width: 760px; min-width: 0; display: flex; flex-direction: column; min-height: 0;">
+
+          <sc-if value="{{ hasEntries }}" hint-placeholder-val="{{ true }}">
+            <div style="flex-shrink: 0; padding: 40px 4px 28px;">
+              <div style="display: flex; align-items: center; gap: 10px; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 26px; padding: 10px 10px 10px 20px;" style-focus="border-color: rgba(255,255,255,0.35);">
+                <input type="text" placeholder="Ask a question about your lease…" style="flex: 1; background: transparent; border: none; outline: none; color: #ECEDEF; font-size: 15px; font-family: inherit;" />
+                <div style="font-size: 12px; color: rgba(236,237,239,0.4); white-space: nowrap; flex-shrink: 0;">{{ selectedSourcesLabel }}</div>
+                <button style="width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; border: none; background: #EDEDEF; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="background: #ffffff;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M12 5l-6 6M12 5l6 6" stroke="#17181b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;">
+                <sc-for list="{{ exampleQuestions }}" as="eq" hint-placeholder-count="4">
+                  <div style="font-size: 12px; color: rgba(236,237,239,0.42); background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 5px 12px; cursor: pointer; white-space: nowrap;" style-hover="background: rgba(255,255,255,0.05); color: rgba(236,237,239,0.7); border-color: rgba(255,255,255,0.14);">{{ eq }}</div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="flex: 1; overflow-y: auto; padding: 36px 4px 32px;">
+              <sc-for list="{{ entries }}" as="entry" hint-placeholder-count="3">
+                <div style="padding-bottom: 20px; margin-bottom: 20px;">
+                  <div style="margin-bottom: 10px;">
+                    <div style="font-size: 16.5px; font-weight: 600; color: #ECEDEF; line-height: 1.4;">{{ entry.question }}</div>
+                  </div>
+                  <div style="font-size: 14.5px; line-height: 1.7; color: rgba(236,237,239,0.82);">
+                    <sc-for list="{{ entry.segments }}" as="seg" hint-placeholder-count="3">
+                      <sc-if value="{{ seg.isText }}" hint-placeholder-val="{{ true }}">
+                        <span>{{ seg.value }}</span>
+                      </sc-if>
+                      <sc-if value="{{ seg.isCite }}" hint-placeholder-val="{{ false }}">
+                        <span onClick="{{ seg.onClick }}" style="display: inline-flex; align-items: center; gap: 4px; font-size: {{ seg.citeFontSize }}; font-weight: 500; color: {{ seg.citeColor }}; background: {{ seg.citeBg }}; border: {{ seg.citeBorder }}; border-radius: 20px; padding: 1px 8px; margin: 0 2px; white-space: nowrap; vertical-align: middle; cursor: pointer;" style-hover="background: rgba(255,255,255,0.12); color: #ECEDEF;">{{ seg.value }}</span>
+                      </sc-if>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hasNoEntries }}" hint-placeholder-val="{{ false }}">
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 20px 4px 12vh;">
+              <div style="text-align: center;">
+                <div style="font-size: 30px; font-weight: 600; color: #ECEDEF; letter-spacing: -0.02em;">Ask your lease anything</div>
+              </div>
+              <div style="width: 100%;">
+                <div style="display: flex; align-items: center; gap: 10px; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 26px; padding: 10px 10px 10px 20px;" style-focus="border-color: rgba(255,255,255,0.35);">
+                  <input type="text" placeholder="Ask a question about your lease…" style="flex: 1; background: transparent; border: none; outline: none; color: #ECEDEF; font-size: 15px; font-family: inherit;" />
+                  <div style="font-size: 12px; color: rgba(236,237,239,0.4); white-space: nowrap; flex-shrink: 0;">{{ selectedSourcesLabel }}</div>
+                  <button style="width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; border: none; background: #EDEDEF; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="background: #ffffff;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M12 5l-6 6M12 5l6 6" stroke="#17181b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px;">
+                  <sc-for list="{{ exampleQuestions }}" as="eq" hint-placeholder-count="4">
+                    <div style="font-size: 12px; color: rgba(236,237,239,0.42); background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 5px 12px; cursor: pointer; white-space: nowrap;" style-hover="background: rgba(255,255,255,0.05); color: rgba(236,237,239,0.7); border-color: rgba(255,255,255,0.14);">{{ eq }}</div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+        </div>
+
+        <sc-if value="{{ viewerOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="width: 340px; flex-shrink: 0; background: #1e2025; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; display: flex; flex-direction: column; min-height: 0;">
+          <div style="padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;">
+            <div style="min-width: 0;">
+              <div style="font-size: 13.5px; font-weight: 600; color: #ECEDEF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ viewerDocName }}</div>
+              <div style="font-size: 11.5px; color: rgba(236,237,239,0.45); margin-top: 2px;">{{ viewerChunkCountLabel }}</div>
+            </div>
+            <button onClick="{{ closeViewer }}" title="Close" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 6px; border: none; background: transparent; color: rgba(236,237,239,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="background: rgba(255,255,255,0.08); color: #ECEDEF;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+
+
+          <div style="flex: 1; overflow-y: auto; padding: 14px 18px 20px; display: flex; flex-direction: column; gap: 18px;">
+            <sc-for list="{{ viewerChunks }}" as="chunk" hint-placeholder-count="4">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+                  <sc-if value="{{ chunk.hasLabel }}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size: 13px; font-weight: 600; color: #ECEDEF;">{{ chunk.label }}</div>
+                  </sc-if>
+                  <span style="display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; color: rgba(236,237,239,0.5); background: rgba(255,255,255,0.06); border-radius: 20px; padding: 1px 8px; white-space: nowrap;">{{ chunk.citationId }}</span>
+                </div>
+                <div style="font-size: 13.5px; line-height: 1.65; color: rgba(236,237,239,0.78); background: {{ chunk.textBg }}; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: {{ chunk.textPad }};">{{ chunk.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+      </div>
+    </div>
+
+
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'app',
+    sources: [
+      { id: 1, name: '123 Oak Street Lease Agreement.pdf', checked: true },
+      { id: 2, name: 'Pet Policy Addendum.pdf', checked: true },
+      { id: 3, name: 'Move-In Inspection Report.pdf', checked: false },
+      { id: 4, name: 'Lease Renewal Notice 2026.pdf', checked: true }
+    ],
+    openMenuId: null,
+    demoEntries: true,
+    sourcesCollapsed: false,
+    viewingDocId: null,
+    accountMenuOpen: false,
+    avatarMenuOpen: false
+  };
+
+  docChunks = {
+    1: { slug: 'lease', chunks: [
+      { clauseNumber: '1', clauseLabel: 'Term of Lease', pageNumber: 1, charStart: 0, text: 'This lease begins on June 1, 2025 and continues for a fixed term of 12 months, ending May 31, 2026, unless renewed or terminated as provided herein.' },
+      { clauseNumber: '2', clauseLabel: 'Rent Payment', pageNumber: 1, charStart: 820, text: 'Rent of $2,400 is due on the 1st of each month, payable by ACH transfer or check to the Landlord\u2019s designated account.' },
+      { clauseNumber: '3.2', clauseLabel: 'Late Fees', pageNumber: 2, charStart: 140, text: 'Tenant is granted a 5-day grace period. If rent remains unpaid after the grace period, a late fee of $75 plus $10 per additional day shall apply until paid in full.' },
+      { clauseNumber: '4.1', clauseLabel: 'Security Deposit', pageNumber: 2, charStart: 960, text: 'Tenant shall pay a security deposit of $2,400, equal to one month\u2019s rent, prior to occupancy.' },
+      { clauseNumber: '4.3', clauseLabel: 'Return of Deposit', pageNumber: 3, charStart: 80, text: 'Landlord shall return the security deposit, less any lawful deductions for damage beyond normal wear and tear, within 21 days of move-out.' },
+      { clauseNumber: null, clauseLabel: null, pageNumber: 5, charStart: 1220, text: 'Either party may terminate this agreement for material breach upon 10 days written notice and a reasonable opportunity to cure.' }
+    ]},
+    2: { slug: 'pet-addendum', chunks: [
+      { clauseNumber: '1', clauseLabel: 'Pet Approval', pageNumber: 1, charStart: 0, text: 'Tenant may keep one (1) domestic cat on the premises subject to prior written approval from Landlord.' },
+      { clauseNumber: '2', clauseLabel: 'Pet Deposit & Fees', pageNumber: 1, charStart: 410, text: 'A pet deposit of $350 is required, along with a non-refundable monthly pet fee of $25.' }
+    ]},
+    3: { slug: 'move-in-report', chunks: [
+      { clauseNumber: null, clauseLabel: null, pageNumber: 1, charStart: 0, text: 'Kitchen: appliances in good working condition. Minor scuff noted on cabinet below sink.' },
+      { clauseNumber: null, clauseLabel: null, pageNumber: 2, charStart: 410, text: 'Living room: carpet clean, no stains noted. Two small nail holes in the west wall.' },
+      { clauseNumber: null, clauseLabel: null, pageNumber: 2, charStart: 900, text: 'Bathroom: grout slightly discolored around tub. All fixtures functional.' }
+    ]},
+    4: { slug: 'renewal-notice-2026', chunks: [
+      { clauseNumber: '1', clauseLabel: 'Renewal Terms', pageNumber: 1, charStart: 0, text: 'This notice confirms renewal of the lease for an additional 12-month term beginning June 1, 2026.' },
+      { clauseNumber: '2', clauseLabel: 'Rent Adjustment', pageNumber: 1, charStart: 340, text: 'Monthly rent shall increase from $2,400 to $2,500, effective at the start of the renewal term.' }
+    ]}
+  };
+
+  goToApp = () => this.setState({ view: 'app' });
+
+  goToLogin = () => this.setState({ view: 'login' });
+
+  toggleAccountMenu = () => this.setState(s => ({ accountMenuOpen: !s.accountMenuOpen }));
+
+  toggleAvatarMenu = () => this.setState(s => ({ avatarMenuOpen: !s.avatarMenuOpen }));
+
+  toggleSourcesCollapsed = () => this.setState(s => ({ sourcesCollapsed: !s.sourcesCollapsed }));
+
+  toggleSource = (id) => {
+    this.setState(s => ({
+      sources: s.sources.map(src => src.id === id ? { ...src, checked: !src.checked } : src)
+    }));
+  };
+
+  toggleMenu = (id) => {
+    this.setState(s => ({ openMenuId: s.openMenuId === id ? null : id }));
+  };
+
+  openViewer = (id, highlightClause) => this.setState(s => ({
+    viewingDocId: id,
+    highlightClause: highlightClause || null,
+    sourcesCollapsed: true,
+    wasSourcesCollapsedBeforeViewer: s.viewingDocId ? s.wasSourcesCollapsedBeforeViewer : s.sourcesCollapsed
+  }));
+
+  closeViewer = () => this.setState(s => ({ viewingDocId: null, highlightClause: null, sourcesCollapsed: s.wasSourcesCollapsedBeforeViewer || false }));
+
+  citationId = (slug, chunk) => {
+    if (chunk.clauseNumber) return '[' + slug + ' \u00a7' + chunk.clauseNumber + ']';
+    return '[' + slug + ' p.' + chunk.pageNumber + '@' + chunk.charStart + ']';
+  };
+
+  toggleSelectAll = () => {
+    this.setState(s => {
+      const allChecked = s.sources.every(src => src.checked);
+      return { sources: s.sources.map(src => ({ ...src, checked: !allChecked })) };
+    });
+  };
+
+  renderVals() {
+    const { view, sources, openMenuId, demoEntries, sourcesCollapsed, viewingDocId, highlightClause } = this.state;
+    const allChecked = sources.every(s => s.checked);
+    const selectedCount = sources.filter(s => s.checked).length;
+
+    const viewingDoc = viewingDocId ? this.docChunks[viewingDocId] : null;
+    const viewingSource = viewingDocId ? sources.find(s => s.id === viewingDocId) : null;
+    const viewerChunks = viewingDoc ? viewingDoc.chunks.map(c => {
+      const isHighlighted = !!highlightClause && c.clauseNumber === highlightClause;
+      return {
+        hasLabel: !!c.clauseLabel,
+        label: c.clauseLabel,
+        citationId: this.citationId(viewingDoc.slug, c),
+        text: c.text,
+        textBg: isHighlighted ? 'rgba(76,158,235,0.25)' : 'transparent',
+        textPad: isHighlighted ? '2px 4px' : '0'
+      };
+    }) : [];
+
+    const entries = [
+      {
+        question: 'What happens if I pay rent 5 days late?',
+        segments: [
+          { isText: true, value: 'Rent is due on the 1st, with a ' },
+          { isText: true, value: '5-day grace period' },
+          { isText: true, value: '. After that, a late fee of ' },
+          { isText: true, value: '$75' },
+          { isText: true, value: ' plus ' },
+          { isText: true, value: '$10/day' },
+          { isText: true, value: ' applies ' },
+          { isCite: true, isText: false, value: 'Lease · §3.2', citeBg: 'rgba(255,255,255,0.06)', citeColor: 'rgba(236,237,239,0.5)', citeBorder: 'none', citeFontSize: '11px', citeDocId: 1, citeClauseNumber: '3.2' },
+          { isText: true, value: '. On day 5 you would owe the base late fee only, since it falls within the grace window.' }
+        ]
+      },
+      {
+        question: 'Can I have a cat? Is there a pet deposit?',
+        segments: [
+          { isText: true, value: 'Yes — one cat is allowed with prior written approval ' },
+          { isCite: true, isText: false, value: 'Pet Addendum · §1', citeBg: 'rgba(255,255,255,0.06)', citeColor: 'rgba(236,237,239,0.5)', citeBorder: 'none', citeFontSize: '11px', citeDocId: 2, citeClauseNumber: '1' },
+          { isText: true, value: '. A separate pet deposit of ' },
+          { isText: true, value: '$350' },
+          { isText: true, value: ' applies, plus a non-refundable ' },
+          { isText: true, value: '$25/month' },
+          { isText: true, value: ' pet fee ' },
+          { isCite: true, isText: false, value: 'Pet Addendum · §2', citeBg: 'rgba(255,255,255,0.06)', citeColor: 'rgba(236,237,239,0.5)', citeBorder: 'none', citeFontSize: '11px', citeDocId: 2, citeClauseNumber: '2' },
+          { isText: true, value: '.' }
+        ]
+      },
+      {
+        question: 'What is the security deposit, and when do I get it back after move-out?',
+        segments: [
+          { isText: true, value: 'The security deposit is ' },
+          { isText: true, value: '$2,400', isCite: false },
+          { isText: true, value: ', equal to one month\u2019s rent ' },
+          { isCite: true, isText: false, value: 'Lease · §4.1', citeBg: 'rgba(255,255,255,0.06)', citeColor: 'rgba(236,237,239,0.5)', citeBorder: 'none', citeFontSize: '11px', citeDocId: 1, citeClauseNumber: '4.1' },
+          { isText: true, value: '. Your landlord must return it, minus any lawful deductions, within ' },
+          { isText: true, value: '21 days' },
+          { isText: true, value: ' of move-out ' },
+          { isCite: true, isText: false, value: 'Lease · §4.3', citeBg: 'rgba(255,255,255,0.06)', citeColor: 'rgba(236,237,239,0.5)', citeBorder: 'none', citeFontSize: '11px', citeDocId: 1, citeClauseNumber: '4.3' },
+          { isText: true, value: '.' }
+        ]
+      }
+    ];
+
+    return {
+      isLogin: view === 'login',
+      isApp: view === 'app',
+      goToApp: this.goToApp,
+      goToLogin: this.goToLogin,
+      accountMenuOpen: this.state.accountMenuOpen,
+      toggleAccountMenu: this.toggleAccountMenu,
+      avatarMenuOpen: this.state.avatarMenuOpen,
+      toggleAvatarMenu: this.toggleAvatarMenu,
+      allChecked,
+      toggleSelectAll: this.toggleSelectAll,
+      selectAllBg: allChecked ? '#4a4d55' : 'transparent',
+      selectAllBorder: allChecked ? '#4a4d55' : 'rgba(255,255,255,0.25)',
+      sourceCountLabel: selectedCount + ' of ' + sources.length,
+      selectedSourcesLabel: selectedCount + ' source' + (selectedCount === 1 ? '' : 's'),
+      sources: sources.map(src => ({
+        ...src,
+        rowBg: 'transparent',
+        checkboxBg: src.checked ? '#4a4d55' : 'transparent',
+        checkboxBorder: src.checked ? '#4a4d55' : 'rgba(255,255,255,0.25)',
+        collapsedBorder: 'rgba(255,255,255,0.08)',
+        onToggle: () => this.toggleSource(src.id),
+        onMenuToggle: () => this.toggleMenu(src.id),
+        onOpen: () => this.openViewer(src.id),
+        menuOpen: openMenuId === src.id
+      })),
+      viewerOpen: !!viewingDoc,
+      viewerDocName: viewingSource ? viewingSource.name : '',
+      viewerChunkCountLabel: viewerChunks.length + ' chunk' + (viewerChunks.length === 1 ? '' : 's'),
+      viewerChunks,
+      closeViewer: this.closeViewer,
+      toggleSourcesCollapsed: this.toggleSourcesCollapsed,
+      sourcesCollapsed,
+      sourcesExpanded: !sourcesCollapsed,
+      sourcesPanelWidth: sourcesCollapsed ? '64px' : '340px',
+      entries: (demoEntries ? entries : []).map(entry => ({
+        ...entry,
+        segments: entry.segments.map(seg => seg.isCite
+          ? { ...seg, onClick: () => this.openViewer(seg.citeDocId, seg.citeClauseNumber) }
+          : seg)
+      })),
+      hasEntries: demoEntries,
+      hasNoEntries: !demoEntries,
+      corpusSummary: sources.length + ' documents indexed: your lease, pet addendum, move-in report, and renewal notice.',
+      exampleQuestions: [
+        'When is rent due?',
+        'Can I have a pet?',
+        'What\u2019s my notice period?',
+        'Can I sublet the unit?'
+      ]
+    };
+  }
+}
+
+</script>
+</body>
+</html>
