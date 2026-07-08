@@ -10,6 +10,12 @@ Residential lease Q&A with **cited answers**, **honest refusals**, and **publish
 
 ## Development
 
+Run everything (Postgres, API, and frontend) with one command from the repo root:
+
+```bash
+./dev.sh
+```
+
 ### Backend
 
 ```bash
