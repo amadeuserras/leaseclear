@@ -54,8 +54,8 @@ function GoogleIcon() {
 }
 
 export function LoginCard() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('owner@leaseclear.example');
+  const [password, setPassword] = useState('leaseclear');
   const { isSubmitting, notice, submit, googleSignIn, tryDemo } = useLogin();
 
   return (

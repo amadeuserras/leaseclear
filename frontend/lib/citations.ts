@@ -1,11 +1,13 @@
-export type AnswerSegment = {
-  type: 'text' | 'citation';
-  value: string;
-};
+export type AnswerSegment =
+  | { type: 'text'; value: string }
+  | { type: 'citation'; value: string; slug: string; clause: string | null };
 
 const CITATION_RE = /\[([a-z0-9-]+) (§[^\]]+|p\.[^\]]+)\]/g;
 
 const displayRef = (ref: string) => (ref.startsWith('p.') ? ref.split('@')[0] : ref);
+
+// Clause number to highlight in the viewer, e.g. "§4.1" → "4.1". Page refs have none.
+const clauseFromRef = (ref: string): string | null => (ref.startsWith('§') ? ref.slice(1) : null);
 
 const prettifySlug = (slug: string) =>
   slug
@@ -15,6 +17,16 @@ const prettifySlug = (slug: string) =>
 
 export const citationLabel = (slug: string, ref: string, docNames: Map<string, string>) =>
   `${docNames.get(slug) ?? prettifySlug(slug)} · ${displayRef(ref)}`;
+
+// The bracketed id shown next to a chunk in the viewer, mirroring the format the
+// backend emits in answers: [slug §clause] for numbered clauses, else [slug p.N@char].
+export const chunkCitationId = (
+  slug: string,
+  chunk: { clause_number: string | null; page_number: number; char_start: number },
+): string =>
+  chunk.clause_number
+    ? `[${slug} §${chunk.clause_number}]`
+    : `[${slug} p.${chunk.page_number}@${chunk.char_start}]`;
 
 export const segmentAnswer = (text: string, docNames: Map<string, string>): AnswerSegment[] => {
   const segments: AnswerSegment[] = [];
@@ -26,6 +38,8 @@ export const segmentAnswer = (text: string, docNames: Map<string, string>): Answ
     segments.push({
       type: 'citation',
       value: citationLabel(match[1], match[2], docNames),
+      slug: match[1],
+      clause: clauseFromRef(match[2]),
     });
     cursor = match.index + match[0].length;
   }

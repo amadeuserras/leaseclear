@@ -1,7 +1,6 @@
-import { TopBar } from '@/components/TopBar';
 import { Workspace } from '@/components/Workspace';
 import { ApiError, listDocuments, type LeaseDocument } from '@/lib/api';
-import { EMAIL_COOKIE, TOKEN_COOKIE, initialsFromEmail } from '@/lib/session';
+import { EMAIL_COOKIE, TOKEN_COOKIE } from '@/lib/session';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -21,9 +20,8 @@ export default async function Home() {
   const email = cookieStore.get(EMAIL_COOKIE)?.value ?? '';
 
   return (
-    <div className="flex h-dvh flex-col">
-      <TopBar initials={initialsFromEmail(email)} />
-      <Workspace documents={documents} />
+    <div className="flex h-dvh flex-col overflow-hidden">
+      <Workspace documents={documents} email={email} />
     </div>
   );
 }

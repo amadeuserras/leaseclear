@@ -14,6 +14,7 @@
   --color-emphasis-hover: #ffffff;
   --color-on-emphasis: #17181b;
   --color-logo: #4c9eeb;
+  --color-highlight: rgba(76, 158, 235, 0.25);
   --color-avatar: #3c4450;
   --color-checkbox-checked: #4a4d55;
   --color-hairline: rgba(255, 255, 255, 0.08);
@@ -25,8 +26,6 @@
   html {
     font-family: var(--font-sans);
     font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
   body {

@@ -19,6 +19,15 @@ export type Citation = {
   passage: string;
 };
 
+export type DocumentChunk = {
+  chunk_id: string;
+  clause_number: string | null;
+  clause_label: string | null;
+  page_number: number;
+  char_start: number;
+  passage: string;
+};
+
 export type QueryResult = {
   answer: string;
   citations: Citation[];
@@ -78,6 +87,16 @@ export const listDocuments = async (token: string): Promise<LeaseDocument[]> => 
   });
   if (!res.ok) throw await errorFromResponse(res);
   return (await res.json()) as LeaseDocument[];
+};
+
+// FIXME(mock): no backend endpoint returns a document's full chunk list yet.
+// The document viewer needs every chunk (not just the cited ones the `query`
+// stream returns), so this reads from lib/mockData.ts keyed by slug. Replace
+// with a real `GET /documents/{slug}/chunks` call once it exists.
+export const getDocumentChunks = async (slug: string, _token: string): Promise<DocumentChunk[]> => {
+  const { MOCK_DOCUMENT_CHUNKS } = await import('@/lib/mockData');
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  return MOCK_DOCUMENT_CHUNKS[slug] ?? MOCK_DOCUMENT_CHUNKS.lease;
 };
 
 export const uploadDocuments = async (files: File[], token: string): Promise<void> => {

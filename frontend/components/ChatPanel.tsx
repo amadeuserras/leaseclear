@@ -2,31 +2,55 @@
 
 import type { ChatMessage } from '@/hooks/useChat';
 import { segmentAnswer, withholdPartialCitation } from '@/lib/citations';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
-type AssistantMessageProps = {
-  message: ChatMessage;
-  docNames: Map<string, string>;
+const EXAMPLE_QUESTIONS = [
+  'When is rent due?',
+  'Can I have a pet?',
+  'What’s my notice period?',
+  'Can I sublet the unit?',
+];
+
+// A question paired with its answer — the design groups each turn into one entry.
+type Entry = {
+  id: string;
+  question: string;
+  answer: ChatMessage | undefined;
 };
 
-function AssistantMessage({ message, docNames }: AssistantMessageProps) {
+const toEntries = (messages: ChatMessage[]): Entry[] => {
+  const entries: Entry[] = [];
+  for (const m of messages) {
+    if (m.role === 'user') {
+      entries.push({ id: m.id, question: m.text, answer: undefined });
+    } else if (entries.length > 0) {
+      entries[entries.length - 1].answer = m;
+    }
+  }
+  return entries;
+};
+
+type AnswerBodyProps = {
+  message: ChatMessage;
+  docNames: Map<string, string>;
+  onCitation: (slug: string, clause: string | null) => void;
+};
+
+function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
   if (message.error) {
-    return (
-      <div className="text-text-secondary max-w-[84%] text-[14.5px] leading-[1.7]">
-        {message.text}
-      </div>
-    );
+    return <div className="text-text-secondary text-[14.5px] leading-[1.7]">{message.text}</div>;
   }
   const text = message.streaming ? withholdPartialCitation(message.text) : message.text;
   return (
-    <div className="max-w-[84%] text-[14.5px] leading-[1.7] text-[rgba(236,237,239,0.9)]">
+    <div className="text-[14.5px] leading-[1.7] text-[rgba(236,237,239,0.82)]">
       {segmentAnswer(text, docNames).map((seg, i) =>
         seg.type === 'text' ? (
           <span key={i}>{seg.value}</span>
         ) : (
           <span
             key={i}
-            className="text-text-main mx-0.5 inline-flex cursor-default items-center gap-1 rounded-[20px] border border-white/18 bg-white/10 px-2 py-px align-middle text-[11.5px] font-medium whitespace-nowrap"
+            onClick={() => onCitation(seg.slug, seg.clause)}
+            className="mx-0.5 inline-flex cursor-pointer items-center gap-1 rounded-[20px] bg-white/6 px-2 py-px align-middle text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)] hover:bg-white/12 hover:text-[#ECEDEF]"
           >
             {seg.value}
           </span>
@@ -36,36 +60,88 @@ function AssistantMessage({ message, docNames }: AssistantMessageProps) {
   );
 }
 
-type MessageListProps = {
-  messages: ChatMessage[];
+type EntryItemProps = {
+  entry: Entry;
   docNames: Map<string, string>;
+  onCitation: (slug: string, clause: string | null) => void;
 };
 
-function MessageList({ messages, docNames }: MessageListProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages]);
-
+function EntryItem({ entry, docNames, onCitation }: EntryItemProps) {
   return (
-    <div
-      ref={scrollRef}
-      className="custom-scrollbar flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto px-8 py-7"
-    >
-      {messages.map((m) =>
-        m.role === 'user' ? (
-          <div key={m.id} className="flex justify-end">
-            <div className="bg-bg-inset text-text-main max-w-[72%] rounded-[14px] px-[15px] py-2.5 text-[14.5px] leading-[1.55]">
-              {m.text}
-            </div>
-          </div>
-        ) : (
-          <AssistantMessage key={m.id} message={m} docNames={docNames} />
-        ),
+    <div className="space-y-2.5">
+      <div className="text-text-main text-[16.5px] leading-[1.4] font-semibold">
+        {entry.question}
+      </div>
+      {entry.answer && (
+        <AnswerBody message={entry.answer} docNames={docNames} onCitation={onCitation} />
       )}
     </div>
+  );
+}
+
+type ComposerProps = {
+  draft: string;
+  selectedCount: number;
+  centered: boolean;
+  onDraftChange: (value: string) => void;
+  onSubmit: () => void;
+  onExample: (question: string) => void;
+};
+
+function Composer({
+  draft,
+  selectedCount,
+  centered,
+  onDraftChange,
+  onSubmit,
+  onExample,
+}: ComposerProps) {
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
+      <div className="border-hairline-input bg-bg-inset flex items-center gap-2.5 rounded-[26px] border py-2.5 pr-2.5 pl-5 focus-within:border-white/35">
+        <input
+          type="text"
+          placeholder="Ask a question about your lease…"
+          className="text-text-main flex-1 border-none bg-transparent text-[15px] outline-none"
+          value={draft}
+          onChange={(e) => onDraftChange(e.target.value)}
+        />
+        <div className="text-text-muted shrink-0 text-xs whitespace-nowrap">
+          {selectedCount} source{selectedCount === 1 ? '' : 's'}
+        </div>
+        <button
+          type="submit"
+          className="bg-emphasis hover:bg-emphasis-hover flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 19V5M12 5l-6 6M12 5l6 6"
+              stroke="#17181b"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+      <div className={`mt-3 flex flex-wrap gap-2 ${centered ? 'justify-center' : 'justify-start'}`}>
+        {EXAMPLE_QUESTIONS.map((q) => (
+          <button
+            key={q}
+            type="button"
+            onClick={() => onExample(q)}
+            className="cursor-pointer rounded-[20px] border border-white/8 px-3 py-[5px] text-xs whitespace-nowrap text-[rgba(236,237,239,0.42)] hover:border-white/14 hover:bg-white/5 hover:text-[rgba(236,237,239,0.7)]"
+          >
+            {q}
+          </button>
+        ))}
+      </div>
+    </form>
   );
 }
 
@@ -75,6 +151,7 @@ type ChatPanelProps = {
   selectedCount: number;
   docNames: Map<string, string>;
   onSend: (question: string) => void;
+  onCitation: (slug: string, clause: string | null) => void;
 };
 
 export function ChatPanel({
@@ -83,56 +160,63 @@ export function ChatPanel({
   selectedCount,
   docNames,
   onSend,
+  onCitation,
 }: ChatPanelProps) {
   const [draft, setDraft] = useState('');
-
-  const canSend = !isStreaming && draft.trim().length > 0 && selectedCount > 0;
+  // Newest turn shows directly under the composer, so render most-recent-first.
+  const entries = toEntries(messages).reverse();
+  const canSubmit = !isStreaming && selectedCount > 0;
 
   const submit = () => {
-    if (!canSend) return;
+    if (!canSubmit || draft.trim().length === 0) return;
     onSend(draft);
     setDraft('');
   };
 
-  return (
-    <section className="border-hairline bg-bg-surface flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border">
-      <MessageList messages={messages} docNames={docNames} />
+  const sendExample = (question: string) => {
+    if (canSubmit) onSend(question);
+    else setDraft(question);
+  };
 
-      <form
-        className="border-hairline shrink-0 border-t px-5 pt-4 pb-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit();
-        }}
-      >
-        <div className="border-hairline-input bg-bg-inset flex items-center gap-2.5 rounded-[24px] border py-2 pr-2 pl-[18px] focus-within:border-white/35">
-          <input
-            type="text"
-            placeholder="Ask a question about your lease…"
-            className="text-text-main flex-1 border-none bg-transparent text-sm outline-none"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-          />
-          <div className="text-text-muted shrink-0 text-xs whitespace-nowrap">
-            {selectedCount} source{selectedCount === 1 ? '' : 's'}
+  const composer = (centered: boolean) => (
+    <Composer
+      draft={draft}
+      selectedCount={selectedCount}
+      centered={centered}
+      onDraftChange={setDraft}
+      onSubmit={submit}
+      onExample={sendExample}
+    />
+  );
+
+  return (
+    <div className="flex min-h-0 min-w-[380px] flex-1 justify-center">
+      <div className="flex min-h-0 w-full max-w-[760px] min-w-0 flex-col">
+        {entries.length > 0 ? (
+          <>
+            <div className="shrink-0 px-1 pt-10 pb-7">{composer(false)}</div>
+            <div className="custom-scrollbar min-h-0 flex-1 space-y-11 overflow-y-auto px-1 pt-9 pb-8">
+              {entries.map((entry) => (
+                <EntryItem
+                  key={entry.id}
+                  entry={entry}
+                  docNames={docNames}
+                  onCitation={onCitation}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-1 flex-col items-center justify-center gap-[26px] px-1 pt-5 pb-[12vh]">
+            <div className="text-center">
+              <div className="text-text-main text-[30px] font-semibold tracking-[-0.02em]">
+                Ask your lease anything
+              </div>
+            </div>
+            <div className="w-full">{composer(true)}</div>
           </div>
-          <button
-            type="submit"
-            disabled={!canSend}
-            className="bg-emphasis hover:bg-emphasis-hover flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full disabled:cursor-default"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 19V5M12 5l-6 6M12 5l6 6"
-                stroke="#17181b"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
-      </form>
-    </section>
+        )}
+      </div>
+    </div>
   );
 }

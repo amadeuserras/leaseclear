@@ -35,9 +35,20 @@ function Checkbox({ checked, onToggle }: CheckboxProps) {
   );
 }
 
-function PdfIcon() {
+type PdfIconProps = {
+  title?: string;
+  onClick?: () => void;
+};
+
+function PdfIcon({ title, onClick }: PdfIconProps) {
   return (
-    <div className="border-hairline bg-bg-inset-hover relative flex h-[30px] w-[26px] shrink-0 items-end justify-center overflow-hidden rounded-[3px] border">
+    <div
+      title={title}
+      onClick={onClick}
+      className={`border-hairline bg-bg-inset-hover relative flex h-[30px] w-[26px] shrink-0 items-end justify-center overflow-hidden rounded-[3px] border-[1.5px] ${
+        onClick ? 'cursor-pointer' : ''
+      }`}
+    >
       <div className="border-r-bg-main absolute top-0 right-0 h-0 w-0 border-t-0 border-r-[8px] border-b-[8px] border-l-0 border-solid border-b-transparent" />
       <div className="mb-[3px] text-[6px] font-bold tracking-[0.02em] text-[rgba(236,237,239,0.5)]">
         PDF
@@ -46,20 +57,50 @@ function PdfIcon() {
   );
 }
 
+function UploadIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 4v12M12 4l-5 5M12 4l5 5"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 type SourceRowProps = {
   source: Source;
   menuOpen: boolean;
   onToggle: () => void;
+  onOpen: () => void;
   onMenuToggle: () => void;
   onMenuClose: () => void;
 };
 
-function SourceRow({ source, menuOpen, onToggle, onMenuToggle, onMenuClose }: SourceRowProps) {
+function SourceRow({
+  source,
+  menuOpen,
+  onToggle,
+  onOpen,
+  onMenuToggle,
+  onMenuClose,
+}: SourceRowProps) {
   return (
     <div className="relative mb-0.5 flex items-center gap-2.5 rounded-lg px-2 py-[9px] hover:bg-white/5">
-      <PdfIcon />
-      <div className="text-text-main min-w-0 flex-1 truncate text-[13px]">{source.filename}</div>
-      <Checkbox checked={source.checked} onToggle={onToggle} />
+      <div onClick={onOpen} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5">
+        <PdfIcon />
+        <div className="text-text-main min-w-0 flex-1 truncate text-[13px]">{source.filename}</div>
+      </div>
       <div className="relative shrink-0">
         <button
           onClick={(e) => {
@@ -71,7 +112,7 @@ function SourceRow({ source, menuOpen, onToggle, onMenuToggle, onMenuClose }: So
           ⋯
         </button>
         {menuOpen && (
-          <div className="border-hairline-input bg-bg-inset absolute top-[26px] right-0 z-10 min-w-[110px] rounded-lg border p-1 shadow-[0_6px_20px_rgba(0,0,0,0.4)]">
+          <div className="border-hairline-input bg-bg-inset absolute top-[26px] left-0 z-10 min-w-[110px] rounded-lg border p-1 shadow-[0_6px_20px_rgba(0,0,0,0.4)]">
             {/* Parked: no DELETE /documents endpoint — visual only per handoff. */}
             <div
               onClick={onMenuClose}
@@ -82,99 +123,149 @@ function SourceRow({ source, menuOpen, onToggle, onMenuToggle, onMenuClose }: So
           </div>
         )}
       </div>
+      <Checkbox checked={source.checked} onToggle={onToggle} />
     </div>
   );
 }
 
 type SourcesPanelProps = {
   sources: Source[];
-  selectedCount: number;
   allChecked: boolean;
+  collapsed: boolean;
   onToggle: (id: string) => void;
   onToggleAll: () => void;
+  onToggleCollapsed: () => void;
+  onOpen: (source: Source) => void;
 };
 
 export function SourcesPanel({
   sources,
-  selectedCount,
   allChecked,
+  collapsed,
   onToggle,
   onToggleAll,
+  onToggleCollapsed,
+  onOpen,
 }: SourcesPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isUploading, error, upload } = useUpload();
   const menu = useKebabMenu();
 
+  const openPicker = () => fileInputRef.current?.click();
+
   return (
-    <section className="border-hairline bg-bg-surface flex min-h-0 w-[450px] shrink-0 flex-col rounded-xl border">
-      <div className="flex shrink-0 items-center justify-between px-[18px] pt-4 pb-2.5">
-        <div className="text-text-main text-[13.5px] font-semibold">Sources</div>
-        <div className="text-text-muted text-xs">
-          {selectedCount} of {sources.length}
-        </div>
-      </div>
+    <section
+      className={`border-hairline bg-bg-surface flex min-h-0 shrink-0 flex-col rounded-xl border transition-[width] duration-150 ${
+        collapsed ? 'w-16' : 'w-[340px]'
+      }`}
+    >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/pdf"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          upload(e.target.files);
+          e.target.value = '';
+        }}
+      />
 
-      <div className="shrink-0 px-[18px] pb-3.5">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/pdf"
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            upload(e.target.files);
-            e.target.value = '';
-          }}
-        />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-          className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-lg border p-[9px] text-[13px] font-medium disabled:cursor-default disabled:opacity-70"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 4v12M12 4l-5 5M12 4l5 5"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {isUploading ? 'Uploading…' : 'Upload documents'}
-        </button>
-        {error && <div className="mt-2 text-[12px] text-[#e07f84]">{error}</div>}
-      </div>
+      {collapsed ? (
+        <>
+          <div className="flex shrink-0 justify-center pt-4 pb-2.5">
+            <button
+              onClick={onToggleCollapsed}
+              title="Expand"
+              className="hover:text-text-main flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-[rgba(236,237,239,0.5)] hover:bg-white/8"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M9 5l6 7-6 7"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
 
-      <div className="border-hairline flex shrink-0 items-center justify-end gap-[9px] border-b px-[18px] pt-1 pb-3">
-        <label
-          onClick={onToggleAll}
-          className="shrink-0 cursor-pointer text-[13px] whitespace-nowrap text-[rgba(236,237,239,0.7)]"
-        >
-          Select all
-        </label>
-        <Checkbox checked={allChecked} onToggle={onToggleAll} />
-        <div className="w-[22px] shrink-0" />
-      </div>
+          <div className="flex shrink-0 justify-center pb-3.5">
+            <button
+              onClick={openPicker}
+              disabled={isUploading}
+              title="Upload documents"
+              className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border disabled:cursor-default disabled:opacity-70"
+            >
+              <UploadIcon />
+            </button>
+          </div>
 
-      <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-2.5 py-2">
-        {sources.map((s) => (
-          <SourceRow
-            key={s.id}
-            source={s}
-            menuOpen={menu.openId === s.id}
-            onToggle={() => onToggle(s.id)}
-            onMenuToggle={() => menu.toggle(s.id)}
-            onMenuClose={menu.close}
-          />
-        ))}
-      </div>
+          <div className="custom-scrollbar flex min-h-0 flex-1 flex-col items-center gap-1.5 overflow-y-auto pt-1 pb-2">
+            {sources.map((s) => (
+              <PdfIcon key={s.id} title={s.filename} onClick={() => onToggle(s.id)} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex shrink-0 items-center justify-between px-[18px] pt-4 pb-2.5">
+            <div className="text-text-main text-[13.5px] font-semibold">Sources</div>
+            <button
+              onClick={onToggleCollapsed}
+              title="Collapse"
+              className="hover:text-text-main flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-[rgba(236,237,239,0.5)] hover:bg-white/8"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M15 5l-6 7 6 7"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div className="shrink-0 px-[18px] pb-3.5">
+            <button
+              onClick={openPicker}
+              disabled={isUploading}
+              className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-lg border p-[9px] text-[13px] font-medium disabled:cursor-default disabled:opacity-70"
+            >
+              <UploadIcon />
+              {isUploading ? 'Uploading…' : 'Upload documents'}
+            </button>
+            {error && <div className="mt-2 text-[12px] text-[#e07f84]">{error}</div>}
+          </div>
+
+          <div className="border-hairline flex shrink-0 items-center justify-end gap-2.5 border-b px-[18px] pt-1 pb-3">
+            <label
+              onClick={onToggleAll}
+              className="shrink-0 cursor-pointer text-[13px] whitespace-nowrap text-[rgba(236,237,239,0.7)]"
+            >
+              Select all
+            </label>
+            <Checkbox checked={allChecked} onToggle={onToggleAll} />
+          </div>
+
+          <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-2.5 py-2">
+            {sources.map((s) => (
+              <SourceRow
+                key={s.id}
+                source={s}
+                menuOpen={menu.openId === s.id}
+                onToggle={() => onToggle(s.id)}
+                onOpen={() => onOpen(s)}
+                onMenuToggle={() => menu.toggle(s.id)}
+                onMenuClose={menu.close}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </section>
   );
 }
