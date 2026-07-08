@@ -58,6 +58,7 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
         initials={initialsFromEmail(email)}
         email={email}
         isDemo={isDemo}
+        hasMessages={messages.length > 0}
         onClearChat={clear}
       />
       <main className="flex min-h-0 flex-1 gap-4 overflow-x-auto px-6 py-5">
