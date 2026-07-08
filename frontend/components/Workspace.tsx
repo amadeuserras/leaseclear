@@ -54,7 +54,12 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
 
   return (
     <>
-      <TopBar initials={initialsFromEmail(email)} email={email} onClearChat={clear} />
+      <TopBar
+        initials={initialsFromEmail(email)}
+        email={email}
+        isDemo={isDemo}
+        onClearChat={clear}
+      />
       <main className="flex min-h-0 flex-1 gap-4 overflow-x-auto px-6 py-5">
         <SourcesPanel
           sources={sources}

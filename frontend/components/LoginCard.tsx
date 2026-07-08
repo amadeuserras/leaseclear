@@ -156,7 +156,7 @@ export function LoginCard({ isDemo = false, onClose }: LoginCardProps = {}) {
           className="text-text-main hover:text-emphasis-hover cursor-pointer font-medium"
           onClick={() => submit('register', email, password)}
         >
-          Create one
+          Sign up
         </span>
         {!isDemo && (
           <>

@@ -8,10 +8,11 @@ import { useRouter } from 'next/navigation';
 type TopBarProps = {
   initials: string;
   email: string;
+  isDemo?: boolean;
   onClearChat: () => void;
 };
 
-export function TopBar({ initials, email, onClearChat }: TopBarProps) {
+export function TopBar({ initials, email, isDemo, onClearChat }: TopBarProps) {
   const router = useRouter();
   const menu = useKebabMenu();
 
@@ -30,6 +31,18 @@ export function TopBar({ initials, email, onClearChat }: TopBarProps) {
       </div>
 
       <div className="flex items-center gap-3.5">
+        {isDemo && (
+          <div className="text-[12px] whitespace-nowrap text-[rgba(236,237,239,0.5)]">
+            You&apos;re in demo mode &middot;{' '}
+            <span
+              onClick={logOut}
+              className="cursor-pointer text-[rgba(236,237,239,0.85)] underline underline-offset-2 hover:text-[#ECEDEF]"
+            >
+              sign up
+            </span>
+          </div>
+        )}
+
         <div className="relative">
           <button
             onClick={(e) => {
