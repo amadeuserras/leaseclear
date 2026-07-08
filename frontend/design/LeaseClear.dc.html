@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='18' ry='18' fill='%234C9EEB'/%3E%3Cpath d='M17 33l10 10 20-22' stroke='%23ffffff' stroke-width='7' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M4 22 A16 16 0 0 1 20 6 H48 A16 16 0 0 1 60 22 V42 A16 16 0 0 1 44 58 H4 Z' fill='%234C9EEB'/%3E%3Cpath d='M22 33l7 7 14-15' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -96,7 +96,7 @@ Don't have an account? <span onClick="{{ goToApp }}" style="color: #ECEDEF; font
             <div onClick="{{ toggleAvatarMenu }}" style="width: 32px; height: 32px; border-radius: 50%; background: #3C4450; color: #ECEDEF; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 600; cursor: pointer;">D</div>
             <sc-if value="{{ avatarMenuOpen }}" hint-placeholder-val="{{ false }}">
               <div style="position: absolute; top: 40px; right: 0; z-index: 10; width: 200px; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); padding: 5px;">
-                <div style="padding: 10px 10px 8px; font-size: 12.5px; color: rgba(236,237,239,0.5); border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px;">demo@leaseclear.app</div>
+                <div style="padding: 10px 10px 8px; font-size: 12.5px; color: rgba(236,237,239,0.5); border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5236373f3d123e37332137313e3733207c332222">[email&#160;protected]</a></div>
                 <div onClick="{{ toggleAvatarMenu }}" style="padding: 8px 10px; font-size: 12.5px; color: #ECEDEF; border-radius: 6px; cursor: pointer;" style-hover="background: rgba(255,255,255,0.06);">Log out</div>
               </div>
             </sc-if>
@@ -288,7 +288,7 @@ Don't have an account? <span onClick="{{ goToApp }}" style="color: #ECEDEF; font
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
     view: 'app',
