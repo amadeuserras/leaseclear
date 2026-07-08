@@ -112,7 +112,7 @@ function SourceRow({
           ⋯
         </button>
         {menuOpen && (
-          <div className="border-hairline-input bg-bg-inset absolute top-[26px] left-0 z-10 min-w-[110px] rounded-lg border p-1 shadow-[0_6px_20px_rgba(0,0,0,0.4)]">
+          <div className="border-hairline-input bg-bg-inset absolute top-[26px] right-0 z-10 min-w-[110px] rounded-lg border p-1 shadow-[0_6px_20px_rgba(0,0,0,0.4)]">
             {/* Parked: no DELETE /documents endpoint — visual only per handoff. */}
             <div
               onClick={onMenuClose}
