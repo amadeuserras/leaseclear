@@ -119,7 +119,8 @@ function Composer({
         </div>
         <button
           type="submit"
-          className="bg-emphasis hover:bg-emphasis-hover flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full"
+          disabled={selectedCount === 0}
+          className="bg-emphasis hover:bg-emphasis-hover flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-emphasis"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path
