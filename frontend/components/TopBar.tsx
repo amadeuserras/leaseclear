@@ -11,9 +11,17 @@ type TopBarProps = {
   isDemo?: boolean;
   hasMessages?: boolean;
   onClearChat: () => void;
+  onExportChat: () => void;
 };
 
-export function TopBar({ initials, email, isDemo, hasMessages, onClearChat }: TopBarProps) {
+export function TopBar({
+  initials,
+  email,
+  isDemo,
+  hasMessages,
+  onClearChat,
+  onExportChat,
+}: TopBarProps) {
   const router = useRouter();
   const menu = useKebabMenu();
 
@@ -58,8 +66,10 @@ export function TopBar({ initials, email, isDemo, hasMessages, onClearChat }: To
             </button>
             {menu.openId === 'account' && (
               <div className="border-hairline-input bg-bg-inset absolute top-8 right-0 z-10 w-[170px] rounded-[10px] border p-[5px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
-                {/* Parked: no chat-export endpoint yet — visual only. */}
-                <div className="text-text-main cursor-pointer rounded-md px-2.5 py-2 text-[12.5px] hover:bg-white/6">
+                <div
+                  onClick={onExportChat}
+                  className="text-text-main cursor-pointer rounded-md px-2.5 py-2 text-[12.5px] hover:bg-white/6"
+                >
                   Export chat
                 </div>
                 <div

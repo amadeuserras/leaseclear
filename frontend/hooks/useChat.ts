@@ -30,6 +30,22 @@ export const useChat = (selectedIds: string[]) => {
 
   const clear = () => setMessages([]);
 
+  const exportChat = () => {
+    if (messages.length === 0) return;
+
+    const transcript = messages
+      .map((m) => `${m.role === 'user' ? 'You' : 'LeaseClear'}: ${m.text}`)
+      .join('\n\n');
+
+    const blob = new Blob([transcript], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leaseclear-chat-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const send = async (question: string) => {
     if (isStreaming || !question.trim() || selectedIds.length === 0) return;
 
@@ -64,5 +80,5 @@ export const useChat = (selectedIds: string[]) => {
     }
   };
 
-  return { messages, isStreaming, send, clear };
+  return { messages, isStreaming, send, clear, exportChat };
 };

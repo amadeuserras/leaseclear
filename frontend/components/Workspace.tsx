@@ -23,7 +23,7 @@ type WorkspaceProps = {
 
 export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
   const { sources, selectedIds, allChecked, toggle, toggleAll } = useSources(documents);
-  const { messages, isStreaming, send, clear } = useChat(selectedIds);
+  const { messages, isStreaming, send, clear, exportChat } = useChat(selectedIds);
   const suggestions = useSuggestedQuestions();
   const viewer = useViewer();
 
@@ -60,6 +60,7 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
         isDemo={isDemo}
         hasMessages={messages.length > 0}
         onClearChat={clear}
+        onExportChat={exportChat}
       />
       <main className="flex min-h-0 flex-1 gap-4 overflow-x-auto px-6 py-5">
         <SourcesPanel
