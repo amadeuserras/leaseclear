@@ -24,7 +24,7 @@ type WorkspaceProps = {
 export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
   const { sources, selectedIds, allChecked, toggle, toggleAll } = useSources(documents);
   const { messages, isStreaming, send, clear, exportChat } = useChat(selectedIds);
-  const suggestions = useSuggestedQuestions();
+  const { questions: suggestions, isLoading: isLoadingSuggestions } = useSuggestedQuestions();
   const viewer = useViewer();
 
   const [collapsed, setCollapsed] = useState(false);
@@ -79,6 +79,7 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
           selectedCount={selectedIds.length}
           docNames={docNames}
           suggestions={suggestions}
+          isLoadingSuggestions={isLoadingSuggestions}
           onSend={send}
           onCitation={openCitation}
         />

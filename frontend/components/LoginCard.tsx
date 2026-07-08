@@ -1,6 +1,7 @@
 'use client';
 
 import { LogoMark } from '@/components/Logo';
+import { Spinner } from '@/components/Spinner';
 import { useLogin, type LoginNotice } from '@/hooks/useLogin';
 import { useState, type ReactNode } from 'react';
 
@@ -129,9 +130,9 @@ export function LoginCard({ isDemo = false, onClose }: LoginCardProps = {}) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-emphasis text-on-emphasis hover:bg-emphasis-hover mt-1 w-full cursor-pointer rounded-lg p-[11px] text-sm font-semibold disabled:cursor-default disabled:opacity-70"
+          className="bg-emphasis text-on-emphasis hover:bg-emphasis-hover mt-1 flex h-10 w-full cursor-pointer items-center justify-center rounded-lg p-[11px] text-sm font-semibold disabled:cursor-default disabled:opacity-70"
         >
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
+          {isSubmitting ? <Spinner size={17} /> : 'Sign in'}
         </button>
 
         <div className="my-1.5 flex items-center gap-3">

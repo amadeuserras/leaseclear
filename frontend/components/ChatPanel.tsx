@@ -2,15 +2,38 @@
 
 import type { ChatMessage } from '@/hooks/useChat';
 import { segmentAnswer, withholdPartialCitation } from '@/lib/citations';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 
-// Fallback prompts shown until (or if) the backend's suggested questions load.
-const EXAMPLE_QUESTIONS = [
-  'When is rent due?',
-  'Can I have a pet?',
-  'What’s my notice period?',
-  'Can I sublet the unit?',
-];
+// Widths for the suggested-question skeleton badges shown while they load,
+// matching the "lc-badge-pulse" spec in frontend/design/LeaseClear.dc.html.
+const SKELETON_WIDTHS = ['118px', '96px', '140px', '104px'];
+
+const CITATION_CLASSES =
+  'mx-0.5 inline-flex cursor-pointer items-center gap-1 rounded-[20px] bg-white/6 px-2 py-px align-middle text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)] hover:bg-white/12 hover:text-[#ECEDEF]';
+
+function ChatAnimationStyles() {
+  return (
+    <style>{`
+      @keyframes lc-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
+      @keyframes lc-sweep { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+      .lc-badge-pulse { opacity: 0.35; animation: lc-pulse 1.4s ease-in-out infinite; }
+      .lc-badge-pulse:nth-child(2) { animation-delay: 0.15s; }
+      .lc-badge-pulse:nth-child(3) { animation-delay: 0.3s; }
+      .lc-badge-pulse:nth-child(4) { animation-delay: 0.45s; }
+      .lc-answer-shimmer {
+        background: linear-gradient(90deg, rgba(236,237,239,0.32) 25%, rgba(236,237,239,0.88) 50%, rgba(236,237,239,0.32) 75%);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: lc-sweep 3.4s linear infinite;
+        display: inline-block;
+      }
+      @keyframes lc-fade-word-in { from { opacity: 0; } to { opacity: 1; } }
+      .lc-fade-word { display: inline-block; animation: lc-fade-word-in 0.22s ease-out; }
+    `}</style>
+  );
+}
 
 // A question paired with its answer — the design groups each turn into one entry.
 type Entry = {
@@ -41,17 +64,39 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
   if (message.error) {
     return <div className="text-text-secondary text-[14.5px] leading-[1.7]">{message.text}</div>;
   }
+
+  if (message.streaming && message.text.length === 0) {
+    return (
+      <div className="lc-answer-shimmer text-[14.5px] leading-[1.7] font-medium">
+        Reading your lease…
+      </div>
+    );
+  }
+
   const text = message.streaming ? withholdPartialCitation(message.text) : message.text;
+  const segments = segmentAnswer(text, docNames);
+
+  // While streaming, each newly-arrived word fades in individually (SSE fade-in);
+  // once done, segments render statically without the animation class.
   return (
     <div className="text-[14.5px] leading-[1.7] text-[rgba(236,237,239,0.82)]">
-      {segmentAnswer(text, docNames).map((seg, i) =>
+      {segments.map((seg, i) =>
         seg.type === 'text' ? (
-          <span key={i}>{seg.value}</span>
+          message.streaming ? (
+            seg.value.split(' ').map((w, j) => (
+              <Fragment key={`${i}-${j}`}>
+                <span className="lc-fade-word">{w}</span>
+                {j < seg.value.split(' ').length - 1 && ' '}
+              </Fragment>
+            ))
+          ) : (
+            <span key={i}>{seg.value}</span>
+          )
         ) : (
           <span
             key={i}
             onClick={() => onCitation(seg.slug, seg.clause)}
-            className="mx-0.5 inline-flex cursor-pointer items-center gap-1 rounded-[20px] bg-white/6 px-2 py-px align-middle text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)] hover:bg-white/12 hover:text-[#ECEDEF]"
+            className={`${CITATION_CLASSES} ${message.streaming ? 'lc-fade-word' : ''}`}
           >
             {seg.value}
           </span>
@@ -85,6 +130,7 @@ type ComposerProps = {
   selectedCount: number;
   centered: boolean;
   questions: string[];
+  isLoadingSuggestions: boolean;
   onDraftChange: (value: string) => void;
   onSubmit: () => void;
   onExample: (question: string) => void;
@@ -95,6 +141,7 @@ function Composer({
   selectedCount,
   centered,
   questions,
+  isLoadingSuggestions,
   onDraftChange,
   onSubmit,
   onExample,
@@ -120,7 +167,7 @@ function Composer({
         <button
           type="submit"
           disabled={selectedCount === 0}
-          className="bg-emphasis hover:bg-emphasis-hover flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-emphasis"
+          className="bg-emphasis hover:bg-emphasis-hover disabled:hover:bg-emphasis flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-40"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path
@@ -134,16 +181,24 @@ function Composer({
         </button>
       </div>
       <div className={`mt-3 flex flex-wrap gap-2 ${centered ? 'justify-center' : 'justify-start'}`}>
-        {questions.map((q) => (
-          <button
-            key={q}
-            type="button"
-            onClick={() => onExample(q)}
-            className="cursor-pointer rounded-[20px] border border-white/8 px-3 py-[5px] text-xs whitespace-nowrap text-[rgba(236,237,239,0.42)] hover:border-white/14 hover:bg-white/5 hover:text-[rgba(236,237,239,0.7)]"
-          >
-            {q}
-          </button>
-        ))}
+        {isLoadingSuggestions
+          ? SKELETON_WIDTHS.map((w, i) => (
+              <div
+                key={i}
+                style={{ width: w }}
+                className="lc-badge-pulse h-[26px] rounded-[20px] bg-white/[0.07]"
+              />
+            ))
+          : questions.map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => onExample(q)}
+                className="cursor-pointer rounded-[20px] border border-white/8 px-3 py-[5px] text-xs whitespace-nowrap text-[rgba(236,237,239,0.42)] hover:border-white/14 hover:bg-white/5 hover:text-[rgba(236,237,239,0.7)]"
+              >
+                {q}
+              </button>
+            ))}
       </div>
     </form>
   );
@@ -155,6 +210,7 @@ type ChatPanelProps = {
   selectedCount: number;
   docNames: Map<string, string>;
   suggestions: string[];
+  isLoadingSuggestions: boolean;
   onSend: (question: string) => void;
   onCitation: (slug: string, clause: string | null) => void;
 };
@@ -165,6 +221,7 @@ export function ChatPanel({
   selectedCount,
   docNames,
   suggestions,
+  isLoadingSuggestions,
   onSend,
   onCitation,
 }: ChatPanelProps) {
@@ -172,7 +229,6 @@ export function ChatPanel({
   // Newest turn shows directly under the composer, so render most-recent-first.
   const entries = toEntries(messages).reverse();
   const canSubmit = !isStreaming && selectedCount > 0;
-  const questions = suggestions.length > 0 ? suggestions : EXAMPLE_QUESTIONS;
 
   const submit = () => {
     if (!canSubmit || draft.trim().length === 0) return;
@@ -185,24 +241,24 @@ export function ChatPanel({
     else setDraft(question);
   };
 
-  const composer = (centered: boolean) => (
-    <Composer
-      draft={draft}
-      selectedCount={selectedCount}
-      centered={centered}
-      questions={questions}
-      onDraftChange={setDraft}
-      onSubmit={submit}
-      onExample={sendExample}
-    />
-  );
-
   return (
     <div className="flex min-h-0 min-w-[380px] flex-1 justify-center">
+      <ChatAnimationStyles />
       <div className="flex min-h-0 w-full max-w-[760px] min-w-0 flex-col">
         {entries.length > 0 ? (
           <>
-            <div className="shrink-0 px-1 pt-10 pb-7">{composer(false)}</div>
+            <div className="shrink-0 px-1 pt-10 pb-7">
+              <Composer
+                draft={draft}
+                selectedCount={selectedCount}
+                centered={false}
+                questions={suggestions}
+                isLoadingSuggestions={isLoadingSuggestions}
+                onDraftChange={setDraft}
+                onSubmit={submit}
+                onExample={sendExample}
+              />
+            </div>
             <div className="custom-scrollbar min-h-0 flex-1 space-y-11 overflow-y-auto px-1 pt-9 pb-8">
               {entries.map((entry) => (
                 <EntryItem
@@ -221,7 +277,18 @@ export function ChatPanel({
                 Ask your lease anything
               </div>
             </div>
-            <div className="w-full">{composer(true)}</div>
+            <div className="w-full">
+              <Composer
+                draft={draft}
+                selectedCount={selectedCount}
+                centered={true}
+                questions={suggestions}
+                isLoadingSuggestions={isLoadingSuggestions}
+                onDraftChange={setDraft}
+                onSubmit={submit}
+                onExample={sendExample}
+              />
+            </div>
           </div>
         )}
       </div>

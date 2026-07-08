@@ -1,6 +1,7 @@
 'use client';
 
 import { LoginCard } from '@/components/LoginCard';
+import { Spinner } from '@/components/Spinner';
 import { useKebabMenu } from '@/hooks/useKebabMenu';
 import type { Source } from '@/hooks/useSources';
 import { useUpload } from '@/hooks/useUpload';
@@ -200,7 +201,7 @@ export function SourcesPanel({
               title="Upload documents"
               className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border disabled:cursor-default disabled:opacity-70"
             >
-              <UploadIcon />
+              {isUploading ? <Spinner size={15} /> : <UploadIcon />}
             </button>
           </div>
 
@@ -235,10 +236,16 @@ export function SourcesPanel({
             <button
               onClick={openPicker}
               disabled={isUploading}
-              className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-lg border p-[9px] text-[13px] font-medium disabled:cursor-default disabled:opacity-70"
+              className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex h-[34px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-lg border p-[9px] text-[13px] font-medium disabled:cursor-default disabled:opacity-70"
             >
-              <UploadIcon />
-              {isUploading ? 'Uploading…' : 'Upload documents'}
+              {isUploading ? (
+                <Spinner size={15} />
+              ) : (
+                <>
+                  <UploadIcon />
+                  Upload documents
+                </>
+              )}
             </button>
             {error && <div className="mt-2 text-[12px] text-[#e07f84]">{error}</div>}
           </div>

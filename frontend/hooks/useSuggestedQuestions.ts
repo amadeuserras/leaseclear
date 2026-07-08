@@ -6,9 +6,9 @@ import { useEffect, useState } from 'react';
 
 // Fetches LLM-suggested starter questions for the current documents. The backend
 // caches these per document set, so this is effectively one call per deploy.
-// Returns [] on any failure — callers fall back to static example prompts.
-export const useSuggestedQuestions = (): string[] => {
+export const useSuggestedQuestions = () => {
   const [questions, setQuestions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -17,7 +17,9 @@ export const useSuggestedQuestions = (): string[] => {
         const result = await listSuggestedQuestions(getToken() ?? '');
         if (!cancelled) setQuestions(result);
       } catch {
-        // Keep the fallback prompts.
+        // Leave questions empty on failure.
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
     })();
     return () => {
@@ -25,5 +27,5 @@ export const useSuggestedQuestions = (): string[] => {
     };
   }, []);
 
-  return questions;
+  return { questions, isLoading };
 };
