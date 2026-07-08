@@ -4,38 +4,8 @@ import type { ChatMessage } from '@/hooks/useChat';
 import { segmentAnswer, withholdPartialCitation } from '@/lib/citations';
 import { Fragment, useState } from 'react';
 
-// Widths for the suggested-question skeleton badges shown while they load,
-// matching the "lc-badge-pulse" spec in frontend/design/LeaseClear.dc.html.
 const SKELETON_WIDTHS = ['118px', '96px', '140px', '104px'];
 
-const CITATION_CLASSES =
-  'mx-0.5 inline-flex cursor-pointer items-center gap-1 rounded-[20px] bg-white/6 px-2 py-px align-middle text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)] hover:bg-white/12 hover:text-[#ECEDEF]';
-
-function ChatAnimationStyles() {
-  return (
-    <style>{`
-      @keyframes lc-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
-      @keyframes lc-sweep { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-      .lc-badge-pulse { opacity: 0.35; animation: lc-pulse 1.4s ease-in-out infinite; }
-      .lc-badge-pulse:nth-child(2) { animation-delay: 0.15s; }
-      .lc-badge-pulse:nth-child(3) { animation-delay: 0.3s; }
-      .lc-badge-pulse:nth-child(4) { animation-delay: 0.45s; }
-      .lc-answer-shimmer {
-        background: linear-gradient(90deg, rgba(236,237,239,0.32) 25%, rgba(236,237,239,0.88) 50%, rgba(236,237,239,0.32) 75%);
-        background-size: 200% 100%;
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        animation: lc-sweep 3.4s linear infinite;
-        display: inline-block;
-      }
-      @keyframes lc-fade-word-in { from { opacity: 0; } to { opacity: 1; } }
-      .lc-fade-word { display: inline-block; animation: lc-fade-word-in 0.22s ease-out; }
-    `}</style>
-  );
-}
-
-// A question paired with its answer — the design groups each turn into one entry.
 type Entry = {
   id: string;
   question: string;
@@ -67,7 +37,7 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
 
   if (message.streaming && message.text.length === 0) {
     return (
-      <div className="lc-answer-shimmer text-[14.5px] leading-[1.7] font-medium">
+      <div className="animate-lc-sweep inline-block bg-[linear-gradient(90deg,rgba(236,237,239,0.32)_25%,rgba(236,237,239,0.75)_50%,rgba(236,237,239,0.32)_78%)] bg-size-[200%_100%] bg-clip-text text-[14.5px] leading-[1.7] font-medium text-transparent">
         Reading your lease…
       </div>
     );
@@ -76,8 +46,6 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
   const text = message.streaming ? withholdPartialCitation(message.text) : message.text;
   const segments = segmentAnswer(text, docNames);
 
-  // While streaming, each newly-arrived word fades in individually (SSE fade-in);
-  // once done, segments render statically without the animation class.
   return (
     <div className="text-[14.5px] leading-[1.7] text-[rgba(236,237,239,0.82)]">
       {segments.map((seg, i) =>
@@ -85,7 +53,7 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
           message.streaming ? (
             seg.value.split(' ').map((w, j) => (
               <Fragment key={`${i}-${j}`}>
-                <span className="lc-fade-word">{w}</span>
+                <span className="animate-lc-fade-word inline-block">{w}</span>
                 {j < seg.value.split(' ').length - 1 && ' '}
               </Fragment>
             ))
@@ -96,7 +64,7 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
           <span
             key={i}
             onClick={() => onCitation(seg.slug, seg.clause)}
-            className={`${CITATION_CLASSES} ${message.streaming ? 'lc-fade-word' : ''}`}
+            className={`mx-0.5 inline-flex cursor-pointer items-center gap-1 rounded-[20px] bg-white/6 px-2 py-px align-middle text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)] hover:bg-white/12 hover:text-[#ECEDEF] ${message.streaming ? 'animate-lc-fade-word' : ''}`}
           >
             {seg.value}
           </span>
@@ -180,13 +148,15 @@ function Composer({
           </svg>
         </button>
       </div>
-      <div className={`mt-3 flex flex-wrap gap-2 ${centered ? 'justify-center' : 'justify-start'}`}>
+      <div
+        className={`mt-3 flex min-h-16 flex-wrap gap-2 ${centered ? 'justify-center' : 'justify-start'}`}
+      >
         {isLoadingSuggestions
           ? SKELETON_WIDTHS.map((w, i) => (
               <div
                 key={i}
-                style={{ width: w }}
-                className="lc-badge-pulse h-[26px] rounded-[20px] bg-white/[0.07]"
+                style={{ width: w, animationDelay: `${i * 0.15}s` }}
+                className="animate-lc-pulse h-[26px] rounded-[20px] bg-white/[0.07] opacity-[0.35]"
               />
             ))
           : questions.map((q) => (
@@ -226,7 +196,6 @@ export function ChatPanel({
   onCitation,
 }: ChatPanelProps) {
   const [draft, setDraft] = useState('');
-  // Newest turn shows directly under the composer, so render most-recent-first.
   const entries = toEntries(messages).reverse();
   const canSubmit = !isStreaming && selectedCount > 0;
 
@@ -243,7 +212,6 @@ export function ChatPanel({
 
   return (
     <div className="flex min-h-0 min-w-[380px] flex-1 justify-center">
-      <ChatAnimationStyles />
       <div className="flex min-h-0 w-full max-w-[760px] min-w-0 flex-col">
         {entries.length > 0 ? (
           <>

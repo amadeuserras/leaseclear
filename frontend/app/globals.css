@@ -3,6 +3,10 @@
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
+  --animate-lc-pulse: lc-pulse 1.4s ease-in-out infinite;
+  --animate-lc-sweep: lc-sweep 3.4s linear infinite;
+  --animate-lc-fade-word: lc-fade-word-in 0.22s ease-out;
+
   --color-bg-main: #16171b;
   --color-bg-surface: #1e2025;
   --color-bg-inset: #26282e;
@@ -41,6 +45,34 @@
   input::placeholder,
   textarea::placeholder {
     color: rgba(236, 237, 239, 0.36);
+  }
+}
+
+@keyframes lc-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes lc-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes lc-fade-word-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
