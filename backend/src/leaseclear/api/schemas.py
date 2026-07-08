@@ -41,3 +41,7 @@ class DocumentResponse(BaseModel):
     landlord_name: str | None
     tenant_names: list[str]
     property_address: str | None
+
+
+class SuggestedQuestionsResponse(BaseModel):
+    questions: list[str]

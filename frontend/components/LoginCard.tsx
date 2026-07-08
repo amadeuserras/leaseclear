@@ -2,7 +2,6 @@
 
 import { LogoMark } from '@/components/Logo';
 import { useLogin, type LoginNotice } from '@/hooks/useLogin';
-import { MOCK_LOGIN_CREDENTIALS } from '@/lib/mockData';
 import { useState, type ReactNode } from 'react';
 
 const INPUT_CLASSES =
@@ -55,8 +54,8 @@ function GoogleIcon() {
 }
 
 export function LoginCard() {
-  const [email, setEmail] = useState(MOCK_LOGIN_CREDENTIALS.email);
-  const [password, setPassword] = useState(MOCK_LOGIN_CREDENTIALS.password);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const { isSubmitting, notice, submit, googleSignIn, tryDemo } = useLogin();
 
   return (

@@ -80,6 +80,18 @@ export const login = (email: string, password: string) =>
 export const register = (email: string, password: string) =>
   postJson<TokenResponse>('/auth/register', { email, password });
 
+export const demoLogin = () => postJson<TokenResponse>('/auth/demo', {});
+
+export const listSuggestedQuestions = async (token: string): Promise<string[]> => {
+  const res = await fetch(`${baseUrl()}/documents/suggested-questions`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+  if (!res.ok) throw await errorFromResponse(res);
+  const body = (await res.json()) as { questions: string[] };
+  return body.questions;
+};
+
 export const listDocuments = async (token: string): Promise<LeaseDocument[]> => {
   const res = await fetch(`${baseUrl()}/documents`, {
     headers: { Authorization: `Bearer ${token}` },

@@ -26,6 +26,12 @@ async def register_user(email: str, password: str) -> str:
     return user_id
 
 
+async def get_user_id_by_email(email: str) -> str | None:
+    async with db_session() as conn:
+        row = await conn.fetchrow("SELECT id FROM users WHERE email = $1", email)
+    return str(row["id"]) if row is not None else None
+
+
 async def authenticate_user(email: str, password: str) -> str:
     async with db_session() as conn:
         row = await conn.fetchrow(

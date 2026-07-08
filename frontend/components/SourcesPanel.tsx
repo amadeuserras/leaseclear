@@ -81,6 +81,7 @@ function UploadIcon() {
 type SourceRowProps = {
   source: Source;
   menuOpen: boolean;
+  readOnly: boolean;
   onToggle: () => void;
   onOpen: () => void;
   onMenuToggle: () => void;
@@ -90,6 +91,7 @@ type SourceRowProps = {
 function SourceRow({
   source,
   menuOpen,
+  readOnly,
   onToggle,
   onOpen,
   onMenuToggle,
@@ -101,28 +103,30 @@ function SourceRow({
         <PdfIcon />
         <div className="text-text-main min-w-0 flex-1 truncate text-[13px]">{source.filename}</div>
       </div>
-      <div className="relative shrink-0">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onMenuToggle();
-          }}
-          className="hover:text-text-main flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-md text-sm leading-none text-[rgba(236,237,239,0.5)] hover:bg-white/8"
-        >
-          ⋯
-        </button>
-        {menuOpen && (
-          <div className="border-hairline-input bg-bg-inset absolute top-[26px] right-0 z-10 min-w-[110px] rounded-lg border p-1 shadow-[0_6px_20px_rgba(0,0,0,0.4)]">
-            {/* Parked: no DELETE /documents endpoint — visual only per handoff. */}
-            <div
-              onClick={onMenuClose}
-              className="text-text-main cursor-pointer rounded-[5px] px-2.5 py-[7px] text-[12.5px] hover:bg-white/6"
-            >
-              Remove
+      {!readOnly && (
+        <div className="relative shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onMenuToggle();
+            }}
+            className="hover:text-text-main flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-md text-sm leading-none text-[rgba(236,237,239,0.5)] hover:bg-white/8"
+          >
+            ⋯
+          </button>
+          {menuOpen && (
+            <div className="border-hairline-input bg-bg-inset absolute top-[26px] right-0 z-10 min-w-[110px] rounded-lg border p-1 shadow-[0_6px_20px_rgba(0,0,0,0.4)]">
+              {/* Parked: no DELETE /documents endpoint — visual only per handoff. */}
+              <div
+                onClick={onMenuClose}
+                className="text-text-main cursor-pointer rounded-[5px] px-2.5 py-[7px] text-[12.5px] hover:bg-white/6"
+              >
+                Remove
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
       <Checkbox checked={source.checked} onToggle={onToggle} />
     </div>
   );
@@ -132,6 +136,7 @@ type SourcesPanelProps = {
   sources: Source[];
   allChecked: boolean;
   collapsed: boolean;
+  readOnly: boolean;
   onToggle: (id: string) => void;
   onToggleAll: () => void;
   onToggleCollapsed: () => void;
@@ -142,6 +147,7 @@ export function SourcesPanel({
   sources,
   allChecked,
   collapsed,
+  readOnly,
   onToggle,
   onToggleAll,
   onToggleCollapsed,
@@ -191,16 +197,18 @@ export function SourcesPanel({
             </button>
           </div>
 
-          <div className="flex shrink-0 justify-center pb-3.5">
-            <button
-              onClick={openPicker}
-              disabled={isUploading}
-              title="Upload documents"
-              className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border disabled:cursor-default disabled:opacity-70"
-            >
-              <UploadIcon />
-            </button>
-          </div>
+          {!readOnly && (
+            <div className="flex shrink-0 justify-center pb-3.5">
+              <button
+                onClick={openPicker}
+                disabled={isUploading}
+                title="Upload documents"
+                className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border disabled:cursor-default disabled:opacity-70"
+              >
+                <UploadIcon />
+              </button>
+            </div>
+          )}
 
           <div className="custom-scrollbar flex min-h-0 flex-1 flex-col items-center gap-1.5 overflow-y-auto pt-1 pb-2">
             {sources.map((s) => (
@@ -229,17 +237,19 @@ export function SourcesPanel({
             </button>
           </div>
 
-          <div className="shrink-0 px-[18px] pb-3.5">
-            <button
-              onClick={openPicker}
-              disabled={isUploading}
-              className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-lg border p-[9px] text-[13px] font-medium disabled:cursor-default disabled:opacity-70"
-            >
-              <UploadIcon />
-              {isUploading ? 'Uploading…' : 'Upload documents'}
-            </button>
-            {error && <div className="mt-2 text-[12px] text-[#e07f84]">{error}</div>}
-          </div>
+          {!readOnly && (
+            <div className="shrink-0 px-[18px] pb-3.5">
+              <button
+                onClick={openPicker}
+                disabled={isUploading}
+                className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-lg border p-[9px] text-[13px] font-medium disabled:cursor-default disabled:opacity-70"
+              >
+                <UploadIcon />
+                {isUploading ? 'Uploading…' : 'Upload documents'}
+              </button>
+              {error && <div className="mt-2 text-[12px] text-[#e07f84]">{error}</div>}
+            </div>
+          )}
 
           <div className="border-hairline flex shrink-0 items-center justify-end gap-2.5 border-b px-[18px] pt-1 pb-3">
             <label
@@ -257,6 +267,7 @@ export function SourcesPanel({
                 key={s.id}
                 source={s}
                 menuOpen={menu.openId === s.id}
+                readOnly={readOnly}
                 onToggle={() => onToggle(s.id)}
                 onOpen={() => onOpen(s)}
                 onMenuToggle={() => menu.toggle(s.id)}

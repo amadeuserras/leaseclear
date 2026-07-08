@@ -46,8 +46,9 @@ export const useLogin = () => {
   const googleSignIn = () =>
     setNotice({ kind: 'info', text: "Google sign-in isn't available yet." });
 
-  // Parked: no demo/seed endpoint yet — see PROGRESS.md parked items.
-  const tryDemo = () => setNotice({ kind: 'info', text: "The demo isn't available yet." });
+  // The /demo route logs into the shared read-only demo account and hands off
+  // to the workspace — same destination as the shareable demo link.
+  const tryDemo = () => router.push('/demo');
 
   return { isSubmitting, notice, submit, googleSignIn, tryDemo };
 };

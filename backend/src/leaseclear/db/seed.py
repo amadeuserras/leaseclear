@@ -9,8 +9,8 @@ from leaseclear.ingestion.ingest import ingest_documents
 from leaseclear.types import UploadDocument
 
 GENERATED_DIR = Path(__file__).resolve().parents[4] / "corpus" / "generated"
-OWNER_EMAIL = "owner@leaseclear.example"
-OWNER_PASSWORD = "leaseclear"
+DEMO_EMAIL = "demo@leaseclear.example"
+DEMO_PASSWORD = "leaseclear"
 
 
 def discover_generated_pdfs() -> list[Path]:
@@ -29,6 +29,6 @@ async def seed_database(database_url: str) -> tuple[UUID, int, int]:
     async with use_database(database_url):
         async with db_session() as conn:
             await conn.execute("TRUNCATE logs, chunks, users, documents")
-        user_id = UUID(await register_user(OWNER_EMAIL, OWNER_PASSWORD))
+        user_id = UUID(await register_user(DEMO_EMAIL, DEMO_PASSWORD))
         chunks = await ingest_documents(uploads, user_id=user_id)
         return user_id, len(pdfs), len(chunks)

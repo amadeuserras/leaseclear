@@ -1,7 +1,6 @@
 'use client';
 
 import { ApiError, streamQuery } from '@/lib/api';
-import { MOCK_MESSAGES } from '@/lib/mockData';
 import { clearSession, getToken } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -23,7 +22,7 @@ const errorText = (e: unknown): string => {
 
 export const useChat = (selectedIds: string[]) => {
   const router = useRouter();
-  const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
 
   const patchMessage = (id: string, patch: Partial<ChatMessage>) =>

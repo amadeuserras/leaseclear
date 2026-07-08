@@ -7,6 +7,7 @@ import { TopBar } from '@/components/TopBar';
 import { useChat } from '@/hooks/useChat';
 import type { Source } from '@/hooks/useSources';
 import { useSources } from '@/hooks/useSources';
+import { useSuggestedQuestions } from '@/hooks/useSuggestedQuestions';
 import { useViewer } from '@/hooks/useViewer';
 import type { LeaseDocument } from '@/lib/api';
 import { initialsFromEmail } from '@/lib/session';
@@ -17,11 +18,13 @@ const filenameStem = (filename: string) => filename.replace(/\.[^.]+$/, '');
 type WorkspaceProps = {
   documents: LeaseDocument[];
   email: string;
+  isDemo: boolean;
 };
 
-export function Workspace({ documents, email }: WorkspaceProps) {
+export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
   const { sources, selectedIds, allChecked, toggle, toggleAll } = useSources(documents);
   const { messages, isStreaming, send, clear } = useChat(selectedIds);
+  const suggestions = useSuggestedQuestions();
   const viewer = useViewer();
 
   const [collapsed, setCollapsed] = useState(false);
@@ -57,6 +60,7 @@ export function Workspace({ documents, email }: WorkspaceProps) {
           sources={sources}
           allChecked={allChecked}
           collapsed={collapsed}
+          readOnly={isDemo}
           onToggle={toggle}
           onToggleAll={toggleAll}
           onToggleCollapsed={() => setCollapsed((c) => !c)}
@@ -67,6 +71,7 @@ export function Workspace({ documents, email }: WorkspaceProps) {
           isStreaming={isStreaming}
           selectedCount={selectedIds.length}
           docNames={docNames}
+          suggestions={suggestions}
           onSend={send}
           onCitation={openCitation}
         />

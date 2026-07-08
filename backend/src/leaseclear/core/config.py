@@ -10,6 +10,7 @@ _BACKEND_ROOT = Path(__file__).resolve().parents[3]
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=_BACKEND_ROOT / ".env")
     cors_origins: list[str] = ["http://localhost:3000"]
+    demo_email: str = "demo@leaseclear.example"
     database_url: str = "postgresql://leaseclear:leaseclear@localhost:5433/leaseclear"
     test_database_url: str = (
         "postgresql://leaseclear:leaseclear@localhost:5433/leaseclear_test"

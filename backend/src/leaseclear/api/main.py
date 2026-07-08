@@ -16,7 +16,13 @@ from leaseclear.api.limiter import (
     rate_limit_exceeded_handler,
 )
 from leaseclear.api.query import query_events
-from leaseclear.api.schemas import DocumentResponse, HealthResponse, QueryRequest
+from leaseclear.api.schemas import (
+    DocumentResponse,
+    HealthResponse,
+    QueryRequest,
+    SuggestedQuestionsResponse,
+)
+from leaseclear.api.suggestions import get_suggested_questions
 from leaseclear.auth.deps import current_user
 from leaseclear.core.config import settings
 from leaseclear.db.connection import close_pool, get_pool
@@ -52,6 +58,13 @@ async def documents_list(
     user_id: Annotated[UUID, Depends(current_user)],
 ) -> list[DocumentResponse]:
     return await get_documents(user_id)
+
+
+@app.get("/documents/suggested-questions", response_model=SuggestedQuestionsResponse)
+async def documents_suggested_questions(
+    user_id: Annotated[UUID, Depends(current_user)],
+) -> SuggestedQuestionsResponse:
+    return await get_suggested_questions(user_id)
 
 
 @app.post("/documents", status_code=204)

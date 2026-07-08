@@ -4,6 +4,7 @@ import type { ChatMessage } from '@/hooks/useChat';
 import { segmentAnswer, withholdPartialCitation } from '@/lib/citations';
 import { useState } from 'react';
 
+// Fallback prompts shown until (or if) the backend's suggested questions load.
 const EXAMPLE_QUESTIONS = [
   'When is rent due?',
   'Can I have a pet?',
@@ -83,6 +84,7 @@ type ComposerProps = {
   draft: string;
   selectedCount: number;
   centered: boolean;
+  questions: string[];
   onDraftChange: (value: string) => void;
   onSubmit: () => void;
   onExample: (question: string) => void;
@@ -92,6 +94,7 @@ function Composer({
   draft,
   selectedCount,
   centered,
+  questions,
   onDraftChange,
   onSubmit,
   onExample,
@@ -130,7 +133,7 @@ function Composer({
         </button>
       </div>
       <div className={`mt-3 flex flex-wrap gap-2 ${centered ? 'justify-center' : 'justify-start'}`}>
-        {EXAMPLE_QUESTIONS.map((q) => (
+        {questions.map((q) => (
           <button
             key={q}
             type="button"
@@ -150,6 +153,7 @@ type ChatPanelProps = {
   isStreaming: boolean;
   selectedCount: number;
   docNames: Map<string, string>;
+  suggestions: string[];
   onSend: (question: string) => void;
   onCitation: (slug: string, clause: string | null) => void;
 };
@@ -159,6 +163,7 @@ export function ChatPanel({
   isStreaming,
   selectedCount,
   docNames,
+  suggestions,
   onSend,
   onCitation,
 }: ChatPanelProps) {
@@ -166,6 +171,7 @@ export function ChatPanel({
   // Newest turn shows directly under the composer, so render most-recent-first.
   const entries = toEntries(messages).reverse();
   const canSubmit = !isStreaming && selectedCount > 0;
+  const questions = suggestions.length > 0 ? suggestions : EXAMPLE_QUESTIONS;
 
   const submit = () => {
     if (!canSubmit || draft.trim().length === 0) return;
@@ -183,6 +189,7 @@ export function ChatPanel({
       draft={draft}
       selectedCount={selectedCount}
       centered={centered}
+      questions={questions}
       onDraftChange={setDraft}
       onSubmit={submit}
       onExample={sendExample}

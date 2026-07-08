@@ -2,7 +2,7 @@ import argparse
 import asyncio
 
 from leaseclear.core.config import settings
-from leaseclear.db.seed import OWNER_EMAIL, seed_database
+from leaseclear.db.seed import DEMO_EMAIL, seed_database
 
 
 def _parse_args() -> argparse.Namespace:
@@ -20,7 +20,7 @@ async def main() -> None:
     database_url = settings.eval_database_url if args.eval else settings.database_url
     user_id, pdf_count, chunk_count = await seed_database(database_url)
     print(f"Seeded {database_url}")
-    print(f"  owner: {OWNER_EMAIL} ({user_id})")
+    print(f"  demo user: {DEMO_EMAIL} ({user_id})")
     print(f"  documents: {pdf_count}")
     print(f"  chunks: {chunk_count}")
 
