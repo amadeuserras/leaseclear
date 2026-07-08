@@ -49,5 +49,6 @@ After frontend changes, from `frontend/`:
 
 \`\`\`bash
 npm run lint
-npm run build
+npm run format
+npm run check
 \`\`\`
