@@ -28,7 +28,7 @@ const toEntries = (messages: ChatMessage[]): Entry[] => {
 type AnswerBodyProps = {
   message: ChatMessage;
   docNames: Map<string, string>;
-  onCitation: (slug: string, clause: string | null) => void;
+  onCitation: (slug: string, ref: string) => void;
 };
 
 function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
@@ -64,7 +64,7 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
         ) : (
           <span
             key={i}
-            onClick={() => onCitation(seg.slug, seg.clause)}
+            onClick={() => onCitation(seg.slug, seg.ref)}
             className={`mx-0.5 inline-flex cursor-pointer items-center gap-1 rounded-[20px] bg-white/6 px-2 py-px align-middle text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)] hover:bg-white/12 hover:text-[#ECEDEF] ${message.streaming ? 'animate-lc-fade-word' : ''}`}
           >
             {seg.value}
@@ -78,7 +78,7 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
 type EntryItemProps = {
   entry: Entry;
   docNames: Map<string, string>;
-  onCitation: (slug: string, clause: string | null) => void;
+  onCitation: (slug: string, ref: string) => void;
 };
 
 function EntryItem({ entry, docNames, onCitation }: EntryItemProps) {
@@ -175,7 +175,7 @@ type ChatPanelProps = {
   suggestions: string[];
   isLoadingSuggestions: boolean;
   onSend: (question: string) => void;
-  onCitation: (slug: string, clause: string | null) => void;
+  onCitation: (slug: string, ref: string) => void;
 };
 
 export function ChatPanel({

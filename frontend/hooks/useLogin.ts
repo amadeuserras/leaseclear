@@ -37,6 +37,10 @@ export const useLogin = (onSuccess?: () => void) => {
       saveSession(access_token, email);
       onSuccess?.();
       router.push('/');
+      // When logging in from the demo (already on '/'), push() alone reuses the
+      // cached demo render — refresh() re-runs the server component with the new
+      // token so documents/suggestions reflect the real account.
+      router.refresh();
     } catch (e) {
       setNotice({ kind: 'error', text: messageFor(e) });
       setIsSubmitting(false);

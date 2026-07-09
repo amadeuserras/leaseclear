@@ -8,11 +8,11 @@ import { useState } from 'react';
 export type ViewerTarget = {
   slug: string;
   name: string;
-  highlightClause: string | null;
+  citationRef: string | null;
 };
 
 // Drives the right-hand document panel: which document is open, its chunks, and
-// the clause to highlight when arriving from a citation click.
+// the citation reference to highlight/scroll to when arriving from a citation click.
 export const useViewer = () => {
   const router = useRouter();
   const [target, setTarget] = useState<ViewerTarget | null>(null);
@@ -20,9 +20,9 @@ export const useViewer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  const open = async (slug: string, name: string, highlightClause: string | null = null) => {
+  const open = async (slug: string, name: string, citationRef: string | null = null) => {
     const sameDoc = target?.slug === slug;
-    setTarget({ slug, name, highlightClause });
+    setTarget({ slug, name, citationRef });
     if (sameDoc && !error) return; // chunks already loaded; just move the highlight
 
     setIsLoading(true);

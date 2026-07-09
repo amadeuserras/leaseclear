@@ -11,7 +11,7 @@ import { useSuggestedQuestions } from '@/hooks/useSuggestedQuestions';
 import { useViewer } from '@/hooks/useViewer';
 import type { LeaseDocument } from '@/lib/api';
 import { initialsFromEmail } from '@/lib/session';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const filenameStem = (filename: string) => filename.replace(/\.[^.]+$/, '');
 
@@ -24,28 +24,27 @@ type WorkspaceProps = {
 export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
   const { sources, selectedIds, allChecked, toggle, toggleAll } = useSources(documents);
   const { messages, isStreaming, send, clear, exportChat } = useChat(selectedIds);
-  const { questions: suggestions, isLoading: isLoadingSuggestions } = useSuggestedQuestions();
+  // Re-fetch suggestions whenever the document set changes (upload/delete), since
+  // the backend keys them per document set.
+  const documentKey = useMemo(
+    () => documents.map((d) => d.id).sort().join(','),
+    [documents],
+  );
+  const { questions: suggestions, isLoading: isLoadingSuggestions } =
+    useSuggestedQuestions(documentKey);
   const viewer = useViewer();
 
   const [collapsed, setCollapsed] = useState(false);
-  const priorCollapsed = useRef(false);
 
   const docNames = useMemo(
     () => new Map(documents.map((d) => [d.slug, filenameStem(d.filename)])),
     [documents],
   );
 
-  // Opening a document collapses the sources rail to make room; closing restores it.
-  const openDoc = (slug: string, name: string, clause: string | null = null) => {
-    if (!viewer.isOpen) priorCollapsed.current = collapsed;
-    setCollapsed(true);
-    viewer.open(slug, name, clause);
-  };
+  const openDoc = (slug: string, name: string, citationRef: string | null = null) =>
+    viewer.open(slug, name, citationRef);
 
-  const closeDoc = () => {
-    viewer.close();
-    setCollapsed(priorCollapsed.current);
-  };
+  const closeDoc = () => viewer.close();
 
   const openSource = (source: Source) => openDoc(source.slug, filenameStem(source.filename));
 
@@ -53,8 +52,8 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
     if (viewer.target?.slug === source.slug) closeDoc();
   };
 
-  const openCitation = (slug: string, clause: string | null) =>
-    openDoc(slug, docNames.get(slug) ?? slug, clause);
+  const openCitation = (slug: string, ref: string) =>
+    openDoc(slug, docNames.get(slug) ?? slug, ref);
 
   return (
     <>

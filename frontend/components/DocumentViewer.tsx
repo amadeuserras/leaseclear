@@ -3,7 +3,8 @@
 import { CloseIcon } from '@/components/icons';
 import type { ViewerTarget } from '@/hooks/useViewer';
 import type { DocumentChunk } from '@/lib/api';
-import { chunkCitationId } from '@/lib/citations';
+import { chunkCitationId, chunkMatchesCitation } from '@/lib/citations';
+import { forwardRef, useEffect, useRef } from 'react';
 
 type ChunkItemProps = {
   slug: string;
@@ -11,9 +12,12 @@ type ChunkItemProps = {
   highlighted: boolean;
 };
 
-function ChunkItem({ slug, chunk, highlighted }: ChunkItemProps) {
+const ChunkItem = forwardRef<HTMLDivElement, ChunkItemProps>(function ChunkItem(
+  { slug, chunk, highlighted },
+  ref,
+) {
   return (
-    <div>
+    <div ref={ref} className="scroll-mt-2">
       <div className="mb-1.5 flex flex-wrap items-center gap-2">
         {chunk.clause_label && (
           <div className="text-text-main text-[13px] font-semibold">{chunk.clause_label}</div>
@@ -31,7 +35,7 @@ function ChunkItem({ slug, chunk, highlighted }: ChunkItemProps) {
       </div>
     </div>
   );
-}
+});
 
 type DocumentViewerProps = {
   target: ViewerTarget;
@@ -42,6 +46,14 @@ type DocumentViewerProps = {
 };
 
 export function DocumentViewer({ target, chunks, isLoading, error, onClose }: DocumentViewerProps) {
+  const citedRef = useRef<HTMLDivElement>(null);
+
+  // Scroll the cited chunk into view once it's rendered — after chunks load, or
+  // when a new citation targets the already-open document.
+  useEffect(() => {
+    citedRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [target.slug, target.citationRef, chunks]);
+
   return (
     <section className="border-hairline bg-bg-surface flex min-h-0 w-[340px] shrink-0 flex-col rounded-xl border">
       <div className="border-hairline flex shrink-0 items-center justify-between gap-2.5 border-b px-[18px] py-4">
@@ -64,16 +76,20 @@ export function DocumentViewer({ target, chunks, isLoading, error, onClose }: Do
         {error ? (
           <div className="text-text-secondary text-[13px]">Couldn’t load this document.</div>
         ) : (
-          chunks.map((c) => (
-            <ChunkItem
-              key={c.chunk_id}
-              slug={target.slug}
-              chunk={c}
-              highlighted={
-                target.highlightClause !== null && c.clause_number === target.highlightClause
-              }
-            />
-          ))
+          chunks.map((c) => {
+            const cited =
+              target.citationRef !== null &&
+              chunkMatchesCitation(target.slug, target.citationRef, c);
+            return (
+              <ChunkItem
+                key={c.chunk_id}
+                ref={cited ? citedRef : undefined}
+                slug={target.slug}
+                chunk={c}
+                highlighted={cited}
+              />
+            );
+          })
         )}
       </div>
     </section>

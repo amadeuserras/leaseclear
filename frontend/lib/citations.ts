@@ -1,13 +1,10 @@
 export type AnswerSegment =
   | { type: 'text'; value: string }
-  | { type: 'citation'; value: string; slug: string; clause: string | null };
+  | { type: 'citation'; value: string; slug: string; ref: string };
 
 const CITATION_RE = /\[([a-z0-9-]+) (§[^\]]+|p\.[^\]]+)\]/g;
 
 const displayRef = (ref: string) => (ref.startsWith('p.') ? ref.split('@')[0] : ref);
-
-// Clause number to highlight in the viewer, e.g. "§4.1" → "4.1". Page refs have none.
-const clauseFromRef = (ref: string): string | null => (ref.startsWith('§') ? ref.slice(1) : null);
 
 const prettifySlug = (slug: string) =>
   slug
@@ -28,6 +25,14 @@ export const chunkCitationId = (
     ? `[${slug} §${chunk.clause_number}]`
     : `[${slug} p.${chunk.page_number}@${chunk.char_start}]`;
 
+// Whether a viewer chunk is the one a citation `ref` (e.g. "§4.1" or "p.3@1024")
+// points at, by reconstructing the bracketed id the backend would emit for it.
+export const chunkMatchesCitation = (
+  slug: string,
+  ref: string,
+  chunk: { clause_number: string | null; page_number: number; char_start: number },
+): boolean => chunkCitationId(slug, chunk) === `[${slug} ${ref}]`;
+
 export const segmentAnswer = (text: string, docNames: Map<string, string>): AnswerSegment[] => {
   const segments: AnswerSegment[] = [];
   let cursor = 0;
@@ -39,7 +44,7 @@ export const segmentAnswer = (text: string, docNames: Map<string, string>): Answ
       type: 'citation',
       value: citationLabel(match[1], match[2], docNames),
       slug: match[1],
-      clause: clauseFromRef(match[2]),
+      ref: match[2],
     });
     cursor = match.index + match[0].length;
   }
