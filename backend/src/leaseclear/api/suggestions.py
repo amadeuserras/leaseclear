@@ -16,36 +16,49 @@ logger = logging.getLogger(__name__)
 
 POOL_PER_DOCUMENT = 6
 SAMPLE_SIZE = 4
+# We only ever render SAMPLE_SIZE chips, so we just need a small working set of
+# documents with cached questions to sample from, not one per document. A
+# 400-lease upload warms ~WORKING_SET_SIZE of them, not 400.
+WORKING_SET_SIZE = 10
+GENERATION_CONCURRENCY = 5
 
-# Cached per document id: uploading or deleting one lease only regenerates that
-# lease's questions instead of the whole corpus.
 _question_cache: dict[UUID, list[str]] = {}
+_inflight: set[UUID] = set()
 _lock = asyncio.Lock()
+_semaphore = asyncio.Semaphore(GENERATION_CONCURRENCY)
+
+
+async def _generate_one(doc: DocumentMetadata, chunks: list[ChunkBase]) -> None:
+    async with _semaphore:
+        try:
+            questions: list[str] | None = await generate_questions(
+                chunks, doc, POOL_PER_DOCUMENT
+            )
+        except Exception:
+            logger.exception("failed to generate suggested questions for %s", doc.slug)
+            questions = None  # leave uncached so a later request can retry
+    async with _lock:
+        _inflight.discard(doc.id)
+        if questions is not None:
+            _question_cache[doc.id] = questions
 
 
 async def _ensure_cached(
     documents: list[DocumentMetadata], chunks_by_doc: dict[UUID, list[ChunkBase]]
 ) -> None:
     async with _lock:
-        missing = [d for d in documents if d.id not in _question_cache]
-        if not missing:
-            return
-        results = await asyncio.gather(
-            *(
-                generate_questions(chunks_by_doc.get(d.id, []), d, POOL_PER_DOCUMENT)
-                for d in missing
-            ),
-            return_exceptions=True,
-        )
-        for doc, result in zip(missing, results, strict=True):
-            if isinstance(result, BaseException):
-                logger.exception(
-                    "failed to generate suggested questions for %s",
-                    doc.slug,
-                    exc_info=result,
-                )
-                continue
-            _question_cache[doc.id] = result
+        to_generate = [
+            d
+            for d in documents
+            if d.id not in _question_cache and d.id not in _inflight
+        ]
+        _inflight.update(d.id for d in to_generate)
+
+    if not to_generate:
+        return
+    await asyncio.gather(
+        *(_generate_one(d, chunks_by_doc.get(d.id, [])) for d in to_generate)
+    )
 
 
 def _sample(questions_by_doc: dict[UUID, list[str]], count: int) -> list[str]:
@@ -75,14 +88,18 @@ async def get_suggested_questions(
     if not documents:
         return SuggestedQuestionsResponse(questions=[])
 
+    cached = [d for d in documents if d.id in _question_cache]
     uncached = [d for d in documents if d.id not in _question_cache]
-    if uncached:
+    need = min(WORKING_SET_SIZE, len(documents)) - len(cached)
+
+    if need > 0 and uncached:
+        picks = random.sample(uncached, min(need, len(uncached)))
         async with db_session():
-            chunks = await get_chunks_by_documents([d.id for d in uncached])
+            chunks = await get_chunks_by_documents([d.id for d in picks])
         chunks_by_doc: dict[UUID, list[ChunkBase]] = defaultdict(list)
         for chunk in chunks:
             chunks_by_doc[chunk.document_id].append(chunk)
-        await _ensure_cached(uncached, chunks_by_doc)
+        await _ensure_cached(picks, chunks_by_doc)
 
     questions_by_doc = {d.id: _question_cache.get(d.id, []) for d in documents}
     return SuggestedQuestionsResponse(questions=_sample(questions_by_doc, SAMPLE_SIZE))
