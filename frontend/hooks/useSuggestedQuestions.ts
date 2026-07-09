@@ -4,9 +4,7 @@ import { listSuggestedQuestions } from '@/lib/api';
 import { getToken } from '@/lib/session';
 import { useEffect, useState } from 'react';
 
-// Fetches LLM-suggested starter questions for the current documents. Re-fetches
-// whenever `documentKey` changes (upload/delete) so suggestions track the live
-// document set; the backend caches the pool per set, so this stays cheap.
+// Re-fetches on `documentKey` change; cheap since the backend caches the pool per document set.
 export const useSuggestedQuestions = (documentKey: string) => {
   const [questions, setQuestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,7 +17,6 @@ export const useSuggestedQuestions = (documentKey: string) => {
         const result = await listSuggestedQuestions(getToken() ?? '');
         if (!cancelled) setQuestions(result);
       } catch {
-        // Leave questions empty on failure.
       } finally {
         if (!cancelled) setIsLoading(false);
       }

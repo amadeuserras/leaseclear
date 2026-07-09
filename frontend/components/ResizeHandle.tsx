@@ -5,8 +5,6 @@ type ResizeHandleProps = {
   onPointerDown: (e: React.PointerEvent) => void;
 };
 
-// An invisible drag strip straddling a panel's inner edge. It gives the panel a
-// col-resize cursor along that edge and starts the drag, with no visible line.
 export function ResizeHandle({ side, onPointerDown }: ResizeHandleProps) {
   return (
     <div

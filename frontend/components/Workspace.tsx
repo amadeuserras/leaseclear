@@ -28,7 +28,11 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
   // Re-fetch suggestions whenever the document set changes (upload/delete), since
   // the backend keys them per document set.
   const documentKey = useMemo(
-    () => documents.map((d) => d.id).sort().join(','),
+    () =>
+      documents
+        .map((d) => d.id)
+        .sort()
+        .join(','),
     [documents],
   );
   const { questions: suggestions, isLoading: isLoadingSuggestions } =

@@ -6,8 +6,6 @@ import { DEMO_EMAIL, saveSession } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-// Entry point for the shareable, zero-signup demo link. Logs into the shared
-// read-only demo account, then hands off to the main workspace.
 export default function DemoPage() {
   const router = useRouter();
   const [failed, setFailed] = useState(false);

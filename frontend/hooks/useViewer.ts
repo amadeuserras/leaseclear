@@ -11,8 +11,6 @@ export type ViewerTarget = {
   citationRef: string | null;
 };
 
-// Drives the right-hand document panel: which document is open, its chunks, and
-// the citation reference to highlight/scroll to when arriving from a citation click.
 export const useViewer = () => {
   const router = useRouter();
   const [target, setTarget] = useState<ViewerTarget | null>(null);

@@ -26,15 +26,18 @@ export const useResizable = (initial: number, min: number, max: number, dir: 1 |
     document.body.style.userSelect = '';
   });
 
-  const startResize = useCallback((e: React.PointerEvent) => {
-    e.preventDefault();
-    origin.current = { x: e.clientX, width };
-    setIsResizing(true);
-    document.addEventListener('pointermove', onPointerMove.current);
-    document.addEventListener('pointerup', onPointerUp.current);
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  }, [width]);
+  const startResize = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      origin.current = { x: e.clientX, width };
+      setIsResizing(true);
+      document.addEventListener('pointermove', onPointerMove.current);
+      document.addEventListener('pointerup', onPointerUp.current);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    },
+    [width],
+  );
 
   return { width, isResizing, startResize };
 };

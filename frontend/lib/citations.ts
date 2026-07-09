@@ -1,6 +1,5 @@
 export type AnswerSegment =
-  | { type: 'text'; value: string }
-  | { type: 'citation'; value: string; slug: string; ref: string };
+  { type: 'text'; value: string } | { type: 'citation'; value: string; slug: string; ref: string };
 
 const CITATION_RE = /\[([a-z0-9-]+) (§[^\]]+|p\.[^\]]+)\]/g;
 

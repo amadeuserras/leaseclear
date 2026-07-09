@@ -12,6 +12,7 @@ alwaysApply: false
 - Prefer flat file structure — avoid nested component folders unless reuse demands it.
 - Define subcomponents only used by one parent in the same file, above that component.
 - In array method callbacks (`.map`, `.filter`, `.reduce`, etc.), prefer short single-letter params for concise callbacks.
+- Comments should be exceptional and rare, not routine. Write one only when there's a non-obvious reason the reader can't get from the code itself. Never restate what the code already says.
 
 ## Next.js
 
