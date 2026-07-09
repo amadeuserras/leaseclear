@@ -5,7 +5,6 @@ import { useMemo, useState } from 'react';
 
 export type Source = LeaseDocument & { checked: boolean };
 
-// Tracks the unchecked set so newly uploaded documents default to selected.
 export const useSources = (documents: LeaseDocument[]) => {
   const [uncheckedIds, setUncheckedIds] = useState<ReadonlySet<string>>(new Set());
 

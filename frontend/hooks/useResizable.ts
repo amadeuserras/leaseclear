@@ -2,9 +2,6 @@
 
 import { useCallback, useRef, useState } from 'react';
 
-// Drag-to-resize a panel width, clamped to [min, max]. `dir` is +1 when the
-// handle sits on the panel's right edge (drag right → wider) and -1 when it
-// sits on the left edge (drag left → wider).
 export const useResizable = (initial: number, min: number, max: number, dir: 1 | -1 = 1) => {
   const [width, setWidth] = useState(initial);
   const [isResizing, setIsResizing] = useState(false);

@@ -22,9 +22,6 @@ export default async function Home() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
-      {/* Key on the account so switching identity (e.g. demo → real login, which
-          refreshes this server component) remounts the workspace and drops stale
-          client state like the demo chat transcript. */}
       <Workspace key={email} documents={documents} email={email} isDemo={isDemo} />
     </div>
   );

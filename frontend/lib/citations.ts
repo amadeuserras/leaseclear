@@ -14,8 +14,6 @@ const prettifySlug = (slug: string) =>
 export const citationLabel = (slug: string, ref: string, docNames: Map<string, string>) =>
   `${docNames.get(slug) ?? prettifySlug(slug)} · ${displayRef(ref)}`;
 
-// The bracketed id shown next to a chunk in the viewer, mirroring the format the
-// backend emits in answers: [slug §clause] for numbered clauses, else [slug p.N@char].
 export const chunkCitationId = (
   slug: string,
   chunk: { clause_number: string | null; page_number: number; char_start: number },
@@ -24,8 +22,6 @@ export const chunkCitationId = (
     ? `[${slug} §${chunk.clause_number}]`
     : `[${slug} p.${chunk.page_number}@${chunk.char_start}]`;
 
-// Whether a viewer chunk is the one a citation `ref` (e.g. "§4.1" or "p.3@1024")
-// points at, by reconstructing the bracketed id the backend would emit for it.
 export const chunkMatchesCitation = (
   slug: string,
   ref: string,

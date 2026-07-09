@@ -1,9 +1,9 @@
 """Eval runner.
 
 Usage:
-    uv run scripts/run_eval.py --mode generation --limit N  # --limit required
+    uv run scripts/run_eval.py --mode generation --limit N
     uv run scripts/run_eval.py --mode retrieval
-    uv run scripts/run_eval.py --mode all --limit N          # --limit required
+    uv run scripts/run_eval.py --mode all --limit N
 """
 
 import argparse

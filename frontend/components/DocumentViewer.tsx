@@ -59,8 +59,6 @@ export function DocumentViewer({
 }: DocumentViewerProps) {
   const citedRef = useRef<HTMLDivElement>(null);
 
-  // Scroll the cited chunk into view once it's rendered — after chunks load, or
-  // when a new citation targets the already-open document.
   useEffect(() => {
     citedRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }, [target.slug, target.citationRef, chunks]);

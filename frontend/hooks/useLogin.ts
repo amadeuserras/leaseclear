@@ -37,9 +37,6 @@ export const useLogin = (onSuccess?: () => void) => {
       saveSession(access_token, email);
       onSuccess?.();
       router.push('/');
-      // When logging in from the demo (already on '/'), push() alone reuses the
-      // cached demo render — refresh() re-runs the server component with the new
-      // token so documents/suggestions reflect the real account.
       router.refresh();
     } catch (e) {
       setNotice({ kind: 'error', text: messageFor(e) });
@@ -47,7 +44,7 @@ export const useLogin = (onSuccess?: () => void) => {
     }
   };
 
-  // Parked: no backend OAuth endpoint yet — see PROGRESS.md parked items.
+  // Parked: no backend OAuth endpoint yet.
   const googleSignIn = () =>
     setNotice({ kind: 'info', text: "Google sign-in isn't available yet." });
 

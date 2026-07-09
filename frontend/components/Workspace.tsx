@@ -31,8 +31,6 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
 
   const [collapsed, setCollapsed] = useState(false);
 
-  // Draggable panel widths. The sources handle sits on its right edge (drag
-  // right → wider); the viewer handle sits on its left edge (drag left → wider).
   const sourcesResize = useResizable(320, 220, 560, 1);
   const viewerResize = useResizable(340, 260, 640, -1);
 

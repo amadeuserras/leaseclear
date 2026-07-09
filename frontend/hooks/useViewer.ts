@@ -21,7 +21,7 @@ export const useViewer = () => {
   const open = async (slug: string, name: string, citationRef: string | null = null) => {
     const sameDoc = target?.slug === slug;
     setTarget({ slug, name, citationRef });
-    if (sameDoc && !error) return; // chunks already loaded; just move the highlight
+    if (sameDoc && !error) return;
 
     setIsLoading(true);
     setError(false);

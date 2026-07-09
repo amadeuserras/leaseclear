@@ -23,8 +23,8 @@ SYSTEM_PROMPT = (
     "ask about ONE topic; never stack multiple names, addresses, or topics into a "
     "single question. "
     "Write the way real people actually type. About half the questions should be "
-    "short and lazy — roughly 3 to 7 words, one identifier, e.g. \"how much is "
-    "Chen's deposit?\" or \"pets ok at Larkspur?\" — and the rest can be normal, "
+    'short and lazy — roughly 3 to 7 words, one identifier, e.g. "how much is '
+    'Chen\'s deposit?" or "pets ok at Larkspur?" — and the rest can be normal, '
     "well-formed questions. Every question must be answerable from the clauses "
     "provided, stay under 14 words, and together cover varied topics. "
     "Reply with ONLY a JSON array of question strings — no prose, no keys."
