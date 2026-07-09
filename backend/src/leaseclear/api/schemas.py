@@ -22,6 +22,10 @@ class QueryRequest(BaseModel):
     document_ids: list[UUID] | None = None
 
 
+class SuggestedQuestionsRequest(BaseModel):
+    document_ids: list[UUID] | None = None
+
+
 class Citation(BaseModel):
     chunk_id: UUID
     clause_label: str

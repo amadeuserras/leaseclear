@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Depends, FastAPI, File, Query, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 
@@ -26,6 +26,7 @@ from leaseclear.api.schemas import (
     DocumentResponse,
     HealthResponse,
     QueryRequest,
+    SuggestedQuestionsRequest,
     SuggestedQuestionsResponse,
 )
 from leaseclear.api.suggestions import get_suggested_questions
@@ -66,12 +67,14 @@ async def documents_list(
     return await get_documents(user_id)
 
 
-@app.get("/documents/suggested-questions", response_model=SuggestedQuestionsResponse)
+@app.post(
+    "/documents/suggested-questions/query", response_model=SuggestedQuestionsResponse
+)
 async def documents_suggested_questions(
+    req: SuggestedQuestionsRequest,
     user_id: Annotated[UUID, Depends(current_user)],
-    document_ids: Annotated[list[UUID] | None, Query()] = None,
 ) -> SuggestedQuestionsResponse:
-    return await get_suggested_questions(user_id, document_ids)
+    return await get_suggested_questions(user_id, req.document_ids)
 
 
 @app.get("/documents/{slug}/chunks", response_model=list[DocumentChunkResponse])

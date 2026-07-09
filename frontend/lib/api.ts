@@ -86,11 +86,14 @@ export const listSuggestedQuestions = async (
   token: string,
   documentIds: string[],
 ): Promise<string[]> => {
-  const params = new URLSearchParams();
-  for (const id of documentIds) params.append('document_ids', id);
-  const res = await fetch(`${baseUrl()}/documents/suggested-questions?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const res = await fetch(`${baseUrl()}/documents/suggested-questions/query`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
     cache: 'no-store',
+    body: JSON.stringify({ document_ids: documentIds }),
   });
   if (!res.ok) throw await errorFromResponse(res);
   const body = (await res.json()) as { questions: string[] };
