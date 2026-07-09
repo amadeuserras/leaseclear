@@ -25,18 +25,8 @@ type WorkspaceProps = {
 export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
   const { sources, selectedIds, allChecked, toggle, toggleAll } = useSources(documents);
   const { messages, isStreaming, send, clear, exportChat } = useChat(selectedIds);
-  // Re-fetch suggestions whenever the document set changes (upload/delete), since
-  // the backend keys them per document set.
-  const documentKey = useMemo(
-    () =>
-      documents
-        .map((d) => d.id)
-        .sort()
-        .join(','),
-    [documents],
-  );
   const { questions: suggestions, isLoading: isLoadingSuggestions } =
-    useSuggestedQuestions(documentKey);
+    useSuggestedQuestions(selectedIds);
   const viewer = useViewer();
 
   const [collapsed, setCollapsed] = useState(false);

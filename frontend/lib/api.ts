@@ -82,8 +82,13 @@ export const register = (email: string, password: string) =>
 
 export const demoLogin = () => postJson<TokenResponse>('/auth/demo', {});
 
-export const listSuggestedQuestions = async (token: string): Promise<string[]> => {
-  const res = await fetch(`${baseUrl()}/documents/suggested-questions`, {
+export const listSuggestedQuestions = async (
+  token: string,
+  documentIds: string[],
+): Promise<string[]> => {
+  const params = new URLSearchParams();
+  for (const id of documentIds) params.append('document_ids', id);
+  const res = await fetch(`${baseUrl()}/documents/suggested-questions?${params.toString()}`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
   });

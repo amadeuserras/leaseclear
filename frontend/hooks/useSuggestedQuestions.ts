@@ -4,17 +4,20 @@ import { listSuggestedQuestions } from '@/lib/api';
 import { getToken } from '@/lib/session';
 import { useEffect, useState } from 'react';
 
-// Re-fetches on `documentKey` change; cheap since the backend caches the pool per document set.
-export const useSuggestedQuestions = (documentKey: string) => {
+export const useSuggestedQuestions = (selectedIds: string[]) => {
   const [questions, setQuestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const key = [...selectedIds].sort().join(',');
+  const empty = key === '';
+
   useEffect(() => {
+    if (key === '') return;
     let cancelled = false;
     (async () => {
       setIsLoading(true);
       try {
-        const result = await listSuggestedQuestions(getToken() ?? '');
+        const result = await listSuggestedQuestions(getToken() ?? '', key.split(','));
         if (!cancelled) setQuestions(result);
       } catch {
       } finally {
@@ -24,7 +27,7 @@ export const useSuggestedQuestions = (documentKey: string) => {
     return () => {
       cancelled = true;
     };
-  }, [documentKey]);
+  }, [key]);
 
-  return { questions, isLoading };
+  return empty ? { questions: [], isLoading: false } : { questions, isLoading };
 };
