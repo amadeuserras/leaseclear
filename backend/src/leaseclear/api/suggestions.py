@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from uuid import UUID
 
 from leaseclear.api.schemas import SuggestedQuestionsResponse
@@ -21,11 +21,31 @@ SAMPLE_SIZE = 4
 # 400-lease upload warms ~WORKING_SET_SIZE of them, not 400.
 WORKING_SET_SIZE = 10
 GENERATION_CONCURRENCY = 5
+# Upper bound on how many documents' questions we keep around. Entries are
+# small, but without a cap the cache grows forever across uploads/deletes and
+# across users. LRU-evicted rather than tied to document deletion, since a
+# deleted document's entry is already unreachable (never shown) and just needs
+# to eventually stop taking up space.
+CACHE_MAX_DOCUMENTS = 500
 
-_question_cache: dict[UUID, list[str]] = {}
+_question_cache: OrderedDict[UUID, list[str]] = OrderedDict()
 _inflight: set[UUID] = set()
 _lock = asyncio.Lock()
 _semaphore = asyncio.Semaphore(GENERATION_CONCURRENCY)
+
+
+def _cache_get(doc_id: UUID) -> list[str] | None:
+    questions = _question_cache.get(doc_id)
+    if questions is not None:
+        _question_cache.move_to_end(doc_id)
+    return questions
+
+
+def _cache_set(doc_id: UUID, questions: list[str]) -> None:
+    _question_cache[doc_id] = questions
+    _question_cache.move_to_end(doc_id)
+    while len(_question_cache) > CACHE_MAX_DOCUMENTS:
+        _question_cache.popitem(last=False)
 
 
 async def _generate_one(doc: DocumentMetadata, chunks: list[ChunkBase]) -> None:
@@ -40,7 +60,7 @@ async def _generate_one(doc: DocumentMetadata, chunks: list[ChunkBase]) -> None:
     async with _lock:
         _inflight.discard(doc.id)
         if questions is not None:
-            _question_cache[doc.id] = questions
+            _cache_set(doc.id, questions)
 
 
 async def _ensure_cached(
@@ -101,5 +121,5 @@ async def get_suggested_questions(
             chunks_by_doc[chunk.document_id].append(chunk)
         await _ensure_cached(picks, chunks_by_doc)
 
-    questions_by_doc = {d.id: _question_cache.get(d.id, []) for d in documents}
+    questions_by_doc = {d.id: _cache_get(d.id) or [] for d in documents}
     return SuggestedQuestionsResponse(questions=_sample(questions_by_doc, SAMPLE_SIZE))
