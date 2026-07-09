@@ -1,5 +1,6 @@
 'use client';
 
+import { ResizeHandle } from '@/components/ResizeHandle';
 import { CloseIcon } from '@/components/icons';
 import type { ViewerTarget } from '@/hooks/useViewer';
 import type { DocumentChunk } from '@/lib/api';
@@ -42,10 +43,20 @@ type DocumentViewerProps = {
   chunks: DocumentChunk[];
   isLoading: boolean;
   error: boolean;
+  width: number;
+  onResizeStart: (e: React.PointerEvent) => void;
   onClose: () => void;
 };
 
-export function DocumentViewer({ target, chunks, isLoading, error, onClose }: DocumentViewerProps) {
+export function DocumentViewer({
+  target,
+  chunks,
+  isLoading,
+  error,
+  width,
+  onResizeStart,
+  onClose,
+}: DocumentViewerProps) {
   const citedRef = useRef<HTMLDivElement>(null);
 
   // Scroll the cited chunk into view once it's rendered — after chunks load, or
@@ -55,7 +66,12 @@ export function DocumentViewer({ target, chunks, isLoading, error, onClose }: Do
   }, [target.slug, target.citationRef, chunks]);
 
   return (
-    <section className="border-hairline bg-bg-surface flex min-h-0 w-[340px] shrink-0 flex-col rounded-xl border">
+    <section
+      style={{ width }}
+      className="border-hairline bg-bg-surface relative flex min-h-0 shrink-0 flex-col rounded-xl border"
+    >
+      <ResizeHandle side="left" onPointerDown={onResizeStart} />
+
       <div className="border-hairline flex shrink-0 items-center justify-between gap-2.5 border-b px-[18px] py-4">
         <div className="min-w-0">
           <div className="text-text-main truncate text-[13.5px] font-semibold">{target.name}</div>

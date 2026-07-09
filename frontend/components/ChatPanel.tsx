@@ -204,7 +204,7 @@ export function ChatPanel({
   };
 
   return (
-    <div className="flex min-h-0 min-w-[380px] flex-1 justify-center">
+    <div className="flex min-h-0 min-w-[380px] flex-1 justify-center px-4">
       <div className="flex min-h-0 w-full max-w-[760px] min-w-0 flex-col">
         {entries.length > 0 ? (
           <>

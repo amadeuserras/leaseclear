@@ -1,6 +1,7 @@
 'use client';
 
 import { LoginCard } from '@/components/LoginCard';
+import { ResizeHandle } from '@/components/ResizeHandle';
 import { Spinner } from '@/components/Spinner';
 import { ChevronIcon, CheckIcon, UploadIcon } from '@/components/icons';
 import { useDeleteDocument } from '@/hooks/useDeleteDocument';
@@ -97,10 +98,13 @@ type SourcesPanelProps = {
   sources: Source[];
   allChecked: boolean;
   collapsed: boolean;
+  width: number;
+  isResizing?: boolean;
   isDemo?: boolean;
   onToggle: (id: string) => void;
   onToggleAll: () => void;
   onToggleCollapsed: () => void;
+  onResizeStart: (e: React.PointerEvent) => void;
   onOpen: (source: Source) => void;
   onDeleted: (source: Source) => void;
 };
@@ -109,10 +113,13 @@ export function SourcesPanel({
   sources,
   allChecked,
   collapsed,
+  width,
+  isResizing = false,
   isDemo = false,
   onToggle,
   onToggleAll,
   onToggleCollapsed,
+  onResizeStart,
   onOpen,
   onDeleted,
 }: SourcesPanelProps) {
@@ -132,10 +139,13 @@ export function SourcesPanel({
 
   return (
     <section
-      className={`border-hairline bg-bg-surface flex min-h-0 shrink-0 flex-col rounded-xl border transition-[width] duration-150 ${
-        collapsed ? 'w-16' : 'w-[340px]'
+      style={{ width: collapsed ? 64 : width }}
+      className={`border-hairline bg-bg-surface relative flex min-h-0 shrink-0 flex-col rounded-xl border ${
+        isResizing ? '' : 'transition-[width] duration-150'
       }`}
     >
+      {!collapsed && <ResizeHandle side="right" onPointerDown={onResizeStart} />}
+
       <input
         ref={fileInputRef}
         type="file"

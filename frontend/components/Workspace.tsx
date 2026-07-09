@@ -5,6 +5,7 @@ import { DocumentViewer } from '@/components/DocumentViewer';
 import { SourcesPanel } from '@/components/SourcesPanel';
 import { TopBar } from '@/components/TopBar';
 import { useChat } from '@/hooks/useChat';
+import { useResizable } from '@/hooks/useResizable';
 import type { Source } from '@/hooks/useSources';
 import { useSources } from '@/hooks/useSources';
 import { useSuggestedQuestions } from '@/hooks/useSuggestedQuestions';
@@ -35,6 +36,11 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
   const viewer = useViewer();
 
   const [collapsed, setCollapsed] = useState(false);
+
+  // Draggable panel widths. The sources handle sits on its right edge (drag
+  // right → wider); the viewer handle sits on its left edge (drag left → wider).
+  const sourcesResize = useResizable(320, 220, 560, 1);
+  const viewerResize = useResizable(340, 260, 640, -1);
 
   const docNames = useMemo(
     () => new Map(documents.map((d) => [d.slug, filenameStem(d.filename)])),
@@ -70,10 +76,13 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
           sources={sources}
           allChecked={allChecked}
           collapsed={collapsed}
+          width={sourcesResize.width}
+          isResizing={sourcesResize.isResizing}
           isDemo={isDemo}
           onToggle={toggle}
           onToggleAll={toggleAll}
           onToggleCollapsed={() => setCollapsed((c) => !c)}
+          onResizeStart={sourcesResize.startResize}
           onOpen={openSource}
           onDeleted={onDeleted}
         />
@@ -93,6 +102,8 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
             chunks={viewer.chunks}
             isLoading={viewer.isLoading}
             error={viewer.error}
+            width={viewerResize.width}
+            onResizeStart={viewerResize.startResize}
             onClose={closeDoc}
           />
         )}
