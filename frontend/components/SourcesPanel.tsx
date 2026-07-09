@@ -3,6 +3,7 @@
 import { LoginCard } from '@/components/LoginCard';
 import { Spinner } from '@/components/Spinner';
 import { ChevronIcon, CheckIcon, UploadIcon } from '@/components/icons';
+import { useDeleteDocument } from '@/hooks/useDeleteDocument';
 import { useKebabMenu } from '@/hooks/useKebabMenu';
 import type { Source } from '@/hooks/useSources';
 import { useUpload } from '@/hooks/useUpload';
@@ -101,6 +102,7 @@ type SourcesPanelProps = {
   onToggleAll: () => void;
   onToggleCollapsed: () => void;
   onOpen: (source: Source) => void;
+  onDeleted: (source: Source) => void;
 };
 
 export function SourcesPanel({
@@ -112,9 +114,11 @@ export function SourcesPanel({
   onToggleAll,
   onToggleCollapsed,
   onOpen,
+  onDeleted,
 }: SourcesPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isUploading, error, upload } = useUpload();
+  const { error: deleteError, remove } = useDeleteDocument();
   const menu = useKebabMenu();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
@@ -201,7 +205,9 @@ export function SourcesPanel({
                 </>
               )}
             </button>
-            {error && <div className="mt-2 text-[12px] text-[#e07f84]">{error}</div>}
+            {(error || deleteError) && (
+              <div className="mt-2 text-[12px] text-[#e07f84]">{error || deleteError}</div>
+            )}
           </div>
 
           <div className="border-hairline flex shrink-0 items-center justify-end gap-2.5 border-b px-[18px] pt-1 pb-3">
@@ -223,9 +229,13 @@ export function SourcesPanel({
                 onToggle={() => onToggle(s.id)}
                 onOpen={() => onOpen(s)}
                 onMenuToggle={() => menu.toggle(s.id)}
-                onDelete={() => {
+                onDelete={async () => {
                   menu.close();
-                  if (isDemo) setShowLoginModal(true);
+                  if (isDemo) {
+                    setShowLoginModal(true);
+                    return;
+                  }
+                  if (await remove(s.id)) onDeleted(s);
                 }}
               />
             ))}

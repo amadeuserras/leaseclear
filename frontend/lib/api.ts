@@ -101,14 +101,23 @@ export const listDocuments = async (token: string): Promise<LeaseDocument[]> => 
   return (await res.json()) as LeaseDocument[];
 };
 
-// FIXME(mock): no backend endpoint returns a document's full chunk list yet.
-// The document viewer needs every chunk (not just the cited ones the `query`
-// stream returns), so this reads from lib/mockData.ts keyed by slug. Replace
-// with a real `GET /documents/{slug}/chunks` call once it exists.
-export const getDocumentChunks = async (slug: string, _token: string): Promise<DocumentChunk[]> => {
-  const { MOCK_DOCUMENT_CHUNKS } = await import('@/lib/mockData');
-  await new Promise((resolve) => setTimeout(resolve, 150));
-  return MOCK_DOCUMENT_CHUNKS[slug] ?? MOCK_DOCUMENT_CHUNKS.lease;
+// Every chunk of a document (not just the cited ones the `query` stream
+// returns), for the document viewer. Keyed by slug, scoped to the user server-side.
+export const getDocumentChunks = async (slug: string, token: string): Promise<DocumentChunk[]> => {
+  const res = await fetch(`${baseUrl()}/documents/${encodeURIComponent(slug)}/chunks`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+  if (!res.ok) throw await errorFromResponse(res);
+  return (await res.json()) as DocumentChunk[];
+};
+
+export const deleteDocument = async (id: string, token: string): Promise<void> => {
+  const res = await fetch(`${baseUrl()}/documents/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw await errorFromResponse(res);
 };
 
 export const uploadDocuments = async (files: File[], token: string): Promise<void> => {

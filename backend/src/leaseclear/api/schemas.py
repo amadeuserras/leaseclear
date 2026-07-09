@@ -34,6 +34,15 @@ class QueryResponse(BaseModel):
     citations: list[Citation]
 
 
+class DocumentChunkResponse(BaseModel):
+    chunk_id: UUID
+    clause_number: str | None
+    clause_label: str | None
+    page_number: int
+    char_start: int
+    passage: str
+
+
 class DocumentResponse(BaseModel):
     id: UUID
     filename: str

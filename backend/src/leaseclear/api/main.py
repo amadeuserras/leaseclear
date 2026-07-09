@@ -9,7 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 
 from leaseclear.api.auth import router as auth_router
-from leaseclear.api.documents import get_documents, upload_documents
+from leaseclear.api.documents import (
+    delete_document,
+    get_document_chunks,
+    get_documents,
+    upload_documents,
+)
 from leaseclear.api.limiter import (
     RateLimitExceeded,
     limiter,
@@ -17,6 +22,7 @@ from leaseclear.api.limiter import (
 )
 from leaseclear.api.query import query_events
 from leaseclear.api.schemas import (
+    DocumentChunkResponse,
     DocumentResponse,
     HealthResponse,
     QueryRequest,
@@ -67,6 +73,14 @@ async def documents_suggested_questions(
     return await get_suggested_questions(user_id)
 
 
+@app.get("/documents/{slug}/chunks", response_model=list[DocumentChunkResponse])
+async def documents_chunks(
+    slug: str,
+    user_id: Annotated[UUID, Depends(current_user)],
+) -> list[DocumentChunkResponse]:
+    return await get_document_chunks(slug, user_id)
+
+
 @app.post("/documents", status_code=204)
 @limiter.limit("5/minute")
 async def documents_upload(
@@ -75,6 +89,14 @@ async def documents_upload(
     user_id: Annotated[UUID, Depends(current_user)],
 ) -> None:
     await upload_documents(files, user_id)
+
+
+@app.delete("/documents/{document_id}", status_code=204)
+async def documents_delete(
+    document_id: UUID,
+    user_id: Annotated[UUID, Depends(current_user)],
+) -> None:
+    await delete_document(document_id, user_id)
 
 
 @app.post("/query")

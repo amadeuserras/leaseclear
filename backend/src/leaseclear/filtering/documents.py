@@ -35,6 +35,41 @@ async def get_chunks_by_documents(
     return [ChunkBase(**dict(row)) for row in rows]
 
 
+async def get_document_chunks(slug: str, user_id: UUID) -> list[ChunkBase]:
+    """Every chunk of the user's document with the given slug, in reading order.
+
+    Powers the document viewer, which shows the whole document rather than only
+    the chunks a query cited. Joins through `documents` so the slug is scoped to
+    the requesting user.
+    """
+    rows = await get_conn().fetch(
+        """--sql
+        SELECT c.id, c.document_id, c.document_slug, c.text, c.clause_number,
+               c.clause_label, c.page_number, c.char_start, c.char_end,
+               c.token_count
+        FROM chunks c
+        JOIN documents d ON d.id = c.document_id
+        WHERE d.user_id = $1 AND c.document_slug = $2
+        ORDER BY c.page_number, c.char_start
+        """,
+        user_id,
+        slug,
+    )
+    return [ChunkBase(**dict(row)) for row in rows]
+
+
+async def delete_document(document_id: UUID, user_id: UUID) -> bool:
+    """Delete a user's document (chunks cascade). False if it wasn't theirs."""
+    result = await get_conn().execute(
+        """--sql
+        DELETE FROM documents WHERE id = $1 AND user_id = $2
+        """,
+        document_id,
+        user_id,
+    )
+    return result != "DELETE 0"
+
+
 async def get_documents(user_id: UUID) -> list[DocumentMetadata]:
     rows = await get_conn().fetch(
         """--sql

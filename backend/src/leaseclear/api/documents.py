@@ -7,8 +7,10 @@ from uuid import UUID
 
 from fastapi import HTTPException, UploadFile
 
-from leaseclear.api.schemas import DocumentResponse
+from leaseclear.api.schemas import DocumentChunkResponse, DocumentResponse
 from leaseclear.db.connection import db_session
+from leaseclear.filtering.documents import delete_document as delete_db_document
+from leaseclear.filtering.documents import get_document_chunks as get_db_document_chunks
 from leaseclear.filtering.documents import get_documents as get_db_documents
 from leaseclear.ingestion.ingest import ingest_documents
 from leaseclear.types import UploadDocument
@@ -55,3 +57,28 @@ async def get_documents(user_id: UUID) -> list[DocumentResponse]:
         )
         for d in docs
     ]
+
+
+async def get_document_chunks(slug: str, user_id: UUID) -> list[DocumentChunkResponse]:
+    async with db_session():
+        chunks = await get_db_document_chunks(slug, user_id)
+    if not chunks:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return [
+        DocumentChunkResponse(
+            chunk_id=c.id,
+            clause_number=c.clause_number,
+            clause_label=c.clause_label,
+            page_number=c.page_number,
+            char_start=c.char_start,
+            passage=c.text,
+        )
+        for c in chunks
+    ]
+
+
+async def delete_document(document_id: UUID, user_id: UUID) -> None:
+    async with db_session():
+        deleted = await delete_db_document(document_id, user_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Document not found")

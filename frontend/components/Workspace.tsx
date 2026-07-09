@@ -49,6 +49,10 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
 
   const openSource = (source: Source) => openDoc(source.slug, filenameStem(source.filename));
 
+  const onDeleted = (source: Source) => {
+    if (viewer.target?.slug === source.slug) closeDoc();
+  };
+
   const openCitation = (slug: string, clause: string | null) =>
     openDoc(slug, docNames.get(slug) ?? slug, clause);
 
@@ -72,6 +76,7 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
           onToggleAll={toggleAll}
           onToggleCollapsed={() => setCollapsed((c) => !c)}
           onOpen={openSource}
+          onDeleted={onDeleted}
         />
         <ChatPanel
           messages={messages}
