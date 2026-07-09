@@ -8,12 +8,12 @@ from uuid import UUID, uuid4
 from leaseclear.api.schemas import Citation, QueryResponse
 from leaseclear.db.connection import db_session
 from leaseclear.db.logs import insert_query_log
-from leaseclear.filtering.documents import get_documents
 from leaseclear.filtering.filter import filter_documents
 from leaseclear.generation.generate import generate_stream
 from leaseclear.generation.parse import parse_response, resolve_citations
 from leaseclear.generation.prompts import DELIMITER, REFUSAL_MESSAGE
 from leaseclear.generation.validate import is_refusal, validate
+from leaseclear.ingestion.documents import get_documents
 from leaseclear.retrieval import hybrid
 from leaseclear.types import ChunkBase, GenerationResult, ParsedResponse, QueryLogEntry
 from leaseclear.types import Citation as GenCitation

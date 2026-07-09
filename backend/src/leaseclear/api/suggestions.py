@@ -7,8 +7,8 @@ from uuid import UUID
 
 from leaseclear.api.schemas import SuggestedQuestionsResponse
 from leaseclear.db.connection import db_session
-from leaseclear.filtering.documents import get_chunks_by_documents, get_documents
 from leaseclear.generation.questions import generate_questions
+from leaseclear.ingestion.documents import get_chunks_by_documents, get_documents
 
 logger = logging.getLogger(__name__)
 

@@ -9,9 +9,9 @@ from fastapi import HTTPException, UploadFile
 
 from leaseclear.api.schemas import DocumentChunkResponse, DocumentResponse
 from leaseclear.db.connection import db_session
-from leaseclear.filtering.documents import delete_document as delete_db_document
-from leaseclear.filtering.documents import get_document_chunks as get_db_document_chunks
-from leaseclear.filtering.documents import get_documents as get_db_documents
+from leaseclear.ingestion.documents import delete_document as delete_db_document
+from leaseclear.ingestion.documents import get_document_chunks as get_db_document_chunks
+from leaseclear.ingestion.documents import get_documents as get_db_documents
 from leaseclear.ingestion.ingest import ingest_documents
 from leaseclear.types import UploadDocument
 
