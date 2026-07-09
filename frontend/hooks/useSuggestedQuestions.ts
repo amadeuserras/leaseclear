@@ -1,7 +1,6 @@
 'use client';
 
 import { listSuggestedQuestions } from '@/lib/api';
-import { getToken } from '@/lib/session';
 import { useEffect, useState } from 'react';
 
 export const useSuggestedQuestions = (selectedIds: string[]) => {
@@ -17,7 +16,7 @@ export const useSuggestedQuestions = (selectedIds: string[]) => {
     (async () => {
       setIsLoading(true);
       try {
-        const result = await listSuggestedQuestions(getToken() ?? '', key.split(','));
+        const result = await listSuggestedQuestions(key.split(','));
         if (!cancelled) setQuestions(result);
       } catch {
       } finally {

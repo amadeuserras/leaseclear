@@ -1,7 +1,7 @@
 'use client';
 
 import { ApiError, getDocumentChunks, type DocumentChunk } from '@/lib/api';
-import { clearSession, getToken } from '@/lib/session';
+import { clearSession } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -26,7 +26,7 @@ export const useViewer = () => {
     setIsLoading(true);
     setError(false);
     try {
-      setChunks(await getDocumentChunks(slug, getToken() ?? ''));
+      setChunks(await getDocumentChunks(slug));
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         clearSession();

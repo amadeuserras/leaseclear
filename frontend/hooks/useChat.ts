@@ -1,7 +1,7 @@
 'use client';
 
 import { ApiError, streamQuery } from '@/lib/api';
-import { clearSession, getToken } from '@/lib/session';
+import { clearSession } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -61,7 +61,6 @@ export const useChat = (selectedIds: string[]) => {
       await streamQuery({
         question: question.trim(),
         documentIds: selectedIds,
-        token: getToken() ?? '',
         onToken: (t) =>
           setMessages((prev) =>
             prev.map((m) => (m.id === answerId ? { ...m, text: m.text + t } : m)),

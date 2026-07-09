@@ -1,3 +1,5 @@
+import { getToken } from '@/lib/session';
+
 export type TokenResponse = {
   access_token: string;
   token_type: string;
@@ -36,7 +38,6 @@ export type QueryResult = {
 export type StreamQueryParams = {
   question: string;
   documentIds: string[];
-  token: string;
   onToken: (token: string) => void;
   onDone: (result: QueryResult) => void;
   signal?: AbortSignal;
@@ -52,6 +53,11 @@ export class ApiError extends Error {
 }
 
 const baseUrl = () => process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
+
+const authHeader = (): Record<string, string> => {
+  const token = getToken() ?? '';
+  return { Authorization: `Bearer ${token}` };
+};
 
 const errorFromResponse = async (res: Response): Promise<ApiError> => {
   let detail = '';
@@ -82,15 +88,12 @@ export const register = (email: string, password: string) =>
 
 export const demoLogin = () => postJson<TokenResponse>('/auth/demo', {});
 
-export const listSuggestedQuestions = async (
-  token: string,
-  documentIds: string[],
-): Promise<string[]> => {
+export const listSuggestedQuestions = async (documentIds: string[]): Promise<string[]> => {
   const res = await fetch(`${baseUrl()}/documents/suggested-questions/query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      ...authHeader(),
     },
     cache: 'no-store',
     body: JSON.stringify({ document_ids: documentIds }),
@@ -109,31 +112,29 @@ export const listDocuments = async (token: string): Promise<LeaseDocument[]> => 
   return (await res.json()) as LeaseDocument[];
 };
 
-// Every chunk of a document (not just the cited ones the `query` stream
-// returns), for the document viewer. Keyed by slug, scoped to the user server-side.
-export const getDocumentChunks = async (slug: string, token: string): Promise<DocumentChunk[]> => {
+export const getDocumentChunks = async (slug: string): Promise<DocumentChunk[]> => {
   const res = await fetch(`${baseUrl()}/documents/${encodeURIComponent(slug)}/chunks`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: authHeader(),
     cache: 'no-store',
   });
   if (!res.ok) throw await errorFromResponse(res);
   return (await res.json()) as DocumentChunk[];
 };
 
-export const deleteDocument = async (id: string, token: string): Promise<void> => {
+export const deleteDocument = async (id: string): Promise<void> => {
   const res = await fetch(`${baseUrl()}/documents/${encodeURIComponent(id)}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
+    headers: authHeader(),
   });
   if (!res.ok) throw await errorFromResponse(res);
 };
 
-export const uploadDocuments = async (files: File[], token: string): Promise<void> => {
+export const uploadDocuments = async (files: File[]): Promise<void> => {
   const form = new FormData();
   for (const f of files) form.append('files', f);
   const res = await fetch(`${baseUrl()}/documents`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
+    headers: authHeader(),
     body: form,
   });
   if (!res.ok) throw await errorFromResponse(res);
@@ -157,7 +158,6 @@ const parseSseEvent = (block: string): SseEvent => {
 export const streamQuery = async ({
   question,
   documentIds,
-  token,
   onToken,
   onDone,
   signal,
@@ -166,7 +166,7 @@ export const streamQuery = async ({
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      ...authHeader(),
     },
     body: JSON.stringify({ question, document_ids: documentIds }),
     signal,

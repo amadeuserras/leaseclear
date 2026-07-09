@@ -1,7 +1,6 @@
 'use client';
 
 import { ApiError, uploadDocuments } from '@/lib/api';
-import { getToken } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -15,7 +14,7 @@ export const useUpload = () => {
     setIsUploading(true);
     setError(null);
     try {
-      await uploadDocuments(Array.from(files), getToken() ?? '');
+      await uploadDocuments(Array.from(files));
       router.refresh();
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) {
