@@ -16,16 +16,8 @@ logger = logging.getLogger(__name__)
 
 POOL_PER_DOCUMENT = 6
 SAMPLE_SIZE = 4
-# We only ever render SAMPLE_SIZE chips, so we just need a small working set of
-# documents with cached questions to sample from, not one per document. A
-# 400-lease upload warms ~WORKING_SET_SIZE of them, not 400.
 WORKING_SET_SIZE = 10
 GENERATION_CONCURRENCY = 5
-# Upper bound on how many documents' questions we keep around. Entries are
-# small, but without a cap the cache grows forever across uploads/deletes and
-# across users. LRU-evicted rather than tied to document deletion, since a
-# deleted document's entry is already unreachable (never shown) and just needs
-# to eventually stop taking up space.
 CACHE_MAX_DOCUMENTS = 500
 
 _question_cache: OrderedDict[UUID, list[str]] = OrderedDict()
