@@ -1,3 +1,7 @@
+import type { useRouter } from 'next/navigation';
+
+type Router = ReturnType<typeof useRouter>;
+
 export const TOKEN_COOKIE = 'lc_token';
 export const EMAIL_COOKIE = 'lc_email';
 export const DEMO_COOKIE = 'lc_demo';
@@ -19,6 +23,24 @@ export const clearSession = () => {
   document.cookie = `${TOKEN_COOKIE}=; path=/; max-age=0`;
   document.cookie = `${EMAIL_COOKIE}=; path=/; max-age=0`;
   document.cookie = `${DEMO_COOKIE}=; path=/; max-age=0`;
+};
+
+export const beginSession = (
+  router: Router,
+  token: string,
+  email: string,
+  { demo = false, replace = false }: { demo?: boolean; replace?: boolean } = {},
+) => {
+  saveSession(token, email, demo);
+  if (replace) router.replace('/');
+  else router.push('/');
+  router.refresh();
+};
+
+export const endSession = (router: Router) => {
+  clearSession();
+  router.push('/login');
+  router.refresh();
 };
 
 export const getToken = (): string | null => {

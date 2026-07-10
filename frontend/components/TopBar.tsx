@@ -2,7 +2,7 @@
 
 import { LogoMark } from '@/components/Logo';
 import { useKebabMenu } from '@/hooks/useKebabMenu';
-import { clearSession } from '@/lib/session';
+import { endSession } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 
 type TopBarProps = {
@@ -25,10 +25,7 @@ export function TopBar({
   const router = useRouter();
   const menu = useKebabMenu();
 
-  const logOut = () => {
-    clearSession();
-    router.push('/login');
-  };
+  const logOut = () => endSession(router);
 
   return (
     <header className="border-hairline flex shrink-0 items-center justify-between border-b px-7 py-3.5">

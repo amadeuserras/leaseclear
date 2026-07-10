@@ -1,7 +1,7 @@
 'use client';
 
 import { ApiError, login, register } from '@/lib/api';
-import { saveSession } from '@/lib/session';
+import { beginSession } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -34,10 +34,8 @@ export const useLogin = (onSuccess?: () => void) => {
     try {
       const auth = mode === 'login' ? login : register;
       const { access_token } = await auth(email, password);
-      saveSession(access_token, email);
       onSuccess?.();
-      router.push('/');
-      router.refresh();
+      beginSession(router, access_token, email);
     } catch (e) {
       setNotice({ kind: 'error', text: messageFor(e) });
       setIsSubmitting(false);

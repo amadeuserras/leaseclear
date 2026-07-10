@@ -1,7 +1,7 @@
 'use client';
 
 import { ApiError, streamQuery } from '@/lib/api';
-import { clearSession } from '@/lib/session';
+import { endSession } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -69,8 +69,7 @@ export const useChat = (selectedIds: string[]) => {
       });
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
-        clearSession();
-        router.push('/login');
+        endSession(router);
         return;
       }
       patchMessage(answerId, { text: errorText(e), streaming: false, error: true });

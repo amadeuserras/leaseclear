@@ -2,7 +2,7 @@
 
 import { LogoMark } from '@/components/Logo';
 import { demoLogin } from '@/lib/api';
-import { DEMO_EMAIL, saveSession } from '@/lib/session';
+import { beginSession, DEMO_EMAIL } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -16,8 +16,7 @@ export default function DemoPage() {
       try {
         const { access_token } = await demoLogin();
         if (cancelled) return;
-        saveSession(access_token, DEMO_EMAIL, true);
-        router.replace('/');
+        beginSession(router, access_token, DEMO_EMAIL, { demo: true, replace: true });
       } catch {
         if (!cancelled) setFailed(true);
       }

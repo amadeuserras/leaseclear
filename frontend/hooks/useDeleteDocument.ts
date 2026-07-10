@@ -1,7 +1,7 @@
 'use client';
 
 import { ApiError, deleteDocument } from '@/lib/api';
-import { clearSession } from '@/lib/session';
+import { endSession } from '@/lib/session';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -17,8 +17,7 @@ export const useDeleteDocument = () => {
       return true;
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
-        clearSession();
-        router.push('/login');
+        endSession(router);
       } else {
         setError('Couldn’t delete this document.');
       }
