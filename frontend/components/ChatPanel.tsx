@@ -142,7 +142,7 @@ function Composer({
         </button>
       </div>
       <div
-        className={`mt-3 flex min-h-16 flex-wrap gap-2 ${centered ? 'justify-center' : 'justify-start'}`}
+        className={`mt-3 flex min-h-16 flex-wrap items-start gap-2 ${centered ? 'justify-center' : 'justify-start'}`}
       >
         {isLoadingSuggestions
           ? SKELETON_WIDTHS.map((w, i) => (
