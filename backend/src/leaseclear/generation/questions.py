@@ -82,7 +82,7 @@ async def generate_questions(
 ) -> list[str]:
     if not chunks:
         return []
-    client = AsyncAnthropic(api_key=settings.anthropic_generate_api_key)
+    client = AsyncAnthropic(api_key=settings.anthropic_api_key)
     message = await client.messages.create(
         model=MODEL,
         max_tokens=800,

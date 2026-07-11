@@ -11,7 +11,7 @@ MODEL = "text-embedding-3-small"
 
 
 def _get_client() -> OpenAI:
-    return OpenAI(api_key=settings.openai_embeddings_api_key)
+    return OpenAI(api_key=settings.openai_api_key)
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:

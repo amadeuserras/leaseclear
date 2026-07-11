@@ -14,11 +14,8 @@ class Settings(BaseSettings):
     database_url: str
     test_database_url: str
     eval_database_url: str
-    openai_embeddings_api_key: str
     openai_api_key: str
-    anthropic_generate_api_key: str
-    anthropic_metadata_api_key: str
-    anthropic_filter_api_key: str
+    anthropic_api_key: str
     jwt_secret: str
     google_client_id: str | None = None
 

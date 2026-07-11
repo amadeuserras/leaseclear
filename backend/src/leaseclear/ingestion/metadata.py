@@ -29,7 +29,7 @@ If a field cannot be determined from the text, use null
 
 
 def _get_client() -> AsyncAnthropic:
-    return AsyncAnthropic(api_key=settings.anthropic_metadata_api_key)
+    return AsyncAnthropic(api_key=settings.anthropic_api_key)
 
 
 def _document_text(document: AssignedDocument) -> str:

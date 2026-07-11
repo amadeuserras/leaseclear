@@ -36,7 +36,7 @@ async def _token_stream(
     documents: list[DocumentMetadata],
     meta: GenerationStreamMeta,
 ) -> AsyncIterator[str]:
-    client = AsyncAnthropic(api_key=settings.anthropic_generate_api_key)
+    client = AsyncAnthropic(api_key=settings.anthropic_api_key)
     async with client.messages.stream(
         model="claude-haiku-4-5",
         max_tokens=1024,
