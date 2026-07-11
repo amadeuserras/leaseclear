@@ -1,3 +1,5 @@
+import { config } from '@/lib/config';
+
 const GIS_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
 
 type GoogleTokenClient = {
@@ -51,8 +53,7 @@ const loadGis = (): Promise<void> => {
 };
 
 export const requestGoogleAccessToken = async (): Promise<string> => {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  if (!clientId) throw new Error('Google sign-in is not configured');
+  const clientId = config.googleClientId;
 
   await loadGis();
   if (!window.google?.accounts?.oauth2) {

@@ -1,3 +1,4 @@
+import { config } from '@/lib/config';
 import { getToken } from '@/lib/session';
 
 export type TokenResponse = {
@@ -56,8 +57,6 @@ export class ApiError extends Error {
   }
 }
 
-const baseUrl = () => process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
-
 const authHeader = (): Record<string, string> => {
   const token = getToken() ?? '';
   return { Authorization: `Bearer ${token}` };
@@ -75,7 +74,7 @@ const errorFromResponse = async (res: Response): Promise<ApiError> => {
 };
 
 const postJson = async <T>(path: string, body: unknown): Promise<T> => {
-  const res = await fetch(`${baseUrl()}${path}`, {
+  const res = await fetch(`${config.backendUrl}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -96,7 +95,7 @@ export const googleLogin = (accessToken: string) =>
   postJson<GoogleAuthResponse>('/auth/google', { access_token: accessToken });
 
 export const listSuggestedQuestions = async (documentIds: string[]): Promise<string[]> => {
-  const res = await fetch(`${baseUrl()}/documents/suggested-questions/query`, {
+  const res = await fetch(`${config.backendUrl}/documents/suggested-questions/query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -111,7 +110,7 @@ export const listSuggestedQuestions = async (documentIds: string[]): Promise<str
 };
 
 export const listDocuments = async (token: string): Promise<LeaseDocument[]> => {
-  const res = await fetch(`${baseUrl()}/documents`, {
+  const res = await fetch(`${config.backendUrl}/documents`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
   });
@@ -120,7 +119,7 @@ export const listDocuments = async (token: string): Promise<LeaseDocument[]> => 
 };
 
 export const getDocumentChunks = async (slug: string): Promise<DocumentChunk[]> => {
-  const res = await fetch(`${baseUrl()}/documents/${encodeURIComponent(slug)}/chunks`, {
+  const res = await fetch(`${config.backendUrl}/documents/${encodeURIComponent(slug)}/chunks`, {
     headers: authHeader(),
     cache: 'no-store',
   });
@@ -129,7 +128,7 @@ export const getDocumentChunks = async (slug: string): Promise<DocumentChunk[]> 
 };
 
 export const deleteDocument = async (id: string): Promise<void> => {
-  const res = await fetch(`${baseUrl()}/documents/${encodeURIComponent(id)}`, {
+  const res = await fetch(`${config.backendUrl}/documents/${encodeURIComponent(id)}`, {
     method: 'DELETE',
     headers: authHeader(),
   });
@@ -139,7 +138,7 @@ export const deleteDocument = async (id: string): Promise<void> => {
 export const uploadDocuments = async (files: File[]): Promise<void> => {
   const form = new FormData();
   for (const f of files) form.append('files', f);
-  const res = await fetch(`${baseUrl()}/documents`, {
+  const res = await fetch(`${config.backendUrl}/documents`, {
     method: 'POST',
     headers: authHeader(),
     body: form,
@@ -169,7 +168,7 @@ export const streamQuery = async ({
   onDone,
   signal,
 }: StreamQueryParams): Promise<void> => {
-  const res = await fetch(`${baseUrl()}/query`, {
+  const res = await fetch(`${config.backendUrl}/query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
