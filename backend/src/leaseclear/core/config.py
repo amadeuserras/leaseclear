@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     anthropic_metadata_api_key: str
     anthropic_filter_api_key: str
     jwt_secret: str
+    google_client_id: str = ""
 
 
 settings = Settings()  # pyright: ignore[reportCallIssue]

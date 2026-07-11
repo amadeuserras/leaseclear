@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import jwt
+import pytest
 from fastapi.testclient import TestClient
 
 from leaseclear.core.config import settings
@@ -122,3 +123,57 @@ def test_query_requires_auth(api_client: TestClient) -> None:
         json={"question": "How much is the security deposit?"},
     )
     assert response.status_code == 401
+
+
+def test_google_login_returns_503_when_unconfigured(
+    api_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(settings, "google_client_id", "")
+    response = api_client.post("/auth/google", json={"access_token": "tok"})
+    assert response.status_code == 503
+
+
+def test_google_login_creates_user_and_returns_token(
+    api_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(settings, "google_client_id", "test-client-id")
+
+    async def fake_email(_access_token: str) -> str:
+        return "google.user@example.com"
+
+    monkeypatch.setattr("leaseclear.api.auth.email_from_access_token", fake_email)
+
+    response = api_client.post("/auth/google", json={"access_token": "google-tok"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["email"] == "google.user@example.com"
+    assert body["access_token"]
+    payload = jwt.decode(
+        body["access_token"],
+        settings.jwt_secret,
+        algorithms=["HS256"],
+    )
+    assert payload["sub"]
+
+
+def test_google_login_reuses_existing_user(
+    api_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(settings, "google_client_id", "test-client-id")
+
+    async def fake_email(_access_token: str) -> str:
+        return "reuse@example.com"
+
+    monkeypatch.setattr("leaseclear.api.auth.email_from_access_token", fake_email)
+
+    first = api_client.post("/auth/google", json={"access_token": "tok-1"})
+    second = api_client.post("/auth/google", json={"access_token": "tok-2"})
+    assert first.status_code == 200
+    assert second.status_code == 200
+    sub1 = jwt.decode(
+        first.json()["access_token"], settings.jwt_secret, algorithms=["HS256"]
+    )["sub"]
+    sub2 = jwt.decode(
+        second.json()["access_token"], settings.jwt_secret, algorithms=["HS256"]
+    )["sub"]
+    assert sub1 == sub2

@@ -3,10 +3,17 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Request
 
 from leaseclear.api.limiter import limiter
-from leaseclear.api.schemas import AuthRequest, TokenResponse
+from leaseclear.api.schemas import (
+    AuthRequest,
+    GoogleAuthRequest,
+    GoogleAuthResponse,
+    TokenResponse,
+)
+from leaseclear.auth.google import email_from_access_token, require_google_configured
 from leaseclear.auth.jwt import create_token
 from leaseclear.auth.users import (
     authenticate_user,
+    get_or_create_oauth_user,
     get_user_id_by_email,
     register_user,
 )
@@ -37,3 +44,12 @@ async def demo() -> TokenResponse:
     if user_id is None:
         raise HTTPException(status_code=503, detail="Demo is not available")
     return TokenResponse(access_token=create_token(user_id))
+
+
+@router.post("/google", response_model=GoogleAuthResponse)
+@limiter.limit("5/minute")
+async def google_login(request: Request, req: GoogleAuthRequest) -> GoogleAuthResponse:
+    require_google_configured()
+    email = await email_from_access_token(req.access_token)
+    user_id = await get_or_create_oauth_user(email)
+    return GoogleAuthResponse(access_token=create_token(user_id), email=email)

@@ -12,9 +12,17 @@ class AuthRequest(BaseModel):
     password: str
 
 
+class GoogleAuthRequest(BaseModel):
+    access_token: str
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class GoogleAuthResponse(TokenResponse):
+    email: EmailStr
 
 
 class QueryRequest(BaseModel):

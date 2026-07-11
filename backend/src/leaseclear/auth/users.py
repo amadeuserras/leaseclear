@@ -38,6 +38,27 @@ async def authenticate_user(email: str, password: str) -> str:
             "SELECT id, password_hash FROM users WHERE email = $1",
             email,
         )
-    if row is None or not verify_password(password, row["password_hash"]):
+    if row is None or row["password_hash"] is None:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    if not verify_password(password, row["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     return str(row["id"])
+
+
+async def get_or_create_oauth_user(email: str) -> str:
+    existing = await get_user_id_by_email(email)
+    if existing is not None:
+        return existing
+    user_id = str(uuid.uuid4())
+    async with db_session() as conn:
+        try:
+            await conn.execute(
+                "INSERT INTO users (id, email, password_hash) VALUES ($1, $2, NULL)",
+                uuid.UUID(user_id),
+                email,
+            )
+        except UniqueViolationError:
+            found = await get_user_id_by_email(email)
+            assert found is not None
+            return found
+    return user_id
