@@ -1,14 +1,12 @@
-const requireEnv = (name: string): string => {
-  const value = process.env[name];
-  if (!value) throw new Error(`${name} is not configured`);
-  return value;
-};
-
 export const config = {
   get apiUrl() {
-    return requireEnv('NEXT_PUBLIC_API_URL');
+    const value = process.env.NEXT_PUBLIC_API_URL;
+    if (!value) throw new Error('NEXT_PUBLIC_API_URL is not configured');
+    return value;
   },
   get googleClientId() {
-    return requireEnv('NEXT_PUBLIC_GOOGLE_CLIENT_ID');
+    const value = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!value) throw new Error('NEXT_PUBLIC_GOOGLE_CLIENT_ID is not configured');
+    return value;
   },
 };
