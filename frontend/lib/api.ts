@@ -43,6 +43,10 @@ export type StreamQueryParams = {
   signal?: AbortSignal;
 };
 
+export type GoogleAuthResponse = TokenResponse & {
+  email: string;
+};
+
 export class ApiError extends Error {
   status: number;
 
@@ -87,6 +91,9 @@ export const register = (email: string, password: string) =>
   postJson<TokenResponse>('/auth/register', { email, password });
 
 export const demoLogin = () => postJson<TokenResponse>('/auth/demo', {});
+
+export const googleLogin = (accessToken: string) =>
+  postJson<GoogleAuthResponse>('/auth/google', { access_token: accessToken });
 
 export const listSuggestedQuestions = async (documentIds: string[]): Promise<string[]> => {
   const res = await fetch(`${baseUrl()}/documents/suggested-questions/query`, {

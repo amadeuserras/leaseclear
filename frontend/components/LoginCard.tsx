@@ -115,7 +115,8 @@ export function LoginCard({ isDemo = false, onClose }: LoginCardProps = {}) {
         <button
           type="button"
           onClick={googleSignIn}
-          className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex w-full cursor-pointer items-center justify-center gap-[9px] rounded-lg border p-2.5 text-sm font-medium"
+          disabled={isSubmitting}
+          className="border-hairline-input bg-bg-inset text-text-main hover:border-hairline-hover hover:bg-bg-inset-hover flex w-full cursor-pointer items-center justify-center gap-[9px] rounded-lg border p-2.5 text-sm font-medium disabled:cursor-default disabled:opacity-70"
         >
           <GoogleIcon />
           Continue with Google
