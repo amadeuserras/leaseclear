@@ -128,7 +128,7 @@ def test_query_requires_auth(api_client: TestClient) -> None:
 def test_google_login_returns_503_when_unconfigured(
     api_client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(settings, "google_client_id", "")
+    monkeypatch.setattr(settings, "google_client_id", None)
     response = api_client.post("/auth/google", json={"access_token": "tok"})
     assert response.status_code == 503
 
