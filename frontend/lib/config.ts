@@ -5,8 +5,8 @@ const requireEnv = (name: string): string => {
 };
 
 export const config = {
-  get backendUrl() {
-    return requireEnv('NEXT_PUBLIC_BACKEND_URL');
+  get apiUrl() {
+    return requireEnv('NEXT_PUBLIC_API_URL');
   },
   get googleClientId() {
     return requireEnv('NEXT_PUBLIC_GOOGLE_CLIENT_ID');
