@@ -103,6 +103,32 @@ export function ArrowUpIcon({
   );
 }
 
+export function PdfFileIcon({ className = '' }: IconProps) {
+  return (
+    <svg width={32} height={30} viewBox="0 0 64 56" className={className}>
+      <path
+        d="M14 4h24l12 12v32a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z"
+        fill="#2c2f36"
+        stroke="rgba(255,255,255,0.12)"
+        strokeWidth="1"
+      />
+      <path d="M38 4v9a3 3 0 0 0 3 3h9z" fill="rgba(255,255,255,0.16)" />
+      <text
+        x="32"
+        y="42"
+        textAnchor="middle"
+        fontFamily="Inter, sans-serif"
+        fontSize="14"
+        fontWeight="700"
+        fill="rgba(236,237,239,0.75)"
+        letterSpacing="0.5"
+      >
+        PDF
+      </text>
+    </svg>
+  );
+}
+
 export function GoogleIcon({ size = 16, className = '' }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className={className}>

@@ -3,7 +3,7 @@
 import { LoginCard } from '@/components/LoginCard';
 import { ResizeHandle } from '@/components/ResizeHandle';
 import { Spinner } from '@/components/Spinner';
-import { ChevronIcon, CheckIcon, UploadIcon } from '@/components/icons';
+import { ChevronIcon, CheckIcon, PdfFileIcon, UploadIcon } from '@/components/icons';
 import { useDeleteDocument } from '@/hooks/useDeleteDocument';
 import { useKebabMenu } from '@/hooks/useKebabMenu';
 import type { Source } from '@/hooks/useSources';
@@ -40,14 +40,9 @@ function PdfIcon({ title, onClick }: PdfIconProps) {
     <div
       title={title}
       onClick={onClick}
-      className={`border-hairline bg-bg-inset-hover relative flex h-[30px] w-[26px] shrink-0 items-end justify-center overflow-hidden rounded-[3px] border-[1.5px] ${
-        onClick ? 'cursor-pointer' : ''
-      }`}
+      className={`flex h-[30px] w-8 shrink-0 ${onClick ? 'cursor-pointer' : ''}`}
     >
-      <div className="border-r-bg-main absolute top-0 right-0 h-0 w-0 border-t-0 border-r-8 border-b-8 border-l-0 border-solid border-b-transparent" />
-      <div className="mb-[3px] text-[6px] font-bold tracking-[0.02em] text-[rgba(236,237,239,0.5)]">
-        PDF
-      </div>
+      <PdfFileIcon />
     </div>
   );
 }

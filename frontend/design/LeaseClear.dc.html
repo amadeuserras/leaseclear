@@ -132,7 +132,7 @@ Don't have an account? <span onClick="{{ goToApp }}" style="color: #ECEDEF; font
             <div onClick="{{ toggleAvatarMenu }}" style="width: 32px; height: 32px; border-radius: 50%; background: #3C4450; color: #ECEDEF; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 600; cursor: pointer;">D</div>
             <sc-if value="{{ avatarMenuOpen }}" hint-placeholder-val="{{ false }}">
               <div style="position: absolute; top: 40px; right: 0; z-index: 10; width: 200px; background: #26282e; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); padding: 5px;">
-                <div style="padding: 10px 10px 8px; font-size: 12.5px; color: rgba(236,237,239,0.5); border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="abcfcec6c4ebc7cecad8cec8c7cecad985cadbdb">[email&#160;protected]</a></div>
+                <div style="padding: 10px 10px 8px; font-size: 12.5px; color: rgba(236,237,239,0.5); border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 4px;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7014151d1f301c15110315131c1511025e110000">[email&#160;protected]</a></div>
                 <div onClick="{{ toggleAvatarMenu }}" style="padding: 8px 10px; font-size: 12.5px; color: #ECEDEF; border-radius: 6px; cursor: pointer;" style-hover="background: rgba(255,255,255,0.06);">Log out</div>
               </div>
             </sc-if>
@@ -177,10 +177,11 @@ Don't have an account? <span onClick="{{ goToApp }}" style="color: #ECEDEF; font
             <sc-for list="{{ sources }}" as="src" hint-placeholder-count="4">
               <div style="position: relative; display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 8px; margin-bottom: 2px; background: {{ src.rowBg }};" style-hover="background: rgba(255,255,255,0.05);">
                 <div onClick="{{ src.onOpen }}" style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; cursor: pointer;">
-                  <div style="width: 26px; height: 30px; flex-shrink: 0; border-radius: 3px; background: #2c2f36; border: 1px solid rgba(255,255,255,0.08); position: relative; display: flex; align-items: flex-end; justify-content: center; overflow: hidden;">
-                    <div style="position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 8px 8px 0; border-color: transparent #16171b transparent transparent;"></div>
-                    <div style="font-size: 6px; font-weight: 700; color: rgba(236,237,239,0.5); margin-bottom: 3px; letter-spacing: 0.02em;">PDF</div>
-                  </div>
+                  <svg width="32" height="30" viewBox="0 0 64 56" style="flex-shrink: 0;">
+                    <path d="M14 4h24l12 12v32a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="{{ src.iconSheetFill }}" stroke="{{ src.iconSheetStroke }}" stroke-width="1"></path>
+                    <path d="M38 4v9a3 3 0 0 0 3 3h9z" fill="{{ src.iconFoldFill }}"></path>
+                    <text x="32" y="{{ src.iconTextY }}" text-anchor="middle" font-family="Inter, sans-serif" font-size="{{ src.iconTextSize }}" font-weight="700" fill="{{ src.iconTextFill }}" letter-spacing="0.5">PDF</text>
+                  </svg>
                   <div style="flex: 1; min-width: 0; font-size: 13px; color: #ECEDEF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ src.name }}</div>
                 </div>
                 <div style="position: relative; flex-shrink: 0;">
@@ -221,9 +222,12 @@ Don't have an account? <span onClick="{{ goToApp }}" style="color: #ECEDEF; font
 
           <div style="flex: 1; overflow-y: auto; padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
             <sc-for list="{{ sources }}" as="src" hint-placeholder-count="4">
-              <div onClick="{{ src.onToggle }}" title="{{ src.name }}" style="width: 26px; height: 30px; flex-shrink: 0; border-radius: 3px; background: #2c2f36; border: 1.5px solid rgba(255,255,255,0.08); position: relative; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; cursor: pointer;">
-                <div style="position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 8px 8px 0; border-color: transparent #16171b transparent transparent;"></div>
-                <div style="font-size: 6px; font-weight: 700; color: rgba(236,237,239,0.5); margin-bottom: 3px; letter-spacing: 0.02em;">PDF</div>
+              <div onClick="{{ src.onToggle }}" title="{{ src.name }}" style="width: 32px; height: 30px; flex-shrink: 0; cursor: pointer;">
+                <svg width="32" height="30" viewBox="0 0 64 56">
+                  <path d="M14 4h24l12 12v32a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="{{ src.iconSheetFill }}" stroke="{{ src.iconSheetStroke }}" stroke-width="1"></path>
+                  <path d="M38 4v9a3 3 0 0 0 3 3h9z" fill="{{ src.iconFoldFill }}"></path>
+                  <text x="32" y="{{ src.iconTextY }}" text-anchor="middle" font-family="Inter, sans-serif" font-size="{{ src.iconTextSize }}" font-weight="700" fill="{{ src.iconTextFill }}" letter-spacing="0.5">PDF</text>
+                </svg>
               </div>
             </sc-for>
           </div>
@@ -362,6 +366,11 @@ Don't have an account? <span onClick="{{ goToApp }}" style="color: #ECEDEF; font
 </x-dc>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
+  iconVariants = [
+    { sheetFill: '#2c2f36', sheetStroke: 'rgba(255,255,255,0.12)', foldFill: 'rgba(255,255,255,0.16)', textFill: 'rgba(236,237,239,0.75)', textY: 42, textSize: 14 },
+    { sheetFill: '#2c2f36', sheetStroke: 'rgba(255,255,255,0.12)', foldFill: 'rgba(255,255,255,0.16)', textFill: 'rgba(236,237,239,0.75)', textY: 45, textSize: 11 },
+    { sheetFill: '#383c44', sheetStroke: 'rgba(255,255,255,0.16)', foldFill: 'rgba(255,255,255,0.2)', textFill: '#ECEDEF', textY: 45, textSize: 11 }
+  ];
   state = {
     view: 'app',
     sources: [
@@ -620,7 +629,7 @@ class Component extends DCLogic {
       selectAllBorder: allChecked ? '#4a4d55' : 'rgba(255,255,255,0.25)',
       sourceCountLabel: selectedCount + ' of ' + sources.length,
       selectedSourcesLabel: selectedCount + ' source' + (selectedCount === 1 ? '' : 's'),
-      sources: sources.map(src => ({
+      sources: sources.map((src, i) => ({
         ...src,
         rowBg: 'transparent',
         checkboxBg: src.checked ? '#4a4d55' : 'transparent',
@@ -629,7 +638,13 @@ class Component extends DCLogic {
         onToggle: () => this.toggleSource(src.id),
         onMenuToggle: () => this.toggleMenu(src.id),
         onOpen: () => this.openViewer(src.id),
-        menuOpen: openMenuId === src.id
+        menuOpen: openMenuId === src.id,
+        iconSheetFill: this.iconVariants[0].sheetFill,
+        iconSheetStroke: this.iconVariants[0].sheetStroke,
+        iconFoldFill: this.iconVariants[0].foldFill,
+        iconTextFill: this.iconVariants[0].textFill,
+        iconTextY: this.iconVariants[0].textY,
+        iconTextSize: this.iconVariants[0].textSize
       })),
       viewerOpen: !!viewingDoc,
       viewerDocName: viewingSource ? viewingSource.name : '',
