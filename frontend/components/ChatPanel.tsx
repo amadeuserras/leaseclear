@@ -97,7 +97,6 @@ function EntryItem({ entry, docNames, onCitation }: EntryItemProps) {
 type ComposerProps = {
   draft: string;
   selectedCount: number;
-  centered: boolean;
   questions: string[];
   isLoadingSuggestions: boolean;
   onDraftChange: (value: string) => void;
@@ -108,7 +107,6 @@ type ComposerProps = {
 function Composer({
   draft,
   selectedCount,
-  centered,
   questions,
   isLoadingSuggestions,
   onDraftChange,
@@ -122,28 +120,28 @@ function Composer({
         onSubmit();
       }}
     >
-      <div className="border-hairline-input bg-bg-inset flex items-center gap-2.5 rounded-[26px] border py-2.5 pr-2.5 pl-5 focus-within:border-white/35">
-        <input
-          type="text"
-          placeholder="Ask a question about your lease…"
-          className="text-text-main flex-1 border-none bg-transparent text-[15px] outline-none"
-          value={draft}
-          onChange={(e) => onDraftChange(e.target.value)}
-        />
-        <div className="text-text-muted shrink-0 text-xs whitespace-nowrap">
-          {selectedCount} source{selectedCount === 1 ? '' : 's'}
+      <div className="mx-auto max-w-[760px]">
+        <div className="border-hairline-input bg-bg-inset flex items-center gap-2.5 rounded-[26px] border py-2.5 pr-2.5 pl-5 focus-within:border-white/35">
+          <input
+            type="text"
+            placeholder="Ask a question about your lease…"
+            className="text-text-main flex-1 border-none bg-transparent text-[15px] outline-none"
+            value={draft}
+            onChange={(e) => onDraftChange(e.target.value)}
+          />
+          <div className="text-text-muted shrink-0 text-xs whitespace-nowrap">
+            {selectedCount} source{selectedCount === 1 ? '' : 's'}
+          </div>
+          <button
+            type="submit"
+            disabled={selectedCount === 0}
+            className="bg-emphasis hover:bg-emphasis-hover disabled:hover:bg-emphasis flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ArrowUpIcon color="#17181b" />
+          </button>
         </div>
-        <button
-          type="submit"
-          disabled={selectedCount === 0}
-          className="bg-emphasis hover:bg-emphasis-hover disabled:hover:bg-emphasis flex h-[34px] w-[34px] shrink-0 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <ArrowUpIcon color="#17181b" />
-        </button>
       </div>
-      <div
-        className={`mt-3 flex min-h-16 flex-wrap items-start gap-2 ${centered ? 'justify-center' : 'justify-start'}`}
-      >
+      <div className="mt-3 flex min-h-16 flex-wrap items-center justify-center gap-2">
         {isLoadingSuggestions
           ? SKELETON_WIDTHS.map((w, i) => (
               <div
@@ -205,14 +203,13 @@ export function ChatPanel({
 
   return (
     <div className="flex min-h-0 min-w-[380px] flex-1 justify-center px-4">
-      <div className="flex min-h-0 w-full max-w-[760px] min-w-0 flex-col">
+      <div className="flex min-h-0 w-full max-w-[960px] min-w-0 flex-col">
         {entries.length > 0 ? (
           <>
             <div className="shrink-0 px-1 pt-10 pb-7">
               <Composer
                 draft={draft}
                 selectedCount={selectedCount}
-                centered={false}
                 questions={suggestions}
                 isLoadingSuggestions={isLoadingSuggestions}
                 onDraftChange={setDraft}
@@ -220,7 +217,7 @@ export function ChatPanel({
                 onExample={sendExample}
               />
             </div>
-            <div className="custom-scrollbar min-h-0 flex-1 space-y-11 overflow-y-auto px-1 pt-9 pb-8">
+            <div className="custom-scrollbar mx-auto min-h-0 w-full max-w-[760px] flex-1 space-y-11 overflow-y-auto px-1 pt-9 pb-8">
               {entries.map((entry) => (
                 <EntryItem
                   key={entry.id}
@@ -242,7 +239,6 @@ export function ChatPanel({
               <Composer
                 draft={draft}
                 selectedCount={selectedCount}
-                centered={true}
                 questions={suggestions}
                 isLoadingSuggestions={isLoadingSuggestions}
                 onDraftChange={setDraft}

@@ -13,22 +13,20 @@ MODEL = "claude-haiku-4-5"
 MAX_CHUNKS = 40
 CHUNK_CHAR_CAP = 500
 
-SYSTEM_PROMPT = (
-    "You write suggested starter questions for a lease-Q&A app. Every question "
-    "you write is about ONE specific tenant's lease. The app mixes these in with "
-    "questions about OTHER tenants' leases, so each one must make clear WHICH "
-    "lease it is about by naming ONE real detail of this document — a tenant name "
-    "(full or just a surname), the landlord, the property address (full or "
-    "partial), or part of the file name. Use only ONE identifier per question and "
-    "ask about ONE topic; never stack multiple names, addresses, or topics into a "
-    "single question. "
-    "Write the way real people actually type. About half the questions should be "
-    'short and lazy — roughly 3 to 7 words, one identifier, e.g. "how much is '
-    'Chen\'s deposit?" or "pets ok at Larkspur?" — and the rest can be normal, '
-    "well-formed questions. Every question must be answerable from the clauses "
-    "provided, stay under 14 words, and together cover varied topics. "
-    "Reply with ONLY a JSON array of question strings — no prose, no keys."
-)
+SYSTEM_PROMPT = """
+You write suggested starter questions for a lease-Q&A app. Every question
+you write is about ONE specific tenant's lease. The app mixes these in with
+questions about OTHER tenants' leases, so each one must make clear WHICH
+lease it is about by naming ONE real detail of this document — a tenant name
+(full or just a surname), the landlord, the property address (full or
+partial), or part of the file name. Use only ONE identifier per question and
+ask about ONE topic; never stack multiple names, addresses, or topics into a
+single question.
+
+Every question must be answerable from the clauses
+provided, stay under 14 words, and together cover varied topics.
+Reply with ONLY a JSON array of question strings — no prose, no keys.
+""".strip()
 
 
 def _describe_document(doc: DocumentMetadata) -> str:
