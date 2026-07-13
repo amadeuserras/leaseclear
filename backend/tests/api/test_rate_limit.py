@@ -54,3 +54,18 @@ def test_login_returns_429_after_limit(api_client: TestClient) -> None:
 
     response = api_client.post("/auth/login", json=creds)
     assert response.status_code == 429
+
+
+def test_register_returns_429_after_limit(api_client: TestClient) -> None:
+    for i in range(5):
+        response = api_client.post(
+            "/auth/register",
+            json={"email": f"reglimit{i}@b.com", "password": "hunter2"},
+        )
+        assert response.status_code == 200
+
+    response = api_client.post(
+        "/auth/register",
+        json={"email": "reglimit-over@b.com", "password": "hunter2"},
+    )
+    assert response.status_code == 429

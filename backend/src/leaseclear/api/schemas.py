@@ -25,6 +25,10 @@ class GoogleAuthResponse(TokenResponse):
     email: EmailStr
 
 
+class MeResponse(BaseModel):
+    email: EmailStr
+
+
 class QueryRequest(BaseModel):
     question: str
     document_ids: list[UUID] | None = None

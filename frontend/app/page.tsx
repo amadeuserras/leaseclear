@@ -13,7 +13,7 @@ export default async function Home() {
   try {
     documents = await listDocuments(token);
   } catch (e) {
-    if (e instanceof ApiError && e.status === 401) redirect('/login');
+    if (e instanceof ApiError && e.status === 401) redirect('/logout');
     throw e;
   }
 

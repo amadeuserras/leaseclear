@@ -1,19 +1,25 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
+from typing import Annotated
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from leaseclear.api.limiter import limiter
 from leaseclear.api.schemas import (
     AuthRequest,
     GoogleAuthRequest,
     GoogleAuthResponse,
+    MeResponse,
     TokenResponse,
 )
+from leaseclear.auth.deps import current_user
 from leaseclear.auth.google import email_from_access_token, require_google_configured
 from leaseclear.auth.jwt import create_token
 from leaseclear.auth.users import (
     authenticate_user,
     get_or_create_oauth_user,
+    get_user_email_by_id,
     get_user_id_by_email,
     register_user,
 )
@@ -23,7 +29,8 @@ router = APIRouter(prefix="/auth")
 
 
 @router.post("/register", response_model=TokenResponse)
-async def register(req: AuthRequest) -> TokenResponse:
+@limiter.limit("5/minute")
+async def register(request: Request, req: AuthRequest) -> TokenResponse:
     user_id = await register_user(req.email, req.password)
     return TokenResponse(access_token=create_token(user_id))
 
@@ -33,6 +40,14 @@ async def register(req: AuthRequest) -> TokenResponse:
 async def login(request: Request, req: AuthRequest) -> TokenResponse:
     user_id = await authenticate_user(req.email, req.password)
     return TokenResponse(access_token=create_token(user_id))
+
+
+@router.get("/me", response_model=MeResponse)
+async def me(user_id: Annotated[UUID, Depends(current_user)]) -> MeResponse:
+    email = await get_user_email_by_id(str(user_id))
+    if email is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return MeResponse(email=email)
 
 
 # Deliberately not rate-limited: a public demo may see many visitors behind one

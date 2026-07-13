@@ -63,6 +63,33 @@ def test_login_returns_401_for_unknown_email(api_client: TestClient) -> None:
     assert response.json()["detail"] == "Invalid credentials"
 
 
+def test_me_returns_email_for_valid_token(api_client: TestClient) -> None:
+    register = api_client.post(
+        "/auth/register",
+        json={"email": "me@b.com", "password": "hunter2"},
+    )
+    token = register.json()["access_token"]
+
+    response = api_client.get(
+        "/auth/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"email": "me@b.com"}
+
+
+def test_me_requires_auth(api_client: TestClient) -> None:
+    assert api_client.get("/auth/me").status_code == 401
+
+
+def test_me_rejects_bad_token(api_client: TestClient) -> None:
+    response = api_client.get(
+        "/auth/me",
+        headers={"Authorization": "Bearer garbage"},
+    )
+    assert response.status_code == 401
+
+
 def test_demo_returns_503_when_not_seeded(api_client: TestClient) -> None:
     response = api_client.post("/auth/demo")
     assert response.status_code == 503

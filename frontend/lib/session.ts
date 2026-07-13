@@ -6,6 +6,8 @@ export const TOKEN_COOKIE = 'lc_token';
 export const EMAIL_COOKIE = 'lc_email';
 export const DEMO_COOKIE = 'lc_demo';
 
+export const SESSION_COOKIES = [TOKEN_COOKIE, EMAIL_COOKIE, DEMO_COOKIE] as const;
+
 export const DEMO_EMAIL = 'demo@leaseclear.app';
 
 const COOKIE_MAX_AGE_S = 60 * 60 * 24 * 7;
@@ -20,9 +22,9 @@ export const saveSession = (token: string, email: string, demo = false) => {
 };
 
 export const clearSession = () => {
-  document.cookie = `${TOKEN_COOKIE}=; path=/; max-age=0`;
-  document.cookie = `${EMAIL_COOKIE}=; path=/; max-age=0`;
-  document.cookie = `${DEMO_COOKIE}=; path=/; max-age=0`;
+  for (const name of SESSION_COOKIES) {
+    document.cookie = `${name}=; path=/; max-age=0`;
+  }
 };
 
 export const beginSession = (

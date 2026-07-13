@@ -48,6 +48,10 @@ export type GoogleAuthResponse = TokenResponse & {
   email: string;
 };
 
+export type MeResponse = {
+  email: string;
+};
+
 export class ApiError extends Error {
   status: number;
 
@@ -93,6 +97,15 @@ export const demoLogin = () => postJson<TokenResponse>('/auth/demo', {});
 
 export const googleLogin = (accessToken: string) =>
   postJson<GoogleAuthResponse>('/auth/google', { access_token: accessToken });
+
+export const getMe = async (token: string): Promise<MeResponse> => {
+  const res = await fetch(`${config.apiUrl}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+  if (!res.ok) throw await errorFromResponse(res);
+  return (await res.json()) as MeResponse;
+};
 
 export const listSuggestedQuestions = async (documentIds: string[]): Promise<string[]> => {
   const res = await fetch(`${config.apiUrl}/documents/suggested-questions/query`, {
