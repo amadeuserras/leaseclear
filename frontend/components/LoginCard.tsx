@@ -61,7 +61,7 @@ export function LoginCard({ isDemo = false, onClose }: LoginCardProps = {}) {
       </div>
 
       <div className="mb-7 text-center text-[13px] leading-normal text-[rgba(236,237,239,0.55)]">
-        Sign in to ask questions about your lease
+        Sign in to upload your leases
       </div>
 
       <form
