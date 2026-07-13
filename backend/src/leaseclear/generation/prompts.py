@@ -17,6 +17,8 @@ Write your response in TWO parts, separated by the line {DELIMITER}.
 PART 1 — the answer as plain prose:
 - Every factual claim MUST carry an inline citation id like [doc §3]. 
 - If a clause directly or indirectly answers the question treat that as the answer.
+- If the question is open-ended (doesn't specify a lease), give a short summary 
+of the relevant clauses across the different leases.
 - If, after checking, the clauses truly lack enough info, write exactly and
   only: "{REFUSAL_MESSAGE}"
   Do not add explanations or related clauses around that sentence.
