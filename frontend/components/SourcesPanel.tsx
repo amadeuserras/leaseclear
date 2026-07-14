@@ -226,24 +226,30 @@ export function SourcesPanel({
           </div>
 
           <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-2.5 py-2">
-            {sources.map((s) => (
-              <SourceRow
-                key={s.id}
-                source={s}
-                menuOpen={menu.openId === s.id}
-                onToggle={() => onToggle(s.id)}
-                onOpen={() => onOpen(s)}
-                onMenuToggle={() => menu.toggle(s.id)}
-                onDelete={async () => {
-                  menu.close();
-                  if (isDemo) {
-                    setShowLoginModal(true);
-                    return;
-                  }
-                  if (await remove(s.id)) onDeleted(s);
-                }}
-              />
-            ))}
+            {sources.length === 0 ? (
+              <div className="text-text-secondary px-2 py-4 text-[13px] leading-relaxed">
+                No documents yet. Upload a lease to get started.
+              </div>
+            ) : (
+              sources.map((s) => (
+                <SourceRow
+                  key={s.id}
+                  source={s}
+                  menuOpen={menu.openId === s.id}
+                  onToggle={() => onToggle(s.id)}
+                  onOpen={() => onOpen(s)}
+                  onMenuToggle={() => menu.toggle(s.id)}
+                  onDelete={async () => {
+                    menu.close();
+                    if (isDemo) {
+                      setShowLoginModal(true);
+                      return;
+                    }
+                    if (await remove(s.id)) onDeleted(s);
+                  }}
+                />
+              ))
+            )}
           </div>
         </>
       )}
