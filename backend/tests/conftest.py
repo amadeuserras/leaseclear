@@ -9,7 +9,7 @@ import pytest
 from leaseclear.core.config import settings
 from leaseclear.db.connection import _session_ctx, apply_schema
 from leaseclear.db.create import ensure_database
-from leaseclear.generation.prompts import REFUSAL_MESSAGE
+from leaseclear.generation.generate import REFUSAL_MESSAGE
 from leaseclear.ingestion.store import store_chunks, store_documents
 from leaseclear.types import ChunkBase, Citation, GenerationResult
 from tests.data.corpus import SEED_CHUNKS, SEED_DOCUMENT

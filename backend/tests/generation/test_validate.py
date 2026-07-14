@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from leaseclear.evals.generation.answer import is_refusal, validate
-from leaseclear.generation.prompts import REFUSAL_MESSAGE
+from leaseclear.generation.generate import REFUSAL_MESSAGE
 from leaseclear.types import Citation, GenerationResult
 
 

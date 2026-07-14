@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from leaseclear.generation.prompts import REFUSAL_MESSAGE
+from leaseclear.generation.generate import REFUSAL_MESSAGE
 from leaseclear.types import ChunkBase, Citation, GenerationResult, ValidationResult
 
 # Matches inline citation ids as they appear in answers.
