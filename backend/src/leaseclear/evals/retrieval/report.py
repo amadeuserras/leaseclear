@@ -15,7 +15,7 @@ def render_retrieval_md(result: RetrievalEvalResult) -> str:
         "(filter LLM + embeddings; no judge/generation LLMs)._",
         "",
         f"MRR and recall@{result.k} are scored against the golden "
-        "`document_slug` + clause/page ground truth, with document "
+        "`citation_ids` ground truth, with document "
         "pre-filtering per question (same as the generation eval pipeline).",
         "",
         f"| Strategy | MRR | Recall@{result.k} |",
