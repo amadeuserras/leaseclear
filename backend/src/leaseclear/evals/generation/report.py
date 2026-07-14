@@ -18,11 +18,14 @@ def _fmt_s(value: float | None) -> str:
     return "n/a" if value is None else f"{value:.2f}s"
 
 
-def _row(label: str, score: MetricScore) -> str:
+def _row(name: str, definition: str, score: MetricScore) -> str:
     direction = "≥" if score.higher_is_better else "≤"
     target = f"{direction} {score.target * 100:.0f}%"
     status = "n/a" if score.passed is None else ("PASS" if score.passed else "FAIL")
-    return f"| {label} | {_fmt_pct(score.value)} | {target} | {score.n} | {status} |"
+    return (
+        f"| {name} | {definition} | {_fmt_pct(score.value)} | "
+        f"{target} | {score.n} | {status} |"
+    )
 
 
 def _section(title: str, body: list[str]) -> list[str]:
@@ -65,7 +68,10 @@ def _render_case(result: CaseResult) -> list[str]:
     lines.extend(_section("User message", _text_fence(user_message)))
     lines.extend(_section("Generation result", _generation_body(result)))
     golden_answer = result.expected_answer or "(Refusal)"
-    lines.extend(_section("Golden Answer", _text_fence(golden_answer)))
+    golden_body = _text_fence(golden_answer)
+    if result.expected_citation_ids:
+        golden_body += [""] + _json_fence(result.expected_citation_ids)
+    lines.extend(_section("Golden Answer", golden_body))
     if result.answer_match is not None:
         lines.extend(
             _section("Answer match", _json_fence({"matches": result.answer_match}))
@@ -97,27 +103,32 @@ def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> s
         f"_Generated {generated} by `scripts/run_eval.py --mode generation` against "
         f"{metrics.n_cases} golden items ({metrics.n_errors} errored)._",
         "",
-        "| Metric | Score | Target | n | Status |",
-        "|---|---|---|---|---|",
+        "| Metric | Definition | Score | Target | n | Status |",
+        "|---|---|---|---|---|---|",
         _row(
-            "Retrieval recall@8 – golden chunk was retrieved in the top 8 chunks",
+            "Retrieval recall@8",
+            "golden chunk was retrieved in the top 8 chunks",
             metrics.retrieval_recall_at_8,
         ),
         _row(
-            "Faithfulness (LLM) – claims supported by retrieved chunks",
+            "Faithfulness (LLM)",
+            "claims supported by retrieved chunks text",
             metrics.faithfulness,
         ),
         _row(
-            "Citation precision (LLM) – claims supported by cited chunks",
+            "Citation precision (LLM)",
+            "claims supported by cited chunks",
             metrics.citation_precision,
         ),
-        _row("Refusal accuracy", metrics.refusal_accuracy),
+        _row("Refusal accuracy", "", metrics.refusal_accuracy),
         _row(
-            "Answer match (LLM) – generated answer matches golden answer",
+            "Answer match (LLM)",
+            "generated answer matches golden answer",
             metrics.answer_match,
         ),
         _row(
-            "Hallucination rate (LLM) – claims not supported by retrieved chunks",
+            "Hallucination rate (LLM)",
+            "claims not supported by retrieved chunks",
             metrics.hallucination_rate,
         ),
         "",

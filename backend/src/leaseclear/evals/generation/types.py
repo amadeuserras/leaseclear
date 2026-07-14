@@ -54,6 +54,7 @@ class CaseResult:
     refused: bool
     expected_refusal: bool
     expected_answer: str | None
+    expected_citation_ids: list[str]
     answer_match: bool | None
     judge: JudgeVerdict | None
     ttft_s: float | None
