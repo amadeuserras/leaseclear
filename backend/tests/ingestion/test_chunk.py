@@ -16,21 +16,26 @@ def test_chunk_documents_corpus_lease() -> None:
 
     assert len(chunks) >= 10
 
-    labels = {chunk.clause_label for chunk in chunks}
+    titles = {chunk.clause_title for chunk in chunks}
     numbers = {chunk.clause_number for chunk in chunks}
-    assert "" in labels
+    citations = {chunk.citation for chunk in chunks}
+
     assert None in numbers
-    assert "3. Rent" in labels
-    assert "5. Security Deposit" in labels
+    assert "Rent" in titles
+    assert "Security Deposit" in titles
     assert "3" in numbers
     assert "5" in numbers
+    assert any(c == "§3" or c.startswith("§3(") for c in citations)
+    assert any(c == "§5" or c.startswith("§5(") for c in citations)
 
     rent = next(chunk for chunk in chunks if chunk.clause_number == "3")
     assert "$2,875.00" in rent.text
 
-    for chunk in chunks:
+    for index, chunk in enumerate(chunks):
         assert chunk.document_id == assigned.id
         assert chunk.document_slug == assigned.slug
         assert chunk.text
-        assert chunk.char_end > chunk.char_start
-        assert chunk.token_count > 0
+        assert chunk.index == index
+        assert chunk.citation
+        assert chunk.start_page >= 1
+        assert chunk.end_page >= chunk.start_page

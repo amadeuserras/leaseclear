@@ -43,7 +43,7 @@ def _build_prompt(
     chunks: list[ChunkBase], document: DocumentMetadata, count: int
 ) -> str:
     clause_block = "\n\n".join(
-        f"{c.clause_label or 'clause'}: {c.text[:CHUNK_CHAR_CAP]}"
+        f"{c.citation}: {c.text[:CHUNK_CHAR_CAP]}"
         for c in chunks[:MAX_CHUNKS]
     )
     return (

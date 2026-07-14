@@ -1,9 +1,7 @@
 export type AnswerSegment =
   { type: 'text'; value: string } | { type: 'citation'; value: string; slug: string; ref: string };
 
-const CITATION_RE = /\[([a-z0-9-]+) (§[^\]]+|p\.[^\]]+)\]/g;
-
-const displayRef = (ref: string) => (ref.startsWith('p.') ? ref.split('@')[0] : ref);
+const CITATION_RE = /\[([a-z0-9-]+) (§[^\]]+|p\d+(?:\(\d+\))?)\]/g;
 
 const prettifySlug = (slug: string) =>
   slug
@@ -12,20 +10,15 @@ const prettifySlug = (slug: string) =>
     .join(' ');
 
 export const citationLabel = (slug: string, ref: string, docNames: Map<string, string>) =>
-  `${docNames.get(slug) ?? prettifySlug(slug)} · ${displayRef(ref)}`;
+  `${docNames.get(slug) ?? prettifySlug(slug)} · ${ref}`;
 
-export const chunkCitationId = (
-  slug: string,
-  chunk: { clause_number: string | null; page_number: number; char_start: number },
-): string =>
-  chunk.clause_number
-    ? `[${slug} §${chunk.clause_number}]`
-    : `[${slug} p.${chunk.page_number}@${chunk.char_start}]`;
+export const chunkCitationId = (slug: string, chunk: { citation: string }): string =>
+  `[${slug} ${chunk.citation}]`;
 
 export const chunkMatchesCitation = (
   slug: string,
   ref: string,
-  chunk: { clause_number: string | null; page_number: number; char_start: number },
+  chunk: { citation: string },
 ): boolean => chunkCitationId(slug, chunk) === `[${slug} ${ref}]`;
 
 export const segmentAnswer = (text: string, docNames: Map<string, string>): AnswerSegment[] => {

@@ -20,7 +20,7 @@ async def test_trigram_search_tolerates_misspelled_names(
     results = await search("pet deposit for Danel Osey", top_k=5)
 
     assert results
-    assert results[0].clause_label == "2. Pet Deposit and Rent"
+    assert results[0].clause_title == "Pet Deposit and Rent"
 
 
 async def test_trigram_search_floor_filters_unrelated_questions(

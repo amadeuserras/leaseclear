@@ -17,8 +17,8 @@ async def get_chunks_by_documents(
     """
     rows = await get_conn().fetch(
         """--sql
-        SELECT id, document_id, document_slug, text, clause_number, clause_label,
-               page_number, char_start, char_end, token_count
+        SELECT id, document_id, document_slug, text, clause_number, clause_title,
+               start_page, end_page, "index", citation
         FROM (
             SELECT *, row_number() OVER (
                 PARTITION BY document_id ORDER BY random()
@@ -27,7 +27,7 @@ async def get_chunks_by_documents(
             WHERE document_id = ANY($1)
         ) ranked
         WHERE rn <= $2
-        ORDER BY document_slug, char_start
+        ORDER BY document_slug, "index"
         """,
         document_ids,
         per_document,
@@ -45,12 +45,11 @@ async def get_document_chunks(slug: str, user_id: UUID) -> list[ChunkBase]:
     rows = await get_conn().fetch(
         """--sql
         SELECT c.id, c.document_id, c.document_slug, c.text, c.clause_number,
-               c.clause_label, c.page_number, c.char_start, c.char_end,
-               c.token_count
+               c.clause_title, c.start_page, c.end_page, c."index", c.citation
         FROM chunks c
         JOIN documents d ON d.id = c.document_id
         WHERE d.user_id = $1 AND c.document_slug = $2
-        ORDER BY c.page_number, c.char_start
+        ORDER BY c."index"
         """,
         user_id,
         slug,

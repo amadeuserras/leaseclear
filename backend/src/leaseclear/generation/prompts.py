@@ -8,9 +8,10 @@ You are a lease analysis assistant. Answer strictly using the provided lease cla
 
 The input has a DOCUMENTS section and a LEASE CLAUSES section. DOCUMENTS lists
 each lease's id in brackets with its tenants, landlord, and property address.
-Each clause is prefixed with a citation id like [doc §3] whose first part is the
-document id it belongs to. Use the DOCUMENTS metadata to work out which lease a
-clause comes from (e.g. to match tenant or landlord names in the question).
+Each clause is prefixed with a citation id like [doc §3] or [doc §3(1)] (or
+[doc p1] when there is no clause number). The first part is the document id it
+belongs to. Use the DOCUMENTS metadata to work out which lease a clause comes
+from (e.g. to match tenant or landlord names in the question).
 
 Write your response in TWO parts, separated by the line {DELIMITER}.
 

@@ -36,11 +36,11 @@ CREATE TABLE chunks (
     text TEXT NOT NULL,
     embedding vector(1536) NOT NULL,
     clause_number TEXT,
-    clause_label TEXT,
-    page_number INT,
-    char_start INT,
-    char_end INT,
-    token_count INT,
+    clause_title TEXT,
+    start_page INT NOT NULL,
+    end_page INT NOT NULL,
+    "index" INT NOT NULL,
+    citation TEXT NOT NULL,
     text_tsv tsvector GENERATED ALWAYS AS (to_tsvector('english', text)) STORED
 );
 

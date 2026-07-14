@@ -20,8 +20,8 @@ const ChunkItem = forwardRef<HTMLDivElement, ChunkItemProps>(function ChunkItem(
   return (
     <div ref={ref} className="scroll-mt-2">
       <div className="mb-1.5 flex flex-wrap items-center gap-2">
-        {chunk.clause_label && (
-          <div className="text-text-main text-[13px] font-semibold">{chunk.clause_label}</div>
+        {chunk.clause_title && (
+          <div className="text-text-main text-[13px] font-semibold">{chunk.clause_title}</div>
         )}
         <span className="inline-flex items-center rounded-[20px] bg-white/6 px-2 py-px text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)]">
           {chunkCitationId(slug, chunk)}

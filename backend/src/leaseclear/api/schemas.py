@@ -40,8 +40,9 @@ class SuggestedQuestionsRequest(BaseModel):
 
 class Citation(BaseModel):
     chunk_id: UUID
-    clause_label: str
-    page_number: int
+    citation: str
+    clause_title: str | None
+    start_page: int
     passage: str
 
 
@@ -53,9 +54,11 @@ class QueryResponse(BaseModel):
 class DocumentChunkResponse(BaseModel):
     chunk_id: UUID
     clause_number: str | None
-    clause_label: str | None
-    page_number: int
-    char_start: int
+    clause_title: str | None
+    start_page: int
+    end_page: int
+    index: int
+    citation: str
     passage: str
 
 

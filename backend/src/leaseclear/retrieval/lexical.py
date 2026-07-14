@@ -18,8 +18,8 @@ async def search(
 ) -> list[ChunkBase]:
     rows = await get_conn().fetch(
         """--sql
-        SELECT id, document_id, document_slug, text, clause_number, clause_label,
-               page_number, char_start, char_end, token_count
+        SELECT id, document_id, document_slug, text, clause_number, clause_title,
+               start_page, end_page, "index", citation
         FROM chunks
         WHERE text_tsv @@ websearch_to_tsquery('english', $1)
           AND ($3::uuid[] IS NULL OR document_id = ANY($3))

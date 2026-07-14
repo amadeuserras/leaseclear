@@ -5,215 +5,151 @@ import uuid
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-import tiktoken
-
 from leaseclear.types import AssignedDocument, ChunkBase, PageText
 
-SUB_CLAUSE_LINE = re.compile(r"^(\d+\.\d+)\s+(.*)$")
-TOP_CLAUSE_LINE = re.compile(r"^(\d+)\.\s+(.*)$")
-TITLE = re.compile(r"^(.+?)\.(?:\s|$)")
-BARE_MARKER_LINE = re.compile(r"^(?:\d+\.|[A-Z]\.)$")
+# Top-level clause: "12." or "12. Title..."
+_TOP_CLAUSE = re.compile(r"^(\d{1,3})\.(?:\s+(.*))?$")
+
+# Dotted clause: "5.1", "5.1 Title...", "5.1.2 ...".
+_DOTTED_CLAUSE = re.compile(r"^(\d{1,3}(?:\.\d+)+)(?:\s+(.*))?$")
+
+# Sentence-ending punctuation or the end of the line, if there is none
+_TITLE_END = re.compile(r"^([^.:;]*)")
+
+# Bare markers: "3.", "5.1", or "A." with the real text on the next.
+_BARE_MARKER = re.compile(r"^(?:\d+\.|\d+(?:\.\d+)+|[A-Z]\.)$")
 
 MAX_CHUNK_CHARS = 2400
-SPLITTERS = ("\n\n", "\n", ". ", " ")
-_TOKEN_ENCODER = tiktoken.get_encoding("cl100k_base")
+_SPLITTERS = ("\n\n", "\n", ". ", " ")
+
+CitationBase = str
 
 
 @dataclass
-class _Section:
+class _Chunk:
     clause_number: str | None
-    clause_label: str
-    page_number: int
-    lines: list[tuple[int, str]]
-
-
-@dataclass
-class _RawChunk:
+    clause_title: str | None
     text: str
-    clause_number: str | None
-    clause_label: str
+    start_page: int
+    end_page: int
+    index: int = 0
+    citation: str = ""
+
+
+@dataclass
+class _Line:
+    text: str
     page_number: int
 
 
 def chunk_documents(documents: Sequence[AssignedDocument]) -> list[ChunkBase]:
     chunks: list[ChunkBase] = []
     for document in documents:
-        chunks.extend(_chunk_document(document))
-    return chunks
-
-
-def _chunk_document(document: AssignedDocument) -> list[ChunkBase]:
-    flat_lines = _flatten_pages(document.pages)
-    sections = _split_into_sections(flat_lines)
-    raw_chunks: list[_RawChunk] = []
-    for section in sections:
-        raw_chunks.extend(_section_to_chunks(section))
-
-    full_text = _section_text(flat_lines)
-    search_from = 0
-    chunks: list[ChunkBase] = []
-    for raw in raw_chunks:
-        char_start = full_text.find(raw.text, search_from)
-        if char_start == -1:
-            char_start = search_from
-        char_end = char_start + len(raw.text)
-        search_from = char_end
-        chunks.append(
-            ChunkBase(
-                id=uuid.uuid4(),
-                document_id=document.id,
-                document_slug=document.slug,
-                text=raw.text,
-                clause_number=raw.clause_number,
-                clause_label=raw.clause_label,
-                page_number=raw.page_number,
-                char_start=char_start,
-                char_end=char_end,
-                token_count=_count_tokens(raw.text),
+        for raw in _chunk_pages(document.pages):
+            chunks.append(
+                ChunkBase(
+                    id=uuid.uuid4(),
+                    document_id=document.id,
+                    document_slug=document.slug,
+                    text=raw.text,
+                    clause_number=raw.clause_number,
+                    clause_title=raw.clause_title,
+                    start_page=raw.start_page,
+                    end_page=raw.end_page,
+                    index=raw.index,
+                    citation=raw.citation,
+                )
             )
-        )
     return chunks
 
 
-def _flatten_pages(pages: list[PageText]) -> list[tuple[int, str]]:
-    lines = [
-        (page.page_number, line)
-        for page in pages
-        if page.text
-        for line in page.text.splitlines()
-    ]
+def _chunk_pages(pages: list[PageText]) -> list[_Chunk]:
+    lines = _flatten_lines(pages)
+
+    chunks: list[_Chunk] = []
+    clause: str | None = None
+    title: str | None = None
+    body: list[str] = []
+    start_page: int | None = None
+    end_page: int | None = None
+
+    def flush() -> None:
+        if body and start_page is not None and end_page is not None:
+            chunks.append(
+                _Chunk(
+                    clause_number=clause,
+                    clause_title=title,
+                    text="\n".join(body),
+                    start_page=start_page,
+                    end_page=end_page,
+                )
+            )
+
+    for line in lines:
+        start = _clause_start(line.text)
+        if start is not None:
+            flush()
+            clause, title = start
+            body = [line.text]
+            start_page = line.page_number
+            end_page = line.page_number
+        else:
+            if start_page is None:
+                start_page = line.page_number
+            body.append(line.text)
+            end_page = line.page_number
+
+    flush()
+    result = [piece for chunk in chunks for piece in _split_chunk(chunk)]
+    _assign_citations(result)
+    for index, chunk in enumerate(result):
+        chunk.index = index
+    return result
+
+
+def _flatten_lines(pages: list[PageText]) -> list[_Line]:
+    lines: list[_Line] = []
+    for page in pages:
+        for raw_line in page.text.splitlines():
+            text = raw_line.strip()
+            if text:
+                lines.append(_Line(text=text, page_number=page.page_number))
     return _merge_bare_markers(lines)
 
 
-def _merge_bare_markers(lines: list[tuple[int, str]]) -> list[tuple[int, str]]:
-    """Join a clause/sub-clause marker that PDF text extraction split onto its
-    own line (e.g. "3." followed by "Rent. Tenant shall pay...") with the
-    line that follows, so it still matches the clause-start regexes."""
-    merged: list[tuple[int, str]] = []
+def _merge_bare_markers(lines: list[_Line]) -> list[_Line]:
+    merged: list[_Line] = []
     i = 0
     while i < len(lines):
-        page_number, line = lines[i]
-        if BARE_MARKER_LINE.match(line.strip()) and i + 1 < len(lines):
-            _, next_line = lines[i + 1]
-            merged.append((page_number, f"{line.strip()} {next_line.strip()}"))
+        line = lines[i]
+        if _BARE_MARKER.match(line.text) and i + 1 < len(lines):
+            nxt = lines[i + 1]
+            merged.append(
+                _Line(
+                    text=f"{line.text} {nxt.text}",
+                    page_number=line.page_number,
+                )
+            )
             i += 2
             continue
-        merged.append((page_number, line))
+        merged.append(line)
         i += 1
     return merged
 
 
-def _split_into_sections(lines: list[tuple[int, str]]) -> list[_Section]:
-    sections: list[_Section] = []
-    current: _Section | None = None
+def _clause_start(line: str) -> tuple[str, str | None] | None:
+    match = _DOTTED_CLAUSE.match(line) or _TOP_CLAUSE.match(line)
+    if not match:
+        return None
 
-    for page_number, line in lines:
-        clause = _parse_clause_start(line)
-        if clause is not None:
-            if current is not None:
-                sections.append(current)
-            num, rest = clause
-            current = _Section(
-                clause_number=num,
-                clause_label=_clause_label(num, rest),
-                page_number=page_number,
-                lines=[(page_number, line)],
-            )
-            continue
+    number = match.group(1)
+    rest = (match.group(2) or "").strip()
+    if not rest:
+        return number, None
 
-        if current is None:
-            current = _Section(
-                clause_number=None,
-                clause_label="",
-                page_number=page_number,
-                lines=[(page_number, line)],
-            )
-        else:
-            current.lines.append((page_number, line))
-
-    if current is not None:
-        sections.append(current)
-
-    return sections
-
-
-def _section_to_chunks(section: _Section) -> list[_RawChunk]:
-    text = _section_text(section.lines).strip()
-    if not text:
-        return []
-
-    pieces = _split_oversized(text, MAX_CHUNK_CHARS)
-    chunks: list[_RawChunk] = []
-    for index, piece in enumerate(pieces):
-        page_number = _page_for_piece(section.lines, index, pieces)
-        body = piece if index == 0 else _prepend_label(piece, section.clause_label)
-        chunks.append(
-            _RawChunk(
-                text=body,
-                clause_number=section.clause_number,
-                clause_label=section.clause_label,
-                page_number=page_number,
-            )
-        )
-    return chunks
-
-
-def _section_text(lines: list[tuple[int, str]]) -> str:
-    if not lines:
-        return ""
-
-    parts = [lines[0][1]]
-    for index in range(1, len(lines)):
-        prev_page = lines[index - 1][0]
-        page, line = lines[index]
-        separator = "\n\n" if page != prev_page else "\n"
-        parts.append(separator + line)
-    return "".join(parts)
-
-
-def _page_for_piece(
-    lines: list[tuple[int, str]],
-    piece_index: int,
-    pieces: list[str],
-) -> int:
-    if piece_index == 0:
-        return lines[0][0]
-
-    offset = sum(len(pieces[i]) for i in range(piece_index))
-    consumed = 0
-    for page_number, line in lines:
-        line_len = len(line) + 1
-        if consumed + line_len > offset:
-            return page_number
-        consumed += line_len
-    return lines[-1][0]
-
-
-def _parse_clause_start(line: str) -> tuple[str, str] | None:
-    sub_match = SUB_CLAUSE_LINE.match(line)
-    if sub_match:
-        return sub_match.group(1), sub_match.group(2)
-    top_match = TOP_CLAUSE_LINE.match(line)
-    if top_match:
-        return top_match.group(1), top_match.group(2)
-    return None
-
-
-def _clause_label(num: str, rest: str) -> str:
-    title_match = TITLE.match(rest)
-    if title_match:
-        return f"{num}. {title_match.group(1).strip()}"
-    return num
-
-
-def _prepend_label(body: str, label: str) -> str:
-    if not label:
-        return body
-    return f"{label}\n\n{body}"
-
-
-def _count_tokens(text: str) -> int:
-    return len(_TOKEN_ENCODER.encode(text))
+    title_match = _TITLE_END.match(rest)
+    title = title_match.group(1).strip() if title_match else ""
+    return number, (title or None)
 
 
 def _split_oversized(text: str, max_chars: int) -> list[str]:
@@ -223,7 +159,7 @@ def _split_oversized(text: str, max_chars: int) -> list[str]:
     if len(text) <= max_chars:
         return [text]
 
-    for separator in SPLITTERS:
+    for separator in _SPLITTERS:
         split_at = text.rfind(separator, 0, max_chars)
         if split_at <= 0:
             continue
@@ -238,3 +174,36 @@ def _split_oversized(text: str, max_chars: int) -> list[str]:
     if not head:
         return _split_oversized(tail, max_chars)
     return [head, *_split_oversized(tail, max_chars)]
+
+
+def _split_chunk(chunk: _Chunk) -> list[_Chunk]:
+    pieces = _split_oversized(chunk.text, MAX_CHUNK_CHARS)
+    return [
+        _Chunk(
+            clause_number=chunk.clause_number,
+            clause_title=chunk.clause_title,
+            text=piece,
+            start_page=chunk.start_page,
+            end_page=chunk.end_page,
+        )
+        for piece in pieces
+    ]
+
+
+def _citation_base(chunk: _Chunk) -> CitationBase:
+    if chunk.clause_number is not None:
+        return f"§{chunk.clause_number}"
+    return f"p{chunk.start_page}"
+
+
+def _assign_citations(chunks: list[_Chunk]) -> None:
+    groups: dict[CitationBase, list[_Chunk]] = {}
+    for chunk in chunks:
+        groups.setdefault(_citation_base(chunk), []).append(chunk)
+
+    for base, group in groups.items():
+        if len(group) == 1:
+            group[0].citation = base
+            continue
+        for index, chunk in enumerate(group, start=1):
+            chunk.citation = f"{base}({index})"

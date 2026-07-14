@@ -19,11 +19,11 @@ def _chunk(chunk_id: UUID) -> ChunkBase:
         document_slug="test-lease",
         text=f"text for {chunk_id}",
         clause_number=None,
-        clause_label=None,
-        page_number=1,
-        char_start=0,
-        char_end=10,
-        token_count=5,
+        clause_title=None,
+        start_page=1,
+        end_page=1,
+        index=0,
+        citation="p1",
     )
 
 

@@ -19,7 +19,6 @@ dependencies = [
     "python-slugify>=8.0.4",
     "slowapi>=0.1.10",
     "sse-starlette>=3.4.5",
-    "tiktoken>=0.9",
     "uvicorn[standard]>=0.32",
 ]
 

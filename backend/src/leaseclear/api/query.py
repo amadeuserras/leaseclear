@@ -28,8 +28,9 @@ def _to_response(result: GenerationResult, retrieved: list[ChunkBase]) -> QueryR
         citations=[
             Citation(
                 chunk_id=chunk.id,
-                clause_label=chunk.clause_label or "",
-                page_number=chunk.page_number,
+                citation=chunk.citation,
+                clause_title=chunk.clause_title,
+                start_page=chunk.start_page,
                 passage=chunk.text,
             )
             for chunk in cited

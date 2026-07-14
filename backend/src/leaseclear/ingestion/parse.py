@@ -11,7 +11,7 @@ from leaseclear.types import PageText, ParsedDocument, UploadDocument
 _HORIZONTAL_WHITESPACE = re.compile(r"[^\S\n]+")
 
 
-def _normalize_whitespace(text: str) -> str:
+def _normalize(text: str) -> str:
     lines = text.split("\n")
     cleaned = [_HORIZONTAL_WHITESPACE.sub(" ", line).strip() for line in lines]
     return "\n".join(cleaned)
@@ -24,7 +24,7 @@ def parse_document(upload: UploadDocument) -> ParsedDocument:
     with fitz.open(source) as doc:
         for index in range(doc.page_count):
             page = doc[index]
-            text = _normalize_whitespace(cast(str, page.get_text("text")).strip())
+            text = _normalize(cast(str, page.get_text("text")).strip())
             pages.append(PageText(page_number=index + 1, text=text))
 
     return ParsedDocument(filename=upload.filename, pages=pages)

@@ -54,17 +54,15 @@ class ChunkBase:
     document_slug: str
     text: str
     clause_number: str | None
-    clause_label: str | None
-    page_number: int
-    char_start: int
-    char_end: int
-    token_count: int
+    clause_title: str | None
+    start_page: int
+    end_page: int
+    index: int
+    citation: str
 
     @property
     def citation_id(self) -> str:
-        if self.clause_number:
-            return f"[{self.document_slug} §{self.clause_number}]"
-        return f"[{self.document_slug} p.{self.page_number}@{self.char_start}]"
+        return f"[{self.document_slug} {self.citation}]"
 
 
 @dataclass

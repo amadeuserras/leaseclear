@@ -31,11 +31,11 @@ SEED_CHUNKS = [
         document_slug=chunk["document_slug"],
         text=chunk["text"],
         clause_number=chunk["clause_number"],
-        clause_label=chunk["clause_label"],
-        page_number=chunk["page_number"],
-        char_start=chunk["char_start"],
-        char_end=chunk["char_end"],
-        token_count=chunk["token_count"],
+        clause_title=chunk["clause_title"],
+        start_page=chunk["start_page"],
+        end_page=chunk["end_page"],
+        index=chunk["index"],
+        citation=chunk["citation"],
         embedding=chunk["embedding"],
     )
     for chunk in _fixture_data["chunks"]

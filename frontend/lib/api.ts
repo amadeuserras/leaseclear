@@ -17,17 +17,20 @@ export type LeaseDocument = {
 
 export type Citation = {
   chunk_id: string;
-  clause_label: string;
-  page_number: number;
+  citation: string;
+  clause_title: string | null;
+  start_page: number;
   passage: string;
 };
 
 export type DocumentChunk = {
   chunk_id: string;
   clause_number: string | null;
-  clause_label: string | null;
-  page_number: number;
-  char_start: number;
+  clause_title: string | null;
+  start_page: number;
+  end_page: number;
+  index: number;
+  citation: string;
   passage: string;
 };
 

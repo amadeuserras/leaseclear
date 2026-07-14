@@ -17,7 +17,7 @@ def is_relevant_chunk(item: GoldenItem, chunk: ChunkBase) -> bool:
         return False
     if item.clause_number is not None:
         return chunk.clause_number == item.clause_number
-    return chunk.page_number == item.page_number
+    return chunk.start_page == item.page_number
 
 
 def check_recall(item: GoldenItem, retrieved: list[ChunkBase]) -> bool | None:

@@ -24,13 +24,15 @@ def test_get_chunks_returns_full_document_in_reading_order(
     assert set(first) == {
         "chunk_id",
         "clause_number",
-        "clause_label",
-        "page_number",
-        "char_start",
+        "clause_title",
+        "start_page",
+        "end_page",
+        "index",
+        "citation",
         "passage",
     }
 
-    ordering = [(c["page_number"], c["char_start"]) for c in chunks]
+    ordering = [c["index"] for c in chunks]
     assert ordering == sorted(ordering)
 
 
