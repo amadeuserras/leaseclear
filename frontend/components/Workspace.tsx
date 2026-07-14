@@ -39,8 +39,8 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
     [documents],
   );
 
-  const openDoc = (slug: string, name: string, citationRef: string | null = null) =>
-    viewer.open(slug, name, citationRef);
+  const openDoc = (slug: string, name: string, citation: string | null = null) =>
+    viewer.open(slug, name, citation);
 
   const closeDoc = () => viewer.close();
 
@@ -50,8 +50,8 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
     if (viewer.target?.slug === source.slug) closeDoc();
   };
 
-  const openCitation = (slug: string, ref: string) =>
-    openDoc(slug, docNames.get(slug) ?? slug, ref);
+  const openCitation = (slug: string, citation: string) =>
+    openDoc(slug, docNames.get(slug) ?? slug, citation);
 
   return (
     <>

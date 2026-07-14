@@ -15,14 +15,6 @@ export type LeaseDocument = {
   property_address: string | null;
 };
 
-export type Citation = {
-  chunk_id: string;
-  citation: string;
-  clause_title: string | null;
-  start_page: number;
-  passage: string;
-};
-
 export type DocumentChunk = {
   chunk_id: string;
   clause_number: string | null;
@@ -36,7 +28,6 @@ export type DocumentChunk = {
 
 export type QueryResult = {
   answer: string;
-  citations: Citation[];
 };
 
 export type StreamQueryParams = {

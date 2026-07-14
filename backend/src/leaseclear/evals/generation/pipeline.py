@@ -12,17 +12,15 @@ from leaseclear.evals.golden.loader import GoldenItem
 from leaseclear.evals.retrieval_recall import check_recall
 from leaseclear.filtering.filter import filter_documents
 from leaseclear.generation.generate import generate_stream
-from leaseclear.generation.parse import parse_response, resolve_citations
+from leaseclear.generation.parse import generation_result_from_answer, resolve_citations
 from leaseclear.generation.prompts import REFUSAL_MESSAGE
 from leaseclear.generation.validate import is_refusal, validate
 from leaseclear.retrieval import hybrid
 from leaseclear.types import (
     ChunkBase,
-    Citation,
     DocumentMetadata,
     GenerationResult,
     GenerationStreamMeta,
-    ParsedResponse,
 )
 
 MAX_CONCURRENT_CASES = 4
@@ -41,11 +39,7 @@ async def _generate(
             ttft_s = time.perf_counter() - start
         raw_parts.append(token)
 
-    parsed: ParsedResponse = parse_response("".join(raw_parts))
-    result = GenerationResult(
-        answer=parsed.prose,
-        citations=[Citation(id=cid) for cid in parsed.citation_ids],
-    )
+    result = generation_result_from_answer("".join(raw_parts))
     return result, meta, ttft_s, time.perf_counter() - start
 
 

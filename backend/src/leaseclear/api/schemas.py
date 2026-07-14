@@ -38,17 +38,8 @@ class SuggestedQuestionsRequest(BaseModel):
     document_ids: list[UUID] | None = None
 
 
-class Citation(BaseModel):
-    chunk_id: UUID
-    citation: str
-    clause_title: str | None
-    start_page: int
-    passage: str
-
-
 class QueryResponse(BaseModel):
     answer: str
-    citations: list[Citation]
 
 
 class DocumentChunkResponse(BaseModel):

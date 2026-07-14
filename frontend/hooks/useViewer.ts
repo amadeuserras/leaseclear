@@ -8,7 +8,7 @@ import { useState } from 'react';
 export type ViewerTarget = {
   slug: string;
   name: string;
-  citationRef: string | null;
+  citation: string | null;
 };
 
 export const useViewer = () => {
@@ -18,9 +18,9 @@ export const useViewer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  const open = async (slug: string, name: string, citationRef: string | null = null) => {
+  const open = async (slug: string, name: string, citation: string | null = null) => {
     const sameDoc = target?.slug === slug;
-    setTarget({ slug, name, citationRef });
+    setTarget({ slug, name, citation });
     if (sameDoc && !error) return;
 
     setIsLoading(true);

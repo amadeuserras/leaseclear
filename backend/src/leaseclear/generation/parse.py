@@ -1,30 +1,31 @@
 from __future__ import annotations
 
-import json
+import re
 
-from leaseclear.generation.prompts import DELIMITER
-from leaseclear.types import ChunkBase, ParsedResponse
-from leaseclear.utils.text import strip_markdown_fence
+from leaseclear.types import ChunkBase, Citation, GenerationResult
+
+# Matches inline citation ids as they appear in answers and chunk prefixes.
+CITATION_ID_RE = re.compile(r"\[([a-z0-9-]+) (§[^\]]+|p\d+(?:\(\d+\))?)\]")
 
 
-def parse_response(raw: str) -> ParsedResponse:
-    parts = raw.split(DELIMITER, 1)
-    if len(parts) != 2:
-        raise ValueError(
-            f"Expected prose and metadata separated by {DELIMITER!r}\n\nRaw:\n{raw}"
-        )
-    prose = parts[0].rstrip()
-    try:
-        data = json.loads(strip_markdown_fence(parts[1]))
-    except json.JSONDecodeError as e:
-        raise ValueError(
-            f"Claude returned invalid metadata JSON: {e}\n\nRaw:\n{raw}"
-        ) from e
-    if not isinstance(data, list):
-        raise ValueError(
-            f"Expected metadata to be a JSON array of citation ids\n\nRaw:\n{raw}"
-        )
-    return ParsedResponse(prose=prose, citation_ids=data)
+def extract_citation_ids(text: str) -> list[str]:
+    """Distinct citation ids in reading order, taken from inline markers."""
+    ids: list[str] = []
+    seen: set[str] = set()
+    for match in CITATION_ID_RE.finditer(text):
+        citation_id = match.group(0)
+        if citation_id not in seen:
+            seen.add(citation_id)
+            ids.append(citation_id)
+    return ids
+
+
+def generation_result_from_answer(answer: str) -> GenerationResult:
+    answer = answer.strip()
+    return GenerationResult(
+        answer=answer,
+        citations=[Citation(id=cid) for cid in extract_citation_ids(answer)],
+    )
 
 
 def resolve_citations(

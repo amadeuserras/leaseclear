@@ -1,5 +1,6 @@
 export type AnswerSegment =
-  { type: 'text'; value: string } | { type: 'citation'; value: string; slug: string; ref: string };
+  | { type: 'text'; value: string }
+  | { type: 'citation'; value: string; slug: string; citation: string };
 
 const CITATION_RE = /\[([a-z0-9-]+) (§[^\]]+|p\d+(?:\(\d+\))?)\]/g;
 
@@ -12,15 +13,7 @@ const prettifySlug = (slug: string) =>
 export const citationLabel = (slug: string, ref: string, docNames: Map<string, string>) =>
   `${docNames.get(slug) ?? prettifySlug(slug)} · ${ref}`;
 
-export const chunkCitationId = (slug: string, chunk: { citation: string }): string =>
-  `[${slug} ${chunk.citation}]`;
-
-export const chunkMatchesCitation = (
-  slug: string,
-  ref: string,
-  chunk: { citation: string },
-): boolean => chunkCitationId(slug, chunk) === `[${slug} ${ref}]`;
-
+/** Split answer text on inline citation ids like [slug §3] / [slug p1]. */
 export const segmentAnswer = (text: string, docNames: Map<string, string>): AnswerSegment[] => {
   const segments: AnswerSegment[] = [];
   let cursor = 0;
@@ -32,7 +25,7 @@ export const segmentAnswer = (text: string, docNames: Map<string, string>): Answ
       type: 'citation',
       value: citationLabel(match[1], match[2], docNames),
       slug: match[1],
-      ref: match[2],
+      citation: match[2],
     });
     cursor = match.index + match[0].length;
   }

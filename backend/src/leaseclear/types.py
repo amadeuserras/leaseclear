@@ -81,12 +81,6 @@ class GenerationResult:
     citations: list[Citation]
 
 
-@dataclass(frozen=True)
-class ParsedResponse:
-    prose: str
-    citation_ids: list[str]
-
-
 @dataclass
 class ValidationResult:
     passed: bool

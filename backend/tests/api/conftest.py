@@ -12,7 +12,6 @@ from leaseclear.api.limiter import limiter
 from leaseclear.api.main import app
 from leaseclear.core.config import settings
 from leaseclear.db.connection import use_database
-from leaseclear.generation.prompts import DELIMITER
 from leaseclear.types import ChunkBase, DocumentMetadata, GenerationStreamMeta
 
 MOCK_INPUT_TOKENS = 10
@@ -45,7 +44,7 @@ def mock_generate_stream(monkeypatch: pytest.MonkeyPatch) -> None:
     ) -> tuple[AsyncIterator[str], GenerationStreamMeta]:
         async def tokens() -> AsyncIterator[str]:
             cid = chunks[0].citation_id if chunks else "[lease §unknown]"
-            yield (f'A mock answer. {cid}\n{DELIMITER}\n["{cid}"]')
+            yield f"A mock answer. {cid}"
 
         return tokens(), GenerationStreamMeta(
             input_tokens=MOCK_INPUT_TOKENS,

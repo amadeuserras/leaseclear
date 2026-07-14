@@ -65,7 +65,11 @@ export const useChat = (selectedIds: string[]) => {
           setMessages((prev) =>
             prev.map((m) => (m.id === answerId ? { ...m, text: m.text + t } : m)),
           ),
-        onDone: () => patchMessage(answerId, { streaming: false }),
+        onDone: (result) =>
+          patchMessage(answerId, {
+            streaming: false,
+            text: result.answer,
+          }),
       });
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {

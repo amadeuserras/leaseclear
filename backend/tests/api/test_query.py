@@ -7,7 +7,6 @@ from uuid import UUID
 import asyncpg
 from fastapi.testclient import TestClient
 
-from leaseclear.generation.prompts import DELIMITER
 from tests.data.corpus import CORPUS_LEASE_DOCUMENT_ID
 
 
@@ -53,11 +52,11 @@ def test_query_endpoint_streams_sse(
     assert len(done_events) == 1
     streamed = "".join(data for _, data in token_events)
     assert streamed.startswith("A mock answer.")
-    assert DELIMITER not in streamed
+    assert "[" in streamed and "§" in streamed
 
     payload = json.loads(done_events[0][1])
-    assert isinstance(payload["answer"], str)
-    assert payload["citations"], "owned document should be retrieved and cited"
+    assert set(payload) == {"answer"}
+    assert payload["answer"] == streamed
 
 
 def test_query_only_searches_own_documents(
@@ -84,7 +83,10 @@ def test_query_only_searches_own_documents(
         body = response.read().decode()
 
     done_data = next(data for event, data in parse_sse_events(body) if event == "done")
-    assert json.loads(done_data)["citations"] == []
+    payload = json.loads(done_data)
+    assert set(payload) == {"answer"}
+    # No owned docs → empty retrieval → mock falls back to an unknown citation id.
+    assert payload["answer"] == "A mock answer. [lease §unknown]"
 
 
 async def test_query_writes_log_row(

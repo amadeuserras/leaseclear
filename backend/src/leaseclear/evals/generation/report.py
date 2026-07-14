@@ -51,7 +51,10 @@ def _judge_data(verdict: JudgeVerdict) -> dict[str, Any]:
 
 def _generation_body(result: CaseResult) -> list[str]:
     citation_ids = [c.id for c in result.result.citations]
-    return _text_fence(result.result.answer) + [""] + _json_fence(citation_ids)
+    body = _text_fence(result.result.answer)
+    if citation_ids:
+        body += [""] + _json_fence(citation_ids)
+    return body
 
 
 def _render_case(result: CaseResult) -> list[str]:

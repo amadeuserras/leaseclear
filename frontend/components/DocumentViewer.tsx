@@ -4,17 +4,15 @@ import { ResizeHandle } from '@/components/ResizeHandle';
 import { CloseIcon } from '@/components/icons';
 import type { ViewerTarget } from '@/hooks/useViewer';
 import type { DocumentChunk } from '@/lib/api';
-import { chunkCitationId, chunkMatchesCitation } from '@/lib/citations';
 import { forwardRef, useEffect, useRef } from 'react';
 
 type ChunkItemProps = {
-  slug: string;
   chunk: DocumentChunk;
   highlighted: boolean;
 };
 
 const ChunkItem = forwardRef<HTMLDivElement, ChunkItemProps>(function ChunkItem(
-  { slug, chunk, highlighted },
+  { chunk, highlighted },
   ref,
 ) {
   return (
@@ -24,7 +22,7 @@ const ChunkItem = forwardRef<HTMLDivElement, ChunkItemProps>(function ChunkItem(
           <div className="text-text-main text-[13px] font-semibold">{chunk.clause_title}</div>
         )}
         <span className="inline-flex items-center rounded-[20px] bg-white/6 px-2 py-px text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)]">
-          {chunkCitationId(slug, chunk)}
+          {chunk.citation}
         </span>
       </div>
       <div
@@ -61,7 +59,7 @@ export function DocumentViewer({
 
   useEffect(() => {
     citedRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, [target.slug, target.citationRef, chunks]);
+  }, [target.slug, target.citation, chunks]);
 
   return (
     <section
@@ -91,14 +89,11 @@ export function DocumentViewer({
           <div className="text-text-secondary text-[13px]">Couldn’t load this document.</div>
         ) : (
           chunks.map((c) => {
-            const cited =
-              target.citationRef !== null &&
-              chunkMatchesCitation(target.slug, target.citationRef, c);
+            const cited = target.citation !== null && c.citation === target.citation;
             return (
               <ChunkItem
                 key={c.chunk_id}
                 ref={cited ? citedRef : undefined}
-                slug={target.slug}
                 chunk={c}
                 highlighted={cited}
               />
