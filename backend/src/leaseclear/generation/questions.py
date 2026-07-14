@@ -43,8 +43,7 @@ def _build_prompt(
     chunks: list[ChunkBase], document: DocumentMetadata, count: int
 ) -> str:
     clause_block = "\n\n".join(
-        f"{c.citation}: {c.text[:CHUNK_CHAR_CAP]}"
-        for c in chunks[:MAX_CHUNKS]
+        f"{c.citation}: {c.text[:CHUNK_CHAR_CAP]}" for c in chunks[:MAX_CHUNKS]
     )
     return (
         f"DOCUMENT (every question must name one real detail of it — tenant, "
