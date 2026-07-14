@@ -107,35 +107,39 @@ def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> s
         "|---|---|---|---|---|---|",
         _row(
             "Retrieval recall@8",
-            "golden chunk was retrieved in the top 8 chunks",
+            "Golden chunk was retrieved in the top 8 chunks",
             metrics.retrieval_recall_at_8,
         ),
         _row(
             "Faithfulness (LLM)",
-            "claims supported by retrieved chunks text",
+            "Claims supported by retrieved chunks text",
             metrics.faithfulness,
         ),
         _row(
             "Citation precision (LLM)",
-            "claims supported by cited chunks",
+            "Claims supported by cited chunks",
             metrics.citation_precision,
         ),
-        _row("Refusal accuracy", "", metrics.refusal_accuracy),
+        _row(
+            "Refusal accuracy",
+            "Correctly refuses when question is unanswerable",
+            metrics.refusal_accuracy,
+        ),
         _row(
             "Answer match (LLM)",
-            "generated answer matches golden answer",
+            "Generated answer matches golden answer",
             metrics.answer_match,
         ),
         _row(
             "Hallucination rate (LLM)",
-            "claims not supported by retrieved chunks",
+            "Claims not supported by retrieved chunks",
             metrics.hallucination_rate,
         ),
         "",
-        f"p95 time-to-first-token – time until the first streamed token appears: "
+        f"p95 time-to-first-token – Time until the first streamed token appears: "
         f"{_fmt_s(metrics.p95_ttft_s)} (target < 1.5s)",
         "",
-        f"p95 total query latency – time until the full answer is generated: "
+        f"p95 total query latency – Time until the full answer is generated: "
         f"{_fmt_s(metrics.p95_total_s)}",
         "",
         "## Per-case results",
