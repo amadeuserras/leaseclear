@@ -36,7 +36,7 @@ def resolve_citations(
 
 
 def is_refusal(result: GenerationResult) -> bool:
-    return REFUSAL_MESSAGE in result.answer and not result.citations
+    return REFUSAL_MESSAGE in result.answer
 
 
 def validate(result: GenerationResult, chunks: list[ChunkBase]) -> ValidationResult:
