@@ -18,11 +18,15 @@ const ChunkItem = forwardRef<HTMLDivElement, ChunkItemProps>(function ChunkItem(
   return (
     <div ref={ref} className="scroll-mt-2">
       <div className="mb-1.5 flex flex-wrap items-center gap-2">
-        {chunk.clause_title && (
-          <div className="text-text-main text-[13px] font-semibold">{chunk.clause_title}</div>
+        {(chunk.clause_number || chunk.clause_title) && (
+          <div className="text-text-main text-[13px] font-semibold">
+            {[chunk.clause_number && `${chunk.clause_number}.`, chunk.clause_title]
+              .filter(Boolean)
+              .join(' ')}
+          </div>
         )}
         <span className="inline-flex items-center rounded-[20px] bg-white/6 px-2 py-px text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)]">
-          {chunk.citation}
+          {chunk.citation_id}
         </span>
       </div>
       <div
