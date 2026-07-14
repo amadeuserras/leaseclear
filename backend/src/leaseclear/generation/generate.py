@@ -15,7 +15,7 @@ Answer questions using only the provided lease clauses.
 Rules:
 - Do not use outside knowledge or make assumptions.
 - Every factual claim must include the citation ID of its supporting clause.
-- No markdown formatting.
+- Copy citation IDs exactly as provided.
 - If the answer is not supported by the lease clauses, respond with exactly:
 "{REFUSAL_MESSAGE}"
 """
