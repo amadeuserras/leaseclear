@@ -72,9 +72,8 @@ async def get_document_chunks(slug: str, user_id: UUID) -> list[DocumentChunkRes
             start_page=c.start_page,
             end_page=c.end_page,
             index=c.index,
-            citation=c.citation,
             citation_id=c.citation_id,
-            passage=c.text,
+            text=c.text,
         )
         for c in chunks
     ]

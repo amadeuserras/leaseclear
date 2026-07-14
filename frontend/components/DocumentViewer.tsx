@@ -34,7 +34,7 @@ const ChunkItem = forwardRef<HTMLDivElement, ChunkItemProps>(function ChunkItem(
           highlighted ? 'bg-highlight px-1 py-0.5' : ''
         }`}
       >
-        {chunk.passage}
+        {chunk.text}
       </div>
     </div>
   );

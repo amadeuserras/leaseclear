@@ -49,9 +49,8 @@ class DocumentChunkResponse(BaseModel):
     start_page: int
     end_page: int
     index: int
-    citation: str
     citation_id: str
-    passage: str
+    text: str
 
 
 class DocumentResponse(BaseModel):

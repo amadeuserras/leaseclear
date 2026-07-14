@@ -22,9 +22,8 @@ export type DocumentChunk = {
   start_page: number;
   end_page: number;
   index: number;
-  citation: string;
   citation_id: string;
-  passage: string;
+  text: string;
 };
 
 export type QueryResult = {
