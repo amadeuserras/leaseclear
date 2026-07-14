@@ -1,5 +1,6 @@
 'use client';
 
+import { CitationChip } from '@/components/CitationChip';
 import { ArrowUpIcon } from '@/components/icons';
 import type { ChatMessage } from '@/hooks/useChat';
 import { segmentAnswer, withholdPartialCitation } from '@/lib/citations';
@@ -61,13 +62,12 @@ function AnswerBody({ message, onCitation }: AnswerBodyProps) {
             <span key={i}>{seg.value}</span>
           )
         ) : (
-          <span
+          <CitationChip
             key={i}
+            citationId={seg.id}
             onClick={() => onCitation(seg.id)}
-            className={`mx-0.5 inline-flex cursor-pointer items-center gap-1 rounded-[20px] bg-white/6 px-2 py-px align-middle text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)] hover:bg-white/12 hover:text-[#ECEDEF] ${message.streaming ? 'animate-lc-fade-word' : ''}`}
-          >
-            {seg.id.slice(1, -1)}
-          </span>
+            className={`mx-0.5 align-middle ${message.streaming ? 'animate-lc-fade-word' : ''}`}
+          />
         ),
       )}
     </div>

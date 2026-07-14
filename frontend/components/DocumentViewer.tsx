@@ -1,5 +1,6 @@
 'use client';
 
+import { CitationChip } from '@/components/CitationChip';
 import { ResizeHandle } from '@/components/ResizeHandle';
 import { CloseIcon } from '@/components/icons';
 import type { ViewerTarget } from '@/hooks/useViewer';
@@ -25,9 +26,7 @@ const ChunkItem = forwardRef<HTMLDivElement, ChunkItemProps>(function ChunkItem(
               .join(' ')}
           </div>
         )}
-        <span className="inline-flex items-center rounded-[20px] bg-white/6 px-2 py-px text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)]">
-          {chunk.citation_id}
-        </span>
+        <CitationChip citationId={chunk.citation_id} />
       </div>
       <div
         className={`rounded box-decoration-clone text-[13.5px] leading-[1.65] text-[rgba(236,237,239,0.78)] ${
