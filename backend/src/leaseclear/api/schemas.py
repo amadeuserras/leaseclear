@@ -50,6 +50,7 @@ class DocumentChunkResponse(BaseModel):
     end_page: int
     index: int
     citation: str
+    citation_id: str
     passage: str
 
 

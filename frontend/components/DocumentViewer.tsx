@@ -3,7 +3,7 @@
 import { ResizeHandle } from '@/components/ResizeHandle';
 import { CloseIcon } from '@/components/icons';
 import type { ViewerTarget } from '@/hooks/useViewer';
-import type { DocumentChunk } from '@/lib/api';
+import type { DocumentChunk, LeaseDocument } from '@/lib/api';
 import { forwardRef, useEffect, useRef } from 'react';
 
 type ChunkItemProps = {
@@ -38,6 +38,7 @@ const ChunkItem = forwardRef<HTMLDivElement, ChunkItemProps>(function ChunkItem(
 
 type DocumentViewerProps = {
   target: ViewerTarget;
+  documents: LeaseDocument[];
   chunks: DocumentChunk[];
   isLoading: boolean;
   error: boolean;
@@ -48,6 +49,7 @@ type DocumentViewerProps = {
 
 export function DocumentViewer({
   target,
+  documents,
   chunks,
   isLoading,
   error,
@@ -56,10 +58,12 @@ export function DocumentViewer({
   onClose,
 }: DocumentViewerProps) {
   const citedRef = useRef<HTMLDivElement>(null);
+  const doc = documents.find((d) => d.slug === target.slug);
+  const name = doc?.filename ?? target.slug;
 
   useEffect(() => {
     citedRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, [target.slug, target.citation, chunks]);
+  }, [target.slug, target.citationId, chunks]);
 
   return (
     <section
@@ -70,7 +74,7 @@ export function DocumentViewer({
 
       <div className="border-hairline flex shrink-0 items-center justify-between gap-2.5 border-b px-[18px] py-4">
         <div className="min-w-0">
-          <div className="text-text-main truncate text-[13.5px] font-semibold">{target.name}</div>
+          <div className="text-text-main truncate text-[13.5px] font-semibold">{name}</div>
           <div className="mt-0.5 text-[11.5px] text-[rgba(236,237,239,0.45)]">
             {isLoading ? 'Loading…' : `${chunks.length} chunk${chunks.length === 1 ? '' : 's'}`}
           </div>
@@ -89,7 +93,7 @@ export function DocumentViewer({
           <div className="text-text-secondary text-[13px]">Couldn’t load this document.</div>
         ) : (
           chunks.map((c) => {
-            const cited = target.citation !== null && c.citation === target.citation;
+            const cited = target.citationId !== null && c.citation_id === target.citationId;
             return (
               <ChunkItem
                 key={c.chunk_id}

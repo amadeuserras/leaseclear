@@ -27,11 +27,10 @@ const toEntries = (messages: ChatMessage[]): Entry[] => {
 
 type AnswerBodyProps = {
   message: ChatMessage;
-  docNames: Map<string, string>;
-  onCitation: (slug: string, citation: string) => void;
+  onCitation: (citationId: string) => void;
 };
 
-function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
+function AnswerBody({ message, onCitation }: AnswerBodyProps) {
   if (message.error) {
     return <div className="text-text-secondary text-[14.5px] leading-[1.7]">{message.text}</div>;
   }
@@ -45,7 +44,7 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
   }
 
   const text = message.streaming ? withholdPartialCitation(message.text) : message.text;
-  const segments = segmentAnswer(text, docNames);
+  const segments = segmentAnswer(text);
 
   return (
     <div className="text-[14.5px] leading-[1.7] text-[rgba(236,237,239,0.82)]">
@@ -64,10 +63,10 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
         ) : (
           <span
             key={i}
-            onClick={() => onCitation(seg.slug, seg.citation)}
+            onClick={() => onCitation(seg.id)}
             className={`mx-0.5 inline-flex cursor-pointer items-center gap-1 rounded-[20px] bg-white/6 px-2 py-px align-middle text-[11px] font-medium whitespace-nowrap text-[rgba(236,237,239,0.5)] hover:bg-white/12 hover:text-[#ECEDEF] ${message.streaming ? 'animate-lc-fade-word' : ''}`}
           >
-            {seg.value}
+            {seg.id.slice(1, -1)}
           </span>
         ),
       )}
@@ -77,19 +76,16 @@ function AnswerBody({ message, docNames, onCitation }: AnswerBodyProps) {
 
 type EntryItemProps = {
   entry: Entry;
-  docNames: Map<string, string>;
-  onCitation: (slug: string, citation: string) => void;
+  onCitation: (citationId: string) => void;
 };
 
-function EntryItem({ entry, docNames, onCitation }: EntryItemProps) {
+function EntryItem({ entry, onCitation }: EntryItemProps) {
   return (
     <div className="space-y-2.5">
       <div className="text-text-main text-[16.5px] leading-[1.4] font-semibold">
         {entry.question}
       </div>
-      {entry.answer && (
-        <AnswerBody message={entry.answer} docNames={docNames} onCitation={onCitation} />
-      )}
+      {entry.answer && <AnswerBody message={entry.answer} onCitation={onCitation} />}
     </div>
   );
 }
@@ -169,18 +165,16 @@ type ChatPanelProps = {
   messages: ChatMessage[];
   isStreaming: boolean;
   selectedCount: number;
-  docNames: Map<string, string>;
   suggestions: string[];
   isLoadingSuggestions: boolean;
   onSend: (question: string) => void;
-  onCitation: (slug: string, citation: string) => void;
+  onCitation: (citationId: string) => void;
 };
 
 export function ChatPanel({
   messages,
   isStreaming,
   selectedCount,
-  docNames,
   suggestions,
   isLoadingSuggestions,
   onSend,
@@ -219,12 +213,7 @@ export function ChatPanel({
             </div>
             <div className="custom-scrollbar mx-auto min-h-0 w-full max-w-[760px] flex-1 space-y-11 overflow-y-auto px-1 pt-9 pb-8">
               {entries.map((entry) => (
-                <EntryItem
-                  key={entry.id}
-                  entry={entry}
-                  docNames={docNames}
-                  onCitation={onCitation}
-                />
+                <EntryItem key={entry.id} entry={entry} onCitation={onCitation} />
               ))}
             </div>
           </>

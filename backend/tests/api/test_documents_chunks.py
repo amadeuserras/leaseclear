@@ -29,8 +29,10 @@ def test_get_chunks_returns_full_document_in_reading_order(
         "end_page",
         "index",
         "citation",
+        "citation_id",
         "passage",
     }
+    assert first["citation_id"] == f"[test-lease {first['citation']}]"
 
     ordering = [c["index"] for c in chunks]
     assert ordering == sorted(ordering)

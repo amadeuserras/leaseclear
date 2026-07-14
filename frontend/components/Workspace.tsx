@@ -11,10 +11,9 @@ import { useSources } from '@/hooks/useSources';
 import { useSuggestedQuestions } from '@/hooks/useSuggestedQuestions';
 import { useViewer } from '@/hooks/useViewer';
 import type { LeaseDocument } from '@/lib/api';
+import { slugFromCitationId } from '@/lib/citations';
 import { initialsFromEmail } from '@/lib/session';
-import { useMemo, useState } from 'react';
-
-const filenameStem = (filename: string) => filename.replace(/\.[^.]+$/, '');
+import { useState } from 'react';
 
 type WorkspaceProps = {
   documents: LeaseDocument[];
@@ -34,24 +33,21 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
   const sourcesResize = useResizable(320, 220, 560, 1);
   const viewerResize = useResizable(340, 260, 640, -1);
 
-  const docNames = useMemo(
-    () => new Map(documents.map((d) => [d.slug, filenameStem(d.filename)])),
-    [documents],
-  );
-
-  const openDoc = (slug: string, name: string, citation: string | null = null) =>
-    viewer.open(slug, name, citation);
+  const openDoc = (slug: string, citationId: string | null = null) => viewer.open(slug, citationId);
 
   const closeDoc = () => viewer.close();
 
-  const openSource = (source: Source) => openDoc(source.slug, filenameStem(source.filename));
+  const openSource = (source: Source) => openDoc(source.slug);
 
   const onDeleted = (source: Source) => {
     if (viewer.target?.slug === source.slug) closeDoc();
   };
 
-  const openCitation = (slug: string, citation: string) =>
-    openDoc(slug, docNames.get(slug) ?? slug, citation);
+  const openCitation = (citationId: string) => {
+    const slug = slugFromCitationId(citationId);
+    if (!slug) return;
+    openDoc(slug, citationId);
+  };
 
   return (
     <>
@@ -82,7 +78,6 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
           messages={messages}
           isStreaming={isStreaming}
           selectedCount={selectedIds.length}
-          docNames={docNames}
           suggestions={suggestions}
           isLoadingSuggestions={isLoadingSuggestions}
           onSend={send}
@@ -91,6 +86,7 @@ export function Workspace({ documents, email, isDemo }: WorkspaceProps) {
         {viewer.target && (
           <DocumentViewer
             target={viewer.target}
+            documents={documents}
             chunks={viewer.chunks}
             isLoading={viewer.isLoading}
             error={viewer.error}

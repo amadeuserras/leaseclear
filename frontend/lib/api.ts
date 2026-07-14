@@ -23,6 +23,7 @@ export type DocumentChunk = {
   end_page: number;
   index: number;
   citation: string;
+  citation_id: string;
   passage: string;
 };
 
