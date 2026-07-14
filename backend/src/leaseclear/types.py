@@ -105,4 +105,3 @@ class QueryLogEntry:
     total_s: float | None
     input_tokens: int | None
     output_tokens: int | None
-    refused: bool

@@ -7,14 +7,17 @@ from leaseclear.db.connection import db_session
 from leaseclear.evals.db import get_all_documents
 from leaseclear.evals.generation import judge as judge_module
 from leaseclear.evals.generation import match as match_module
+from leaseclear.evals.generation.answer import (
+    is_refusal,
+    resolve_citations,
+    result_from_answer,
+    validate,
+)
 from leaseclear.evals.generation.types import CaseResult
 from leaseclear.evals.golden.loader import GoldenItem
 from leaseclear.evals.retrieval_recall import check_recall
 from leaseclear.filtering.filter import filter_documents
 from leaseclear.generation.generate import generate_stream
-from leaseclear.generation.parse import generation_result_from_answer, resolve_citations
-from leaseclear.generation.prompts import REFUSAL_MESSAGE
-from leaseclear.generation.validate import is_refusal, validate
 from leaseclear.retrieval import hybrid
 from leaseclear.types import (
     ChunkBase,
@@ -39,7 +42,7 @@ async def _generate(
             ttft_s = time.perf_counter() - start
         raw_parts.append(token)
 
-    result = generation_result_from_answer("".join(raw_parts))
+    result = result_from_answer("".join(raw_parts))
     return result, meta, ttft_s, time.perf_counter() - start
 
 
@@ -61,8 +64,8 @@ async def run_case(item: GoldenItem) -> CaseResult:
         result, meta, ttft_s, total_s = await _generate(
             item.question, retrieved_chunks, filtered_docs
         )
-        validation = validate(result, retrieved_chunks, REFUSAL_MESSAGE)
-        refused = is_refusal(result, REFUSAL_MESSAGE)
+        validation = validate(result, retrieved_chunks)
+        refused = is_refusal(result)
 
         verdict = None
         matched = None
@@ -109,7 +112,6 @@ async def run_case(item: GoldenItem) -> CaseResult:
             validation=validate(
                 GenerationResult(answer="", citations=[]),
                 [],
-                REFUSAL_MESSAGE,
             ),
             refused=False,
             expected_refusal=item.expected_refusal,

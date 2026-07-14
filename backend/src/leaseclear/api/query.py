@@ -10,9 +10,6 @@ from leaseclear.db.connection import db_session
 from leaseclear.db.logs import insert_query_log
 from leaseclear.filtering.filter import filter_documents
 from leaseclear.generation.generate import generate_stream
-from leaseclear.generation.parse import generation_result_from_answer
-from leaseclear.generation.prompts import REFUSAL_MESSAGE
-from leaseclear.generation.validate import is_refusal
 from leaseclear.ingestion.documents import get_documents
 from leaseclear.retrieval import hybrid
 from leaseclear.types import QueryLogEntry
@@ -52,8 +49,8 @@ async def query_events(
         answer_parts.append(token)
         yield {"event": "token", "data": token}
 
-    result = generation_result_from_answer("".join(answer_parts))
-    payload = QueryResponse(answer=result.answer)
+    answer = "".join(answer_parts).strip()
+    payload = QueryResponse(answer=answer)
     yield {"event": "done", "data": payload.model_dump_json()}
 
     total_s = time.perf_counter() - start
@@ -67,7 +64,6 @@ async def query_events(
         total_s=total_s,
         input_tokens=stream_meta.input_tokens,
         output_tokens=stream_meta.output_tokens,
-        refused=is_refusal(result, REFUSAL_MESSAGE),
     )
     try:
         async with db_session():

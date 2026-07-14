@@ -119,6 +119,5 @@ async def test_query_writes_log_row(
     assert row["chunk_ids_retrieved"]
     assert row["input_tokens"] == 10
     assert row["output_tokens"] == 20
-    assert row["refused"] is False
     assert row["ttft_s"] is not None and row["ttft_s"] > 0
     assert row["total_s"] is not None and row["total_s"] >= row["ttft_s"]

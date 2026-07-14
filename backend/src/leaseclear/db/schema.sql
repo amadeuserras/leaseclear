@@ -64,6 +64,5 @@ CREATE TABLE logs (
     total_s REAL,
     input_tokens INT,
     output_tokens INT,
-    refused BOOLEAN NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
