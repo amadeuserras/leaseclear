@@ -137,7 +137,7 @@ function Composer({
           </button>
         </div>
       </div>
-      <div className="mt-3 flex min-h-16 flex-wrap items-center justify-center gap-2">
+      <div className="mt-3 flex min-h-16 flex-wrap content-start justify-center gap-2">
         {isLoadingSuggestions
           ? SKELETON_WIDTHS.map((w, i) => (
               <div
