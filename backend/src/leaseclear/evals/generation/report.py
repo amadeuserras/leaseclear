@@ -60,13 +60,16 @@ def _generation_body(result: CaseResult) -> list[str]:
     return body
 
 
-def _render_case(result: CaseResult) -> list[str]:
-    user_message = _build_user_message(
-        result.question, result.retrieved, result.documents
-    )
+def _render_case(result: CaseResult, *, details: bool) -> list[str]:
     lines = [f"### {result.item_id}", ""]
-    lines.extend(_section("User message", _text_fence(user_message)))
-    lines.extend(_section("Generation result", _generation_body(result)))
+    if details:
+        user_message = _build_user_message(
+            result.question, result.retrieved, result.documents
+        )
+        lines.extend(_section("User message", _text_fence(user_message)))
+    else:
+        lines.extend(_section("Question", _text_fence(result.question)))
+    lines.extend(_section("Generated Answer", _generation_body(result)))
     golden_answer = result.expected_answer or "(Refusal)"
     golden_body = _text_fence(golden_answer)
     if result.expected_citation_ids:
@@ -95,7 +98,12 @@ def _render_case(result: CaseResult) -> list[str]:
     return lines
 
 
-def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> str:
+def render_metrics_md(
+    metrics: AggregateMetrics,
+    results: list[CaseResult],
+    *,
+    details: bool = False,
+) -> str:
     generated = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC")
     lines = [
         "# METRICS",
@@ -136,10 +144,9 @@ def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> s
             metrics.hallucination_rate,
         ),
         "",
-        f"p95 time-to-first-token – Time until the first streamed token appears: "
-        f"{_fmt_s(metrics.p95_ttft_s)} (target < 1.5s)",
-        "",
-        f"p95 total query latency – Time until the full answer is generated: "
+        f"*p95 time-to-first-token* – Time until the first streamed token appears: "
+        f"{_fmt_s(metrics.p95_ttft_s)}",
+        f"*p95 total query latency* – Time until the full answer is generated: "
         f"{_fmt_s(metrics.p95_total_s)}",
         "",
         "## Per-case results",
@@ -147,6 +154,6 @@ def render_metrics_md(metrics: AggregateMetrics, results: list[CaseResult]) -> s
     ]
 
     for r in results:
-        lines.extend(_render_case(r))
+        lines.extend(_render_case(r, details=details))
 
     return "\n".join(lines)

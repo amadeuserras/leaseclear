@@ -2,6 +2,7 @@
 
 Usage:
     uv run scripts/run_eval.py --mode generation --limit N
+    uv run scripts/run_eval.py --mode generation --limit N --details
     uv run scripts/run_eval.py --mode retrieval
     uv run scripts/run_eval.py --mode all --limit N
 """
@@ -30,14 +31,14 @@ async def _ensure_corpus_ingested() -> None:
         raise SystemExit("No documents in the eval database.")
 
 
-async def _run_generation(limit: int | None) -> None:
+async def _run_generation(limit: int | None, *, details: bool = False) -> None:
     items = load_golden_items(limit=limit)
     results = await run_all(items)
     metrics = aggregate_metrics(results)
 
     timestamp = dt.datetime.now(dt.UTC).strftime("%H%M%S-%Y%m%d")
     out_path = REPORTS_DIR / f"eval-generation-{timestamp}.md"
-    out_path.write_text(render_metrics_md(metrics, results))
+    out_path.write_text(render_metrics_md(metrics, results, details=details))
     print(f"wrote {out_path}")
 
     for score in (
@@ -63,14 +64,14 @@ async def _run_retrieval(limit: int | None) -> None:
     print(report)
 
 
-async def main(mode: str, limit: int | None) -> None:
+async def main(mode: str, limit: int | None, *, details: bool = False) -> None:
     REPORTS_DIR.mkdir(exist_ok=True)
 
     async with use_database(settings.eval_database_url):
         await _ensure_corpus_ingested()
 
         if mode in ("generation", "all"):
-            await _run_generation(limit)
+            await _run_generation(limit, details=details)
         if mode in ("retrieval", "all"):
             await _run_retrieval(limit)
 
@@ -88,7 +89,15 @@ if __name__ == "__main__":
         default=None,
         help="Items to run (required for --mode generation|all; optional for retrieval)",
     )
+    parser.add_argument(
+        "--details",
+        action="store_true",
+        help=(
+            "Include the full generation user message (docs + clauses + question) "
+            "in the report; default is question only"
+        ),
+    )
     args = parser.parse_args()
     if args.mode in ("generation", "all") and args.limit is None:
         parser.error("--limit is required when running the generation eval")
-    asyncio.run(main(args.mode, args.limit))
+    asyncio.run(main(args.mode, args.limit, details=args.details))
