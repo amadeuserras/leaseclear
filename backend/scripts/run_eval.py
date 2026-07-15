@@ -51,8 +51,8 @@ async def _run_generation(limit: int | None) -> None:
         print(f"{score.name}: {score.value} (target {score.target}, n={score.n})")
 
 
-async def _run_retrieval() -> None:
-    items = load_golden_items()
+async def _run_retrieval(limit: int | None) -> None:
+    items = load_golden_items(limit=limit)
     result = await evaluate_retrievers(items)
 
     timestamp = dt.datetime.now(dt.UTC).strftime("%H%M%S-%Y%m%d")
@@ -72,7 +72,7 @@ async def main(mode: str, limit: int | None) -> None:
         if mode in ("generation", "all"):
             await _run_generation(limit)
         if mode in ("retrieval", "all"):
-            await _run_retrieval()
+            await _run_retrieval(limit)
 
 
 if __name__ == "__main__":
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         "--limit",
         type=int,
         default=None,
-        help="Items to run (required for --mode generation|all)",
+        help="Items to run (required for --mode generation|all; optional for retrieval)",
     )
     args = parser.parse_args()
     if args.mode in ("generation", "all") and args.limit is None:

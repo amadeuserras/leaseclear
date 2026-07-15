@@ -53,14 +53,22 @@ class StrategyScore:
 class RetrievalEvalResult:
     k: int
     n_items: int
-    scores: list[StrategyScore]
+    filtered_scores: list[StrategyScore]
+    unfiltered_scores: list[StrategyScore]
 
     @property
-    def winner(self) -> StrategyScore:
-        return self.scores[0]
+    def mrr_winner(self) -> StrategyScore:
+        return max(self.filtered_scores, key=lambda s: s.mrr)
+
+    @property
+    def recall_winner(self) -> StrategyScore:
+        return max(self.filtered_scores, key=lambda s: s.recall_at_k)
+
+    def unfiltered_score_for(self, name: str) -> StrategyScore:
+        return next(s for s in self.unfiltered_scores if s.name == name)
 
 
-async def _search_base(question: str, document_ids: list[UUID]) -> BaseResults:
+async def _search_base(question: str, document_ids: list[UUID] | None) -> BaseResults:
     return BaseResults(
         vector=await vector.search(
             question, top_k=RETRIEVER_TOP_K, document_ids=document_ids
@@ -89,22 +97,11 @@ def _mean(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
-async def evaluate_retrievers(
-    items: list[GoldenItem], *, k: int = EVAL_TOP_K
-) -> RetrievalEvalResult:
-    scored = [item for item in items if has_relevance_label(item)]
+def _score_strategies(
+    scored: list[GoldenItem], bases: list[BaseResults], k: int
+) -> list[StrategyScore]:
     reciprocal_ranks: dict[str, list[float]] = {name: [] for name in STRATEGIES}
     hits: dict[str, list[float]] = {name: [] for name in STRATEGIES}
-
-    semaphore = asyncio.Semaphore(MAX_CONCURRENT_ITEMS)
-
-    async def _base_for(item: GoldenItem) -> BaseResults:
-        async with semaphore, db_session():
-            all_docs = await get_all_documents()
-            filtered_ids = await filter_documents(item.question, all_docs)
-            return await _search_base(item.question, document_ids=filtered_ids)
-
-    bases = await asyncio.gather(*(_base_for(item) for item in scored))
 
     for item, base in zip(scored, bases, strict=True):
         for name, strategy in STRATEGIES.items():
@@ -117,4 +114,31 @@ async def evaluate_retrievers(
         for name in STRATEGIES
     ]
     scores.sort(key=lambda s: s.mrr, reverse=True)
-    return RetrievalEvalResult(k=k, n_items=len(scored), scores=scores)
+    return scores
+
+
+async def evaluate_retrievers(
+    items: list[GoldenItem], *, k: int = EVAL_TOP_K
+) -> RetrievalEvalResult:
+    scored = [item for item in items if has_relevance_label(item)]
+
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_ITEMS)
+
+    async def _bases_for(item: GoldenItem) -> tuple[BaseResults, BaseResults]:
+        async with semaphore, db_session():
+            all_docs = await get_all_documents()
+            filtered_ids = await filter_documents(item.question, all_docs)
+            filtered_base = await _search_base(item.question, document_ids=filtered_ids)
+            unfiltered_base = await _search_base(item.question, document_ids=None)
+            return filtered_base, unfiltered_base
+
+    pairs = await asyncio.gather(*(_bases_for(item) for item in scored))
+    filtered_bases = [pair[0] for pair in pairs]
+    unfiltered_bases = [pair[1] for pair in pairs]
+
+    return RetrievalEvalResult(
+        k=k,
+        n_items=len(scored),
+        filtered_scores=_score_strategies(scored, filtered_bases, k),
+        unfiltered_scores=_score_strategies(scored, unfiltered_bases, k),
+    )
