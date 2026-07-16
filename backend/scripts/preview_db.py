@@ -187,7 +187,9 @@ def print_vertical(
             zip(headers, column_names, strict=True)
         ):
             max_width = (
-                MAX_COMPACT_CELL_WIDTH if compact[index] else min(MAX_CELL_WIDTH, value_width)
+                MAX_COMPACT_CELL_WIDTH
+                if compact[index]
+                else min(MAX_CELL_WIDTH, value_width)
             )
             value = format_cell(row[column_name], max_width=max_width)
             label = truncate(header, label_width).ljust(label_width)
