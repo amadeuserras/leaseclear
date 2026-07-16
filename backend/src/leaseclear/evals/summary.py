@@ -35,7 +35,15 @@ def _fmt_status(score: MetricScore) -> str:
     return "PASS" if score.passed else "FAIL"
 
 
-def render_generation_readme(metrics: AggregateMetrics) -> str:
+def _full_report_line(report: Path | None, repo_root: Path) -> str:
+    if report is None:
+        return "Full report: _none yet._"
+    return f"Full report: [{report.name}]({_rel(report, repo_root)})"
+
+
+def render_generation_readme(
+    metrics: AggregateMetrics, *, report: Path | None, repo_root: Path
+) -> str:
     lines = [
         "### Generation Summary",
         "",
@@ -48,11 +56,13 @@ def render_generation_readme(metrics: AggregateMetrics) -> str:
             f"| {label} | {_fmt_pct(score.value)} | {_fmt_target(score)} | "
             f"{score.n} | {_fmt_status(score)} |"
         )
-    lines.append("")
+    lines.extend(["", _full_report_line(report, repo_root), ""])
     return "\n".join(lines)
 
 
-def render_retrieval_readme(result: RetrievalEvalResult) -> str:
+def render_retrieval_readme(
+    result: RetrievalEvalResult, *, report: Path | None, repo_root: Path
+) -> str:
     mrr = result.mrr_winner
     recall = result.recall_winner
     lines = [
@@ -63,24 +73,10 @@ def render_retrieval_readme(result: RetrievalEvalResult) -> str:
         f"| MRR | {mrr.name} | {mrr.mrr:.2f} |",
         f"| Recall@{result.k} | {recall.name} | {recall.recall_at_k:.2f} |",
         "",
+        _full_report_line(report, repo_root),
+        "",
     ]
     return "\n".join(lines)
-
-
-def render_report_links(
-    *,
-    generation_report: Path | None,
-    retrieval_report: Path | None,
-    repo_root: Path,
-) -> str:
-    links: list[str] = []
-    if generation_report is not None:
-        links.append(f"[generation report]({_rel(generation_report, repo_root)})")
-    if retrieval_report is not None:
-        links.append(f"[retrieval report]({_rel(retrieval_report, repo_root)})")
-    if not links:
-        return "Full reports: _none yet._\n"
-    return "Full reports: " + " · ".join(links) + "\n"
 
 
 def _replace_marked_section(text: str, name: str, body: str) -> str:
@@ -107,21 +103,20 @@ def update_readme_evals(
     retrieval_result: RetrievalEvalResult | None = None,
 ) -> None:
     text = readme_path.read_text()
-    text = _replace_marked_section(
-        text,
-        "eval-report-links",
-        render_report_links(
-            generation_report=generation_report,
-            retrieval_report=retrieval_report,
-            repo_root=repo_root,
-        ),
-    )
     if generation_metrics is not None:
         text = _replace_marked_section(
-            text, "eval-generation", render_generation_readme(generation_metrics)
+            text,
+            "eval-generation",
+            render_generation_readme(
+                generation_metrics, report=generation_report, repo_root=repo_root
+            ),
         )
     if retrieval_result is not None:
         text = _replace_marked_section(
-            text, "eval-retrieval", render_retrieval_readme(retrieval_result)
+            text,
+            "eval-retrieval",
+            render_retrieval_readme(
+                retrieval_result, report=retrieval_report, repo_root=repo_root
+            ),
         )
     readme_path.write_text(text)
