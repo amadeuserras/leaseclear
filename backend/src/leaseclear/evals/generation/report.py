@@ -18,14 +18,11 @@ def _fmt_s(value: float | None) -> str:
     return "n/a" if value is None else f"{value:.2f}s"
 
 
-def _row(name: str, definition: str, score: MetricScore) -> str:
+def _row(name: str, score: MetricScore) -> str:
     direction = "≥" if score.higher_is_better else "≤"
     target = f"{direction} {score.target * 100:.0f}%"
     status = "n/a" if score.passed is None else ("PASS" if score.passed else "FAIL")
-    return (
-        f"| {name} | {definition} | {_fmt_pct(score.value)} | "
-        f"{target} | {score.n} | {status} |"
-    )
+    return f"| {name} | {_fmt_pct(score.value)} | {target} | {score.n} | {status} |"
 
 
 def _section(title: str, body: list[str]) -> list[str]:
@@ -60,9 +57,9 @@ def _generation_body(result: CaseResult) -> list[str]:
     return body
 
 
-def _render_case(result: CaseResult, *, details: bool) -> list[str]:
+def _render_case(result: CaseResult, *, report_extended: bool) -> list[str]:
     lines = [f"### {result.item_id}", ""]
-    if details:
+    if report_extended:
         user_message = _build_user_message(
             result.question, result.retrieved, result.documents
         )
@@ -102,7 +99,7 @@ def render_metrics_md(
     metrics: AggregateMetrics,
     results: list[CaseResult],
     *,
-    details: bool = False,
+    report_extended: bool = False,
 ) -> str:
     generated = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC")
     lines = [
@@ -111,38 +108,14 @@ def render_metrics_md(
         f"_Generated {generated} by `scripts/run_eval.py --mode generation` against "
         f"{metrics.n_cases} golden items ({metrics.n_errors} errored)._",
         "",
-        "| Metric | Definition | Score | Target | n | Status |",
-        "|---|---|---|---|---|---|",
-        _row(
-            "Retrieval recall@8",
-            "Golden chunk was retrieved in the top 8 chunks",
-            metrics.retrieval_recall_at_8,
-        ),
-        _row(
-            "Faithfulness (LLM)",
-            "Claims supported by retrieved chunks text",
-            metrics.faithfulness,
-        ),
-        _row(
-            "Citation precision (LLM)",
-            "Claims supported by cited chunks",
-            metrics.citation_precision,
-        ),
-        _row(
-            "Refusal accuracy",
-            "Correctly refuses when question is unanswerable",
-            metrics.refusal_accuracy,
-        ),
-        _row(
-            "Answer match (LLM)",
-            "Generated answer matches golden answer",
-            metrics.answer_match,
-        ),
-        _row(
-            "Hallucination rate (LLM)",
-            "Claims not supported by retrieved chunks",
-            metrics.hallucination_rate,
-        ),
+        "| Metric | Score | Target | n | Status |",
+        "|---|---|---|---|---|",
+        _row("Retrieval recall@8", metrics.retrieval_recall_at_8),
+        _row("Faithfulness (LLM)", metrics.faithfulness),
+        _row("Citation precision (LLM)", metrics.citation_precision),
+        _row("Refusal accuracy", metrics.refusal_accuracy),
+        _row("Answer match (LLM)", metrics.answer_match),
+        _row("Hallucination rate (LLM)", metrics.hallucination_rate),
         "",
         f"*p95 time-to-first-token* – Time until the first streamed token appears: "
         f"{_fmt_s(metrics.p95_ttft_s)}",
@@ -154,6 +127,6 @@ def render_metrics_md(
     ]
 
     for r in results:
-        lines.extend(_render_case(r, details=details))
+        lines.extend(_render_case(r, report_extended=report_extended))
 
     return "\n".join(lines)

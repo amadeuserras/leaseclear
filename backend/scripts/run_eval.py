@@ -2,7 +2,7 @@
 
 Usage:
     uv run scripts/run_eval.py --mode generation --limit N
-    uv run scripts/run_eval.py --mode generation --limit N --details
+    uv run scripts/run_eval.py --mode generation --limit N --report-extended
     uv run scripts/run_eval.py --mode retrieval
     uv run scripts/run_eval.py --mode all --limit N
 """
@@ -19,18 +19,18 @@ from pathlib import Path
 
 from leaseclear.core.config import settings
 from leaseclear.db.connection import db_session, get_conn, use_database
-from leaseclear.evals.generation.metrics import aggregate_metrics
+from leaseclear.evals.generation.metrics import AggregateMetrics, aggregate_metrics
 from leaseclear.evals.generation.pipeline import run_all
 from leaseclear.evals.generation.report import render_metrics_md
 from leaseclear.evals.golden.loader import load_golden_items
-from leaseclear.evals.retrieval.pipeline import evaluate_retrievers
+from leaseclear.evals.retrieval.pipeline import RetrievalEvalResult, evaluate_retrievers
 from leaseclear.evals.retrieval.report import render_retrieval_md
-from leaseclear.evals.summary import render_evals_md
+from leaseclear.evals.summary import update_readme_evals
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = BACKEND_DIR.parent
 REPORTS_DIR = BACKEND_DIR / "src/leaseclear/evals/reports"
-EVALS_MD = REPO_ROOT / "EVALS.md"
+README_MD = REPO_ROOT / "README.md"
 
 _SPINNER_FRAMES = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 
@@ -83,7 +83,9 @@ async def _ensure_corpus_ingested() -> None:
         raise SystemExit("No documents in the eval database.")
 
 
-async def _run_generation(limit: int | None, *, details: bool = False) -> None:
+async def _run_generation(
+    limit: int | None, *, report_extended: bool = False
+) -> AggregateMetrics:
     items = load_golden_items(limit=limit)
     results = await _with_spinner(
         f"Running generation eval ({len(items)} items)",
@@ -93,7 +95,9 @@ async def _run_generation(limit: int | None, *, details: bool = False) -> None:
 
     timestamp = dt.datetime.now(dt.UTC).strftime("%H%M%S-%Y%m%d")
     out_path = REPORTS_DIR / f"eval-generation-{timestamp}.md"
-    out_path.write_text(render_metrics_md(metrics, results, details=details))
+    out_path.write_text(
+        render_metrics_md(metrics, results, report_extended=report_extended)
+    )
     print(f"wrote {out_path}")
 
     for score in (
@@ -106,8 +110,10 @@ async def _run_generation(limit: int | None, *, details: bool = False) -> None:
     ):
         print(f"{score.name}: {score.value} (target {score.target}, n={score.n})")
 
+    return metrics
 
-async def _run_retrieval(limit: int | None) -> None:
+
+async def _run_retrieval(limit: int | None) -> RetrievalEvalResult:
     items = load_golden_items(limit=limit)
     result = await _with_spinner(
         f"Running retrieval eval ({len(items)} items)",
@@ -120,6 +126,7 @@ async def _run_retrieval(limit: int | None) -> None:
     out_path.write_text(report)
     print(f"wrote {out_path}\n")
     print(report)
+    return result
 
 
 def _latest_report(prefix: str) -> Path | None:
@@ -130,29 +137,42 @@ def _latest_report(prefix: str) -> Path | None:
     return paths[-1] if paths else None
 
 
-def _write_evals_summary() -> None:
-    EVALS_MD.write_text(
-        render_evals_md(
-            generation_report=_latest_report("eval-generation"),
-            retrieval_report=_latest_report("eval-retrieval"),
-            repo_root=REPO_ROOT,
-        )
+def _write_readme_summary(
+    *,
+    generation_metrics: AggregateMetrics | None,
+    retrieval_result: RetrievalEvalResult | None,
+) -> None:
+    update_readme_evals(
+        README_MD,
+        repo_root=REPO_ROOT,
+        generation_report=_latest_report("eval-generation"),
+        retrieval_report=_latest_report("eval-retrieval"),
+        generation_metrics=generation_metrics,
+        retrieval_result=retrieval_result,
     )
-    print(f"wrote {EVALS_MD}")
+    print(f"updated {README_MD}")
 
 
-async def main(mode: str, limit: int | None, *, details: bool = False) -> None:
+async def main(mode: str, limit: int | None, *, report_extended: bool = False) -> None:
     REPORTS_DIR.mkdir(exist_ok=True)
+
+    generation_metrics: AggregateMetrics | None = None
+    retrieval_result: RetrievalEvalResult | None = None
 
     async with use_database(settings.eval_database_url):
         await _ensure_corpus_ingested()
 
         if mode in ("generation", "all"):
-            await _run_generation(limit, details=details)
+            generation_metrics = await _run_generation(
+                limit, report_extended=report_extended
+            )
         if mode in ("retrieval", "all"):
-            await _run_retrieval(limit)
+            retrieval_result = await _run_retrieval(limit)
 
-    _write_evals_summary()
+    _write_readme_summary(
+        generation_metrics=generation_metrics,
+        retrieval_result=retrieval_result,
+    )
 
 
 if __name__ == "__main__":
@@ -171,14 +191,14 @@ if __name__ == "__main__":
         ),
     )
     parser.add_argument(
-        "--details",
+        "--report-extended",
         action="store_true",
         help=(
             "Include the full generation user message (docs + clauses + question) "
-            "in the report; default is question only"
+            "in the generation report; default is question only"
         ),
     )
     args = parser.parse_args()
     if args.mode in ("generation", "all") and args.limit is None:
         parser.error("--limit is required when running the generation eval")
-    asyncio.run(main(args.mode, args.limit, details=args.details))
+    asyncio.run(main(args.mode, args.limit, report_extended=args.report_extended))

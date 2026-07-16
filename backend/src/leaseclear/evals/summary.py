@@ -1,83 +1,127 @@
 from __future__ import annotations
 
-import datetime as dt
+import re
 from pathlib import Path
+
+from leaseclear.evals.generation.metrics import AggregateMetrics, MetricScore
+from leaseclear.evals.retrieval.pipeline import RetrievalEvalResult
+
+GENERATION_DISPLAY = (
+    ("Retrieval recall@8", "retrieval_recall_at_8"),
+    ("Faithfulness (LLM)", "faithfulness"),
+    ("Citation precision (LLM)", "citation_precision"),
+    ("Refusal accuracy", "refusal_accuracy"),
+    ("Answer match (LLM)", "answer_match"),
+    ("Hallucination rate (LLM)", "hallucination_rate"),
+)
 
 
 def _rel(path: Path, repo_root: Path) -> str:
-    return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    return "./" + path.resolve().relative_to(repo_root.resolve()).as_posix()
 
 
-def _generation_excerpt(text: str) -> str:
-    marker = "## Per-case results"
-    if marker in text:
-        text = text.split(marker, 1)[0]
-    return text.strip()
+def _fmt_pct(value: float | None) -> str:
+    return "n/a" if value is None else f"{value * 100:.1f}%"
 
 
-def _strip_h1(text: str) -> str:
-    lines = text.splitlines()
-    if lines and lines[0].startswith("# "):
-        lines = lines[1:]
-        if lines and lines[0] == "":
-            lines = lines[1:]
-    return "\n".join(lines).strip()
+def _fmt_target(score: MetricScore) -> str:
+    direction = "≥" if score.higher_is_better else "≤"
+    return f"{direction} {score.target * 100:.0f}%"
 
 
-def _demote_headings(text: str) -> str:
-    """Demote ATX headings one level so excerpts nest under summary sections."""
-    lines: list[str] = []
-    for line in text.splitlines():
-        if line.startswith("#"):
-            lines.append("#" + line)
-        else:
-            lines.append(line)
+def _fmt_status(score: MetricScore) -> str:
+    if score.passed is None:
+        return "n/a"
+    return "PASS" if score.passed else "FAIL"
+
+
+def render_generation_readme(metrics: AggregateMetrics) -> str:
+    lines = [
+        "### Generation Summary",
+        "",
+        "| Metric | Score | Target | n | Status |",
+        "|---|---|---|---|---|",
+    ]
+    for label, attr in GENERATION_DISPLAY:
+        score: MetricScore = getattr(metrics, attr)
+        lines.append(
+            f"| {label} | {_fmt_pct(score.value)} | {_fmt_target(score)} | "
+            f"{score.n} | {_fmt_status(score)} |"
+        )
+    lines.append("")
     return "\n".join(lines)
 
 
-def render_evals_md(
+def render_retrieval_readme(result: RetrievalEvalResult) -> str:
+    mrr = result.mrr_winner
+    recall = result.recall_winner
+    lines = [
+        "### Retrieval Summary",
+        "",
+        "| Metric | Winner Strategy | Score |",
+        "|---|---|---|",
+        f"| MRR | {mrr.name} | {mrr.mrr:.2f} |",
+        f"| Recall@{result.k} | {recall.name} | {recall.recall_at_k:.2f} |",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def render_report_links(
     *,
     generation_report: Path | None,
     retrieval_report: Path | None,
     repo_root: Path,
 ) -> str:
-    generated = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC")
-    lines = [
-        "# Eval summary",
-        "",
-        f"_Generated {generated} by `scripts/run_eval.py`._",
-        "",
-    ]
-
     links: list[str] = []
     if generation_report is not None:
         links.append(f"[generation report]({_rel(generation_report, repo_root)})")
     if retrieval_report is not None:
         links.append(f"[retrieval report]({_rel(retrieval_report, repo_root)})")
-    if links:
-        lines.append("Full reports: " + " · ".join(links))
-        lines.append("")
+    if not links:
+        return "Full reports: _none yet._\n"
+    return "Full reports: " + " · ".join(links) + "\n"
 
-    lines.append("## Generation")
-    lines.append("")
-    if generation_report is None:
-        lines.append("_No generation report available yet._")
-        lines.append("")
-    else:
-        excerpt = _demote_headings(
-            _strip_h1(_generation_excerpt(generation_report.read_text()))
+
+def _replace_marked_section(text: str, name: str, body: str) -> str:
+    start = f"<!-- {name}:start -->"
+    end = f"<!-- {name}:end -->"
+    pattern = re.compile(
+        re.escape(start) + r".*?" + re.escape(end),
+        flags=re.DOTALL,
+    )
+    replacement = f"{start}\n{body.rstrip()}\n{end}"
+    updated, n = pattern.subn(replacement, text, count=1)
+    if n != 1:
+        raise ValueError(f"README.md missing markers for section {name!r}")
+    return updated
+
+
+def update_readme_evals(
+    readme_path: Path,
+    *,
+    repo_root: Path,
+    generation_report: Path | None,
+    retrieval_report: Path | None,
+    generation_metrics: AggregateMetrics | None = None,
+    retrieval_result: RetrievalEvalResult | None = None,
+) -> None:
+    text = readme_path.read_text()
+    text = _replace_marked_section(
+        text,
+        "eval-report-links",
+        render_report_links(
+            generation_report=generation_report,
+            retrieval_report=retrieval_report,
+            repo_root=repo_root,
+        ),
+    )
+    if generation_metrics is not None:
+        text = _replace_marked_section(
+            text, "eval-generation", render_generation_readme(generation_metrics)
         )
-        lines.append(excerpt)
-        lines.append("")
-
-    lines.append("## Retrieval")
-    lines.append("")
-    if retrieval_report is None:
-        lines.append("_No retrieval report available yet._")
-        lines.append("")
-    else:
-        excerpt = _demote_headings(_strip_h1(retrieval_report.read_text().strip()))
-        lines.append(excerpt)
-        lines.append("")
-
-    return "\n".join(lines)
+    if retrieval_result is not None:
+        text = _replace_marked_section(
+            text, "eval-retrieval", render_retrieval_readme(retrieval_result)
+        )
+    readme_path.write_text(text)
