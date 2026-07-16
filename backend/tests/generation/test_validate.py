@@ -40,8 +40,8 @@ def test_uncited_answer_fails(chunks):
 def test_wrapped_refusal_is_detected(chunks):
     wrapped = GenerationResult(
         answer=(
-            "There is no lease clause about this in the provided documents. "
-            f'"{REFUSAL_MESSAGE}"'
+            f"{REFUSAL_MESSAGE} "
+            "There is no lease clause about this in the provided documents."
         ),
         citations=[],
     )
@@ -49,12 +49,12 @@ def test_wrapped_refusal_is_detected(chunks):
     assert validate(wrapped, chunks).passed
 
 
-def test_cited_answer_quoting_refusal_is_not_a_refusal(chunks):
+def test_answer_containing_refusal_message_is_a_refusal(chunks):
     mixed = GenerationResult(
         answer=(f"The rent is $2,875.00. [lease §3] As for parking: {REFUSAL_MESSAGE}"),
         citations=[Citation(id="[lease §3]")],
     )
-    assert not is_refusal(mixed)
+    assert is_refusal(mixed)
 
 
 def test_exact_refusal_is_detected(refusal_result):

@@ -7,17 +7,26 @@ from anthropic import AsyncAnthropic
 from leaseclear.core.config import settings
 from leaseclear.types import ChunkBase, DocumentMetadata, GenerationStreamMeta
 
-REFUSAL_MESSAGE = "This is not specified in the provided lease(s)."
+REFUSAL_MESSAGE = "This is not specified in the provided lease clauses."
 
 SYSTEM_PROMPT = f"""
-Answer questions using only the provided lease clauses. 
+Answer questions using only the provided lease clauses.
 
 Rules:
 - Do not use outside knowledge or make assumptions.
-- Every factual claim must include the citation ID of its supporting clause.
-- Copy citation IDs exactly as provided.
-- If the answer is not supported by the lease clauses, respond with exactly:
+- Every factual sentence must end with the citation ID of its supporting clause
+(e.g. [doc §3]). Repeat the ID on every sentence that uses that clause — do not
+rely on an earlier citation to cover later sentences.
+- Quotes, checkbox states, arithmetic, and conclusions drawn from cited figures
+are factual claims and need a citation on the same sentence.
+- Lead with the direct answer, then stop. Add at most one extra cited sentence
+when it changes the meaning (e.g. a statutory cap, a condition, an unchecked
+box). Do not restate the clause, add unrelated facts, or narrate.
+- Copy citation IDs exactly as provided — never invent or alter them.
+- If the answer is not supported by the lease clauses, the first sentence must
+be exactly:
 "{REFUSAL_MESSAGE}"
+  You may then add one short cited sentence explaining what is missing.
 """
 
 
@@ -50,7 +59,7 @@ async def _token_stream(
 ) -> AsyncIterator[str]:
     client = AsyncAnthropic(api_key=settings.anthropic_api_key)
     async with client.messages.stream(
-        model="claude-haiku-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=1024,
         system=SYSTEM_PROMPT,
         messages=[
