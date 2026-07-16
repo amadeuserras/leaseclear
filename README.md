@@ -22,7 +22,7 @@ flowchart LR
   UP["Upload PDFs"] --> ING["Ingest — parse, metadata LLM, clause chunk, embed"]
   ING --> DB[("PostgreSQL<br>+ pgvector")]
 
-  SCOPE["Question + selected docs"] --> FIL["LLM filter"]
+  SCOPE["Question"] --> FIL["LLM filter"]
   FIL --> RET["Hybrid retrieval — vector + lexical + trigram, RRF"]
   RET --> DB
   DB --> GEN["Chunks + generate LLM"]
@@ -45,8 +45,6 @@ actually structured. Done with regex over PDF-to-markdown or layout detectors: r
 - Answer-match (LLM) as the core eval: does the answer a human reads contain the golden information? If any stage fails, this fails.
 - Unit/integration tests cover deterministic pieces (chunking, citation IDs, fusion, validation, API wiring) and avoid asserting on LLM answer quality, which is done by the evals.
 - SSE streaming: the UI renders as the model generates. Adds faster visual feedback and nice UX.
-
-## Evals
 
 ## Evals
 
@@ -100,6 +98,29 @@ _Full report:_ [eval-retrieval-161655-20260716.md](./backend/src/leaseclear/eval
 - `GET /health`
 
 Uploads accept PDF files only. Registration, login, Google authentication, uploads, and queries have per-IP rate limits.
+
+## Tech Stack
+
+## Tech stack
+
+**Backend**
+- FastAPI, PostgreSQL, pgvector
+- Pydantic, JWT authentication, Server-Sent Events (SSE)
+- uv, Ruff, Pyright
+
+**AI & Retrieval**
+- Hybrid retrieval (vector + lexical + trigram, Reciprocal Rank Fusion)
+- OpenAI `text-embedding-3-small` embeddings
+- Claude for grounded answer generation
+- GPT-4o-mini for evals LLM-as-judge (cross-model)
+
+**Frontend**
+- Next.js, TypeScript, Tailwind CSS
+
+**Quality**
+- pytest (unit & integration)
+- GitHub Actions
+- Railway (backend), Vercel (frontend)
 
 ## Local setup
 
