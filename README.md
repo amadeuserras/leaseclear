@@ -98,20 +98,18 @@ _Full report:_ [eval-retrieval-161655-20260716.md](./backend/src/leaseclear/eval
 
 Uploads accept PDF files only. Registration, login, Google authentication, uploads, and queries have per-IP rate limits.
 
-## Tech Stack
-
 ## Tech stack
-
-**Backend**
-- FastAPI, PostgreSQL, pgvector
-- Pydantic, JWT authentication, Server-Sent Events (SSE)
-- uv, Ruff, Pyright
 
 **AI & Retrieval**
 - Hybrid retrieval (vector + lexical + trigram, Reciprocal Rank Fusion)
 - OpenAI `text-embedding-3-small` embeddings
 - Claude for grounded answer generation
-- GPT-4o-mini for evals LLM-as-judge (cross-model)
+- GPT-4o-mini for LLM-as-judge in evals (cross-model)
+
+**Backend**
+- FastAPI, PostgreSQL, pgvector
+- Pydantic, JWT authentication, Server-Sent Events (SSE)
+- uv, Ruff, Pyright
 
 **Frontend**
 - Next.js, TypeScript, Tailwind CSS
