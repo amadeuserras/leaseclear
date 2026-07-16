@@ -46,10 +46,10 @@ actually structured. Done with regex over PDF-to-markdown or layout detectors: r
 
 ## Evals
 
-Done by scoring the system against a "golden" dataset of 70 questions with known answers + citations ([40 answerable](./backend/src/leaseclear/evals/golden/answerable.jsonl), [15 hard](./backend/src/leaseclear/evals/golden/hard.jsonl), [15 unanswerable](./backend/src/leaseclear/evals/golden/unanswerable.jsonl)).
+Done by scoring the system against a "golden" dataset of 70 questions with known answers and citations with 3 types (answerable, unanswerable, hard). Summary of the latest run:
 
 <!-- eval-generation:start -->
-### Generation Summary
+### Generation
 
 | Metric | Score | Target | n | Status |
 |---|---|---|---|---|
@@ -60,17 +60,17 @@ Done by scoring the system against a "golden" dataset of 70 questions with known
 | Answer match (LLM) | 96.4% | ≥ 90% | 55 | PASS |
 | Hallucination rate (LLM) | 0.0% | ≤ 5% | 86 | PASS |
 
-Full report: [eval-generation-161559-20260716.md](./backend/src/leaseclear/evals/reports/eval-generation-161559-20260716.md)
+_Full report:_ [eval-generation-161559-20260716.md](./backend/src/leaseclear/evals/reports/eval-generation-161559-20260716.md)
 <!-- eval-generation:end -->
 <!-- eval-retrieval:start -->
-### Retrieval Summary
+### Retrieval
 
 | Metric | Winner Strategy | Score |
 |---|---|---|
 | MRR | vector+lexical+trigram | 0.80 |
 | Recall@8 | vector+trigram | 0.98 |
 
-Full report: [eval-retrieval-161655-20260716.md](./backend/src/leaseclear/evals/reports/eval-retrieval-161655-20260716.md)
+_Full report:_ [eval-retrieval-161655-20260716.md](./backend/src/leaseclear/evals/reports/eval-retrieval-161655-20260716.md)
 <!-- eval-retrieval:end -->
 
 ### Metric cheat sheet

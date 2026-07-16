@@ -37,8 +37,8 @@ def _fmt_status(score: MetricScore) -> str:
 
 def _full_report_line(report: Path | None, repo_root: Path) -> str:
     if report is None:
-        return "Full report: _none yet._"
-    return f"Full report: [{report.name}]({_rel(report, repo_root)})"
+        return "_Full report:_ none yet."
+    return f"_Full report:_ [{report.name}]({_rel(report, repo_root)})"
 
 
 def render_generation_readme(
