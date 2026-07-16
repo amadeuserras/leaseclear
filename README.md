@@ -6,12 +6,14 @@ A document Q&A system for residential lease agreements that answers with citatio
 
 ## What it does
 
-- Upload lease PDFs, ask questions across them and get cited answers.
-- Click a citation and the source document opens with the exact highlighted clause it came from.
-- Ask something the corpus doesn't answer and get an explicit refusal, sometimes paired with related clauses, still cited, so you can verify it yourself.
-- Optionally select which documents are in scope before asking.
-- Get suggested questions for the currently selected documents.
-- Try it in demo mode with 8 example leases, no sign-up required.
+## What it does
+
+- Upload residential lease PDFs and ask questions across them.
+- Every answer is cited; clicking a citation opens the source document with the relevant clause highlighted.
+- Unanswerable questions receive an explicit refusal, optionally with related cited clauses for context.
+- Scope queries to selected documents.
+- Suggested questions are generated from the selected documents.
+- Includes a demo with a corpus of 8 synthetic leases (no sign-up required).
 
 ## System overview
 
@@ -46,7 +48,9 @@ actually structured. Done with regex over PDF-to-markdown or layout detectors: r
 
 ## Evals
 
-Done by scoring the system against a "golden" dataset of 70 questions with known answers and citations with 3 types (answerable, unanswerable, hard). Summary of the latest run:
+## Evals
+
+The system is evaluated against a golden dataset of 70 questions (answerable, unanswerable, and hard), each with expected answers and citations. Latest results summary:
 
 <!-- eval-generation:start -->
 ### Generation
@@ -75,14 +79,13 @@ _Full report:_ [eval-retrieval-161655-20260716.md](./backend/src/leaseclear/eval
 
 ### Metric cheat sheet
 
-- **Retrieval recall@8** — Golden chunk was retrieved in the top 8 chunks
-- **Faithfulness (LLM)** — Answer supported by the retrieved chunks
-- **Citation precision (LLM)** — Answer supported by the cited chunks
-- **Refusal accuracy** — Correctly refuses when question is unanswerable
-- **Answer match (LLM)** — Generated answer matches golden answer
+- **Retrieval Recall@8** — Whether the golden chunk appears in the top 8 retrieved chunks.
+- **Faithfulness (LLM)** — Whether the answer is supported by the retrieved chunks.
+- **Citation precision (LLM)** — Whether the cited chunks support the answer.
+- **Refusal accuracy** — Whether unanswerable questions are correctly refused.
+- **Answer match (LLM)** — Whether the generated answer matches the expected answer.
 - **Hallucination rate (LLM)** — Inverse of faithfulness. Claims not supported by retrieved chunks
 - **MRR** — How high up is the golden chunk in the retrieved set
-- **Recall@8** — Whether the golden chunk is in the first 8 or not
 
 
 ## API overview
@@ -98,112 +101,86 @@ _Full report:_ [eval-retrieval-161655-20260716.md](./backend/src/leaseclear/eval
 
 Uploads accept PDF files only. Registration, login, Google authentication, uploads, and queries have per-IP rate limits.
 
-## Run the app locally
-
-### Corpus
-
-From `/corpus`
-
-1. Generate corpus pdf files in `/generated`
+## Local setup
 
 ```bash
-uv sync && uv run python generate.py
-```
+# Generate corpus
+cd corpus
+uv sync
+uv run python generate.py
 
-### Backend
-
-From `/backend`
-
-1. Copy env files and fill in secrets / API keys:
-
-```bash
+# Backend
+cd ../backend
 cp .env.example .env
-```
-
-2. Start Postgres, create and seed the app DB:
-
-```bash
 uv sync
 docker compose up -d
 uv run scripts/create_db.py
 uv run scripts/seed_db.py
-```
 
-3. (Optional) Preview DB 
-
-```bash
-uv run scripts/preview_db.py
-```
-
-### Frontend
-
-From `/frontend`
-
-1. Copy env files and fill in secrets / API keys:
-
-```bash
+# Frontend
+cd ../frontend
 cp .env.example .env
-```
+npm install
 
-2. Install dependencies:
-
-```bash
-npm run dev
-```
-
-### Start app
-
-From `/`
-
-```bash
+# Start
+cd ..
 ./dev.sh
 ```
-App at [http://localhost:3000](http://localhost:3000), API at [http://localhost:8000](http://localhost:8000).
 
-## Run the tests
+Frontend: http://localhost:3000  
+API: http://localhost:8000
 
-Unit and integration tests live under `backend/tests/`. They use a separate database (`TEST_DATABASE_URL` in `backend/.env`), which is created automatically on first run. From `backend/`:
+## Tests
+
+Tests live under `backend/tests/` and use a separate database (`TEST_DATABASE_URL`), which is created automatically on first run.
 
 ```bash
+cd backend
 docker compose up -d
 uv sync
 uv run pytest
 ```
 
-By default, tests marked `real_api` (external API calls) are skipped. To include them:
+Run external API tests:
 
 ```bash
 uv run pytest -m real_api
 ```
 
-To run a single file:
+Run a single file:
 
 ```bash
 uv run pytest tests/generation/test_validate.py
 ```
 
-## Run the evals locally
+## Evals
 
-Evals use a separate database (`EVAL_DATABASE_URL` in `backend/.env`). From `backend/`:
+Evals run against a separate database (`EVAL_DATABASE_URL`).
 
-1. Start Postgres create and seed the evals db
+### Setup
 
 ```bash
+cd backend
+
 docker compose up -d
 uv run scripts/create_db.py --eval
 uv run scripts/seed_db.py --eval
 ```
 
-2. Run the evals
+### Run
 
 ```bash
 uv run scripts/run_eval.py --mode all --limit 5
 ```
 
-#### Flags
+### Flags
 
-* `--mode <generation|retrieval|all>` – retrieval and generation evals are independent, since retrieval evals are significantly cheaper, it's useful to decouple them.
-* `--limit <number>` – runs evaluations on only the first `<number>` items from each question set. This is useful for quick, low-cost evaluation runs. Mandatory to help prevent accidental full suite runs.
-* `--report-extended` – includes the retrieved chunks sent to the generation LLM. Useful for debugging and manually inspecting generation failures.
+| Flag | Description |
+|------|-------------|
+| `--mode generation` | Generation evals only |
+| `--mode retrieval` | Retrieval evals only |
+| `--mode all` | Run both |
+| `--limit N` | Evaluate the first `N` questions (required to avoid accidental full runs) |
+| `--report-extended` | Include retrieved chunks in the report for debugging |
 
 
