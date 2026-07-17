@@ -6,13 +6,11 @@ A document Q&A system for residential lease agreements that answers with citatio
 
 ## What it does
 
-## What it does
-
 - Upload residential lease PDFs and ask questions across them.
 - Every answer is cited; clicking a citation opens the source document with the relevant clause highlighted.
 - Unanswerable questions receive an explicit refusal, optionally with related cited clauses for context.
-- Scope queries to selected documents.
-- Suggested questions are generated from the selected documents.
+- Suggested questions that are generated from the selected documents.
+- Runs retrieval and generation evaluations against a golden dataset and generates metrics reports. (see [Evals](#evals)).
 - Includes a demo with a corpus of 8 synthetic leases (no sign-up required).
 
 ## System overview
@@ -26,7 +24,7 @@ flowchart LR
   FIL --> RET["Hybrid retrieval — vector + lexical + trigram, RRF"]
   RET --> DB
   DB --> GEN["Chunks + generate LLM"]
-  GEN --> FE["SSE streamed answer"]
+  GEN --> FE["Answer"]
 ```
 
 
@@ -37,10 +35,10 @@ flowchart LR
 
 - **Citation IDs** (`[doc-slug §3]`, `§3(1)` for collisions) are both human- and LLM-readable. Used as source of truth to match answer citations back to their original chunks. 
 - **Clause-aware chunking** keeps retrieval, citations, and click-to-highlight aligned with the lease structure. Residential leases are consistently numbered, so deterministic regex parsing was more robust than PDF-to-markdown or layout detectors. Missed clauses in chunking degrade citations slightly; but they're not catasthropic, the system holds.
-- **LLM document filtering** narrows the document search space before retrieval when a question references lease metadata such as the landlord, tenant, address, or filename (e.g. "What's *Yuna Kim*'s rent?"), which is a common use case for questions asked to an open corpus of documents. This improved Recall@8 from **0.80 → 0.98**, a much larger gain than hybrid retrieval tuning alone.
+- **LLM document filtering** narrows the document search space before retrieval when a question references lease metadata such as the landlord, tenant, address, or filename (e.g. "What's *Yuna Kim*'s rent?"), which is a common use case. This improved Recall@8 from **0.80 → 0.98**, a much larger gain than hybrid retrieval tuning alone.
 - **Suggested questions** are generated per document selection and cached to avoid unnecessary LLM calls on every selection change.
 - **Soft refusals** (a refusal plus a related cited clause) emerged during development and were kept because they remain verifiable while often providing useful context.
-- **Synthetic lease generation** (`/corpus`) lives in the repo and uses dataclasses and Jinja templates, which makes changes far easier than manual PDFs edits. Includes intentional documented edge cases and contradictions.
+- **Synthetic lease generation** (`/corpus`) lives in the repo and generates leases from dataclasses and Jinja templates. Keeping the corpus as code makes it far easier to evolve than manually editing PDFs. It includes documented edge cases and intentional contradictions (e.g. overwriting clauses) to better resemble messy real-world documents.
 - **Answer match** is the primary evaluation metric because it captures end-to-end system quality. It evaluates that the final answer is correct.
 - **Testing** focuses on deterministic behavior (chunking, citations, retrieval, auth, API wiring) and avoids asserting on LLM answer quality, which is done by the evals.
 - **SSE streaming** lets the UI render responses token-by-token which adds faster feedback and better UX.
@@ -93,7 +91,7 @@ _Full report:_ [eval-retrieval-161655-20260716.md](./backend/src/leaseclear/eval
 - `DELETE /documents/{document_id}`
 - `GET /documents/{slug}/chunks`
 - `POST /documents/suggested-questions/query`
-- `POST /query` — streams SSE
+- `POST /query`
 - `GET /health`
 
 Uploads accept PDF files only. Registration, login, Google authentication, uploads, and queries have per-IP rate limits.
