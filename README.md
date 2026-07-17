@@ -16,7 +16,7 @@ A document Q&A system for residential lease agreements that answers with citatio
 ## System overview
 
 ```mermaid
-flowchart TB
+flowchart LR
   UP["Upload PDFs"] --> ING["Ingest — parse, metadata LLM, clause chunk, embed"]
   ING --> DB[("PostgreSQL<br>+ pgvector")]
 
