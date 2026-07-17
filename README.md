@@ -16,14 +16,15 @@ A document Q&A system for residential lease agreements that answers with citatio
 ## System overview
 
 ```mermaid
-flowchart LR
+flowchart TB
   UP["Upload PDFs"] --> ING["Ingest — parse, metadata LLM, clause chunk, embed"]
   ING --> DB[("PostgreSQL<br>+ pgvector")]
 
-  SCOPE["Question"] --> FIL["LLM filter"]
+  Q["Question"] --> FIL["LLM filter"]
+  DB -- "document metadata" --> FIL
   FIL --> RET["Hybrid retrieval — vector + lexical + trigram, RRF"]
-  RET --> DB
-  DB --> GEN["Chunks + generate LLM"]
+  DB -- "chunks" --> RET
+  RET --> GEN["Generate LLM"]
   GEN --> FE["Answer"]
 ```
 
