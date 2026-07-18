@@ -69,7 +69,8 @@ async def run_case(item: GoldenItem) -> CaseResult:
 
         verdict = None
         matched = None
-        if not refused and result.answer.strip():
+
+        if not item.expected_refusal and result.answer.strip():
             cited = resolve_citations(
                 [c.id for c in result.citations], retrieved_chunks
             )
