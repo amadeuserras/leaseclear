@@ -197,7 +197,7 @@ uv run scripts/run_eval.py --mode all --limit 5
 | `--mode generation` | Generation evals only |
 | `--mode retrieval` | Retrieval evals only |
 | `--mode all` | Run both |
-| `--limit N` | Evaluate the first `N` questions (required to avoid accidental full runs) |
+| `--limit N` | Evaluate `N` randomly sampled questions per type (required to avoid accidental full runs) |
 | `--report-extended` | Include retrieved chunks in the report for debugging |
 
 

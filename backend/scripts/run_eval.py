@@ -84,7 +84,7 @@ async def _ensure_corpus_ingested() -> None:
 
 
 async def _run_generation(
-    limit: int | None, *, report_extended: bool = False
+    limit: int, *, report_extended: bool = False
 ) -> AggregateMetrics:
     items = load_golden_items(limit=limit)
     results = await _with_spinner(
@@ -113,7 +113,7 @@ async def _run_generation(
     return metrics
 
 
-async def _run_retrieval(limit: int | None) -> RetrievalEvalResult:
+async def _run_retrieval(limit: int) -> RetrievalEvalResult:
     items = load_golden_items(limit=limit)
     result = await _with_spinner(
         f"Running retrieval eval ({len(items)} items)",
@@ -153,7 +153,7 @@ def _write_readme_summary(
     print(f"updated {README_MD}")
 
 
-async def main(mode: str, limit: int | None, *, report_extended: bool = False) -> None:
+async def main(mode: str, limit: int, *, report_extended: bool = False) -> None:
     REPORTS_DIR.mkdir(exist_ok=True)
 
     generation_metrics: AggregateMetrics | None = None
@@ -185,10 +185,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--limit",
         type=int,
-        default=None,
-        help=(
-            "Items to run (required for --mode generation|all; optional for retrieval)"
-        ),
+        required=True,
+        help="Random sample size per question type",
     )
     parser.add_argument(
         "--report-extended",
@@ -199,6 +197,4 @@ if __name__ == "__main__":
         ),
     )
     args = parser.parse_args()
-    if args.mode in ("generation", "all") and args.limit is None:
-        parser.error("--limit is required when running the generation eval")
     asyncio.run(main(args.mode, args.limit, report_extended=args.report_extended))

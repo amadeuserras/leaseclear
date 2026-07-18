@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import random
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
@@ -46,10 +47,10 @@ def _load_golden_file(path: Path) -> list[GoldenItem]:
 
 
 def load_golden_items(
-    paths: tuple[Path, ...] = DEFAULT_GOLDEN_PATHS, *, limit: int | None = None
+    paths: tuple[Path, ...] = DEFAULT_GOLDEN_PATHS, *, limit: int
 ) -> list[GoldenItem]:
     items: list[GoldenItem] = []
     for path in paths:
         file_items = _load_golden_file(path)
-        items.extend(file_items[:limit] if limit is not None else file_items)
+        items.extend(random.sample(file_items, min(limit, len(file_items))))
     return items
